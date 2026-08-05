@@ -32,6 +32,10 @@ for path in "${required_files[@]}"; do
 done
 
 base_sha="$(git rev-parse "origin/${expected_branch}")"
+head_sha="$(git rev-parse HEAD)"
+git merge-base --is-ancestor "origin/${expected_branch}" HEAD ||
+  fail "현재 체크아웃이 최신 origin/${expected_branch}를 포함하지 않습니다. 먼저 최신 main을 반영하세요."
+
 current_branch="$(git branch --show-current)"
 [[ -n "$current_branch" ]] || current_branch="detached"
 worktree_state="clean"
@@ -44,6 +48,7 @@ echo "원격: ${remote_url}"
 echo "기준 브랜치: ${expected_branch}"
 echo "현재 체크아웃: ${current_branch}"
 echo "기준 커밋: ${base_sha}"
+echo "현재 HEAD: ${head_sha}"
 echo "작업트리: ${worktree_state}"
 echo
 echo "필수 문서:"
