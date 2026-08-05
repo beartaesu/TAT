@@ -19,22 +19,28 @@ fail() {
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || fail "Git 저장소에서 실행해야 합니다."
 cd "$repo_root"
 
-remote_url="$(git remote get-url origin 2>/dev/null)" || fail "origin 원격이 없습니다."
-case "$remote_url" in
-  *beartaesu/TAT|*beartaesu/TAT.git) ;;
-  *) fail "origin이 ${expected_repo}가 아닙니다: ${remote_url}" ;;
-esac
-
-git fetch --quiet origin "$expected_branch" || fail "origin/${expected_branch} 최신화에 실패했습니다."
-
 for path in "${required_files[@]}"; do
   [[ -f "$path" ]] || fail "필수 파일이 없습니다: $path"
 done
 
-base_sha="$(git rev-parse "origin/${expected_branch}")"
+remote_url="$(git remote get-url origin 2>/dev/null || true)"
+if [[ -n "$remote_url" ]]; then
+  case "$remote_url" in
+    *beartaesu/TAT|*beartaesu/TAT.git) ;;
+    *) fail "origin이 ${expected_repo}가 아닙니다: ${remote_url}" ;;
+  esac
+  remote_state="$remote_url"
+else
+  remote_state="없음 (Codex Cloud 체크아웃 허용)"
+fi
+
 head_sha="$(git rev-parse HEAD)"
-git merge-base --is-ancestor "origin/${expected_branch}" HEAD ||
-  fail "현재 체크아웃이 최신 origin/${expected_branch}를 포함하지 않습니다. 먼저 최신 main을 반영하세요."
+base_sha="$head_sha"
+if git show-ref --verify --quiet "refs/remotes/origin/${expected_branch}"; then
+  base_sha="$(git rev-parse "origin/${expected_branch}")"
+  git merge-base --is-ancestor "origin/${expected_branch}" HEAD ||
+    fail "현재 체크아웃이 로컬 origin/${expected_branch}를 포함하지 않습니다. 최신 main 환경에서 다시 시작하세요."
+fi
 
 current_branch="$(git branch --show-current)"
 [[ -n "$current_branch" ]] || current_branch="detached"
@@ -44,7 +50,7 @@ worktree_state="clean"
 echo "[TAT 사전점검]"
 echo
 echo "저장소: ${expected_repo}"
-echo "원격: ${remote_url}"
+echo "원격: ${remote_state}"
 echo "기준 브랜치: ${expected_branch}"
 echo "현재 체크아웃: ${current_branch}"
 echo "기준 커밋: ${base_sha}"
