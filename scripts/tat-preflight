@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+expected_repo="beartaesu/TAT"
+expected_branch="main"
+required_files=(
+  "AGENTS.md"
+  "docs/01_TAT_MASTER.md"
+  "docs/02_TAT_CURRENT_STATUS.md"
+  "docs/03_TAT_DECISIONS.md"
+  "docs/04_TAT_FORMULAS_ERRORS_HANDOFF.md"
+)
+
+fail() {
+  echo "[TAT preflight 실패] $*" >&2
+  exit 1
+}
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || fail "Git 저장소에서 실행해야 합니다."
+cd "$repo_root"
+
+remote_url="$(git remote get-url origin 2>/dev/null)" || fail "origin 원격이 없습니다."
+case "$remote_url" in
+  *beartaesu/TAT|*beartaesu/TAT.git) ;;
+  *) fail "origin이 ${expected_repo}가 아닙니다: ${remote_url}" ;;
+esac
+
+git fetch --quiet origin "$expected_branch" || fail "origin/${expected_branch} 최신화에 실패했습니다."
+
+for path in "${required_files[@]}"; do
+  [[ -f "$path" ]] || fail "필수 파일이 없습니다: $path"
+done
+
+base_sha="$(git rev-parse "origin/${expected_branch}")"
+current_branch="$(git branch --show-current)"
+[[ -n "$current_branch" ]] || current_branch="detached"
+worktree_state="clean"
+[[ -n "$(git status --porcelain)" ]] && worktree_state="dirty"
+
+echo "[TAT 사전점검]"
+echo
+echo "저장소: ${expected_repo}"
+echo "원격: ${remote_url}"
+echo "기준 브랜치: ${expected_branch}"
+echo "현재 체크아웃: ${current_branch}"
+echo "기준 커밋: ${base_sha}"
+echo "작업트리: ${worktree_state}"
+echo
+echo "필수 문서:"
+for path in "${required_files[@]}"; do
+  last_commit="$(git log -1 --format='%h %cs %s' -- "$path")"
+  echo "- ${path}: ${last_commit}"
+done
+
+echo
+echo "02 문서의 다음 작업 우선순위:"
+awk '
+  /^## 6\. 다음 작업 우선순위/ { printing=1; next }
+  printing && /^## / { exit }
+  printing { print }
+' docs/02_TAT_CURRENT_STATUS.md
+
+echo
+echo "[다음 단계]"
+echo "AGENTS.md와 docs/01~04를 순서대로 전부 읽고,"
+echo "사용자에게 [TAT 작업 시작 확인] 블록을 출력한 뒤 본 작업을 시작하세요."
