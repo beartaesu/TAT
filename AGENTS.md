@@ -17,7 +17,7 @@
 ## 2. 필수 실행 순서
 
 1. 첫 명령으로 `bash scripts/tat-preflight`를 실행한다.
-2. 원격 저장소가 `beartaesu/TAT`, 기준 브랜치가 `main`인지 확인한다.
+2. `origin`이 있으면 원격 저장소가 `beartaesu/TAT`인지 확인한다. `origin`이 없는 Codex Cloud 체크아웃은 필수 파일과 현재 `HEAD`로 저장소·기준 커밋을 확인한다.
 3. `AGENTS.md`와 아래 문서를 순서대로 전부 읽는다.
    1. `docs/01_TAT_MASTER.md`
    2. `docs/02_TAT_CURRENT_STATUS.md`
@@ -44,7 +44,7 @@
 문서 충돌/확인 필요: <없음 또는 항목>
 ```
 
-시작 확인 블록 전에는 Power Apps 수식 제공, Power Automate 수정 안내, 기존 구조 판단, 파일 수정, Git 반영을 하지 않는다. 게이트가 실패하면 실패 원인을 먼저 보고하고 정본을 추측하지 않는다.
+시작 확인 블록 전에는 Power Apps 수식 제공, Power Automate 수정 안내, 기존 구조 판단, 파일 수정, Git 반영을 하지 않는다. `origin` 부재만으로는 게이트를 실패시키지 않는다. 그 외 게이트가 실패하면 실패 원인을 먼저 보고하고 정본을 추측하지 않는다.
 
 ## 3. 정본 우선순위
 
