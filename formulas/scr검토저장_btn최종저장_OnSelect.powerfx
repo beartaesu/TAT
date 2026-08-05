@@ -1,0 +1,1308 @@
+If(
+    CountRows(col선택항목) = 0,
+
+    Notify(
+        "선택된 분석항목이 없습니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력수량 < 1
+    ) > 0,
+
+    Notify(
+        "모든 분석항목의 수량은 1 이상이어야 합니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력수량 >
+            If(
+                var완료접수수정모드,
+                CountRows(col시료목록),
+                Value(txt시료수.Text)
+            )
+    ) > 0,
+
+    Notify(
+        "분석항목 수량은 전체 시료수 " &
+        Text(
+            If(
+                var완료접수수정모드,
+                CountRows(col시료목록),
+                Value(txt시료수.Text)
+            )
+        ) &
+        "개를 초과할 수 없습니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력단가 < 0
+    ) > 0,
+
+    Notify(
+        "분석항목 단가는 0원 이상이어야 합니다.",
+        NotificationType.Warning
+    ),
+
+    var저장중,
+
+    Notify(
+        "현재 저장 중입니다. 잠시만 기다려 주세요.",
+        NotificationType.Warning
+    ),
+
+    Set(
+        var저장중,
+        true
+    );
+
+    Notify(
+        If(
+            var완료접수수정모드,
+            "접수완료 건의 분석항목과 시료별 배정을 수정하고 있습니다.",
+            "접수정보 저장 및 결과파일 생성을 시작했습니다. 완료될 때까지 잠시 기다려 주세요."
+        ),
+        NotificationType.Information
+    );
+
+    /* =========================================
+       결과파일 생성용 전달값 준비
+       ========================================= */
+
+    Set(
+        var시료명목록,
+        Substitute(
+            Substitute(
+                Substitute(
+                    Trim(txt시료명.Text),
+                    Char(13),
+                    ""
+                ),
+                Char(10),
+                "|"
+            ),
+            ",",
+            "|"
+        )
+    );
+
+    Set(
+        var분석항목목록,
+        Concat(
+            col선택항목,
+            분석항목명,
+            "|"
+        )
+    );
+
+    Set(
+        var시료항목매핑,
+        Concat(
+            SortByColumns(
+                col시료항목배정,
+                "시료순번",
+                SortOrder.Ascending,
+                "분석항목ID",
+                SortOrder.Ascending
+            ),
+            Text(시료순번) &
+            "^" &
+            시료명 &
+            "^" &
+            분석항목명,
+            "|"
+        )
+    );
+
+    Set(
+        var결과파일응답,
+        Blank()
+    );
+
+    Set(
+        var파일생성오류,
+        Blank()
+    );
+
+    /* =========================================
+       A. 접수완료 건 수정
+       기존 접수번호와 헤더 ID 유지
+       결과파일 Flow는 호출하지 않음
+       ========================================= */
+
+    If(
+        var완료접수수정모드,
+
+        If(
+            IsBlank(var저장헤더.ID) ||
+            IsBlank(var접수번호),
+
+            Notify(
+                "수정 대상 접수정보가 없습니다. 접수상세 화면에서 다시 접수내용 수정을 시작해 주세요.",
+                NotificationType.Error
+            ),
+
+            IfError(
+                Set(
+                    var저장헤더,
+                    Patch(
+                        접수헤더,
+                        LookUp(
+                            접수헤더,
+                            ID = var저장헤더.ID
+                        ),
+                        {
+                            '시료명 요약':
+                                Concat(
+                                    SortByColumns(
+                                        col시료목록,
+                                        "시료순번",
+                                        SortOrder.Ascending
+                                    ),
+                                    시료명,
+                                    ", "
+                                ),
+
+                            시료수:
+                                CountRows(col시료목록),
+
+                            접수상태: {
+                                Value: "접수완료"
+                            },
+
+                            폴더처리상태: {
+                                Value: "수동처리대기"
+                            },
+
+                            폴더처리오류:
+                                Blank(),
+
+                            폴더최종처리일시:
+                                Now()
+                        }
+                    )
+                );
+
+                RemoveIf(
+                    접수항목상세,
+                    접수헤더연결.Id = var저장헤더.ID
+                );
+
+                ForAll(
+                    col선택항목 As 현재항목,
+
+                    Patch(
+                        접수항목상세,
+                        Defaults(접수항목상세),
+                        {
+                            제목:
+                                var접수번호 &
+                                "-" &
+                                현재항목.분석항목명,
+
+                            접수헤더연결:
+                                LookUp(
+                                    Choices(
+                                        접수항목상세.접수헤더연결
+                                    ),
+                                    Id = var저장헤더.ID
+                                ),
+
+                            분석항목:
+                                LookUp(
+                                    Choices(
+                                        접수항목상세.분석항목
+                                    ),
+                                    Id = 현재항목.분석항목ID
+                                ),
+
+                            항목분류:
+                                현재항목.항목분류,
+
+                            수량:
+                                현재항목.입력수량,
+
+                            배정시료명:
+                                Concat(
+                                    Filter(
+                                        col시료항목배정,
+                                        분석항목ID = 현재항목.분석항목ID
+                                    ),
+                                    시료명,
+                                    ", "
+                                ),
+
+                            단가:
+                                현재항목.입력단가,
+
+                            분석상태: {
+                                Value: "대기"
+                            },
+
+                            정산대상여부:
+                                true,
+
+                            표준소요일수:
+                                현재항목.표준소요일수
+                        }
+                    )
+                );
+
+                RemoveIf(
+                    접수시료항목매핑,
+                    접수헤더연결.Id = var저장헤더.ID
+                );
+
+                ForAll(
+                    col시료항목배정 As 현재배정,
+
+                    Patch(
+                        접수시료항목매핑,
+                        Defaults(접수시료항목매핑),
+                        {
+                            제목:
+                                var접수번호 &
+                                "-" &
+                                Text(현재배정.시료순번) &
+                                "-" &
+                                현재배정.분석항목명,
+
+                            접수헤더연결:
+                                LookUp(
+                                    Choices(
+                                        접수시료항목매핑.접수헤더연결
+                                    ),
+                                    Id = var저장헤더.ID
+                                ),
+
+                            시료순번:
+                                현재배정.시료순번,
+
+                            시료명:
+                                현재배정.시료명,
+
+                            분석항목연결:
+                                LookUp(
+                                    Choices(
+                                        접수시료항목매핑.분석항목연결
+                                    ),
+                                    Id = 현재배정.분석항목ID
+                                ),
+
+                            분석항목명복사:
+                                현재배정.분석항목명
+                        }
+                    )
+                );
+/* =========================================
+   기존 결과 Excel 재작성
+   신규 폴더·파일 생성 없이 기존 파일에 스크립트 실행
+   ========================================= */
+
+IfError(
+    Set(
+        var결과파일응답,
+        TAT_결과파일생성_App.Run(
+            Round(Value(var저장헤더.ID), 0),
+            Text(var접수번호),
+            Text(var상세접수.의뢰구분.Value),
+            Text(var상세접수.'업체/현장'.Value),
+            If(
+                var상세접수.의뢰구분.Value = "과제",
+                Coalesce(
+                    var상세접수.과제명복사,
+                    ""
+                ),
+                ""
+            ),
+            CountRows(col시료목록),
+            Text(Concat(
+                SortByColumns(
+                    col시료목록,
+                    "시료순번",
+                    SortOrder.Ascending
+                ),
+                시료명,
+                "|"
+            )),
+            Text(var분석항목목록),
+            Text(var시료항목매핑),
+            "수정",
+            "",
+            "",
+            "",
+            "",
+            0
+        )
+    );
+
+    Set(
+        var저장헤더,
+        Patch(
+            접수헤더,
+            LookUp(
+                접수헤더,
+                ID = var저장헤더.ID
+            ),
+            {
+                결과폴더명:
+                    var결과파일응답.결과폴더명,
+
+                결과폴더경로:
+                    var결과파일응답.결과폴더경로,
+
+                결과엑셀파일명:
+                    var결과파일응답.결과엑셀파일명,
+
+                결과엑셀파일경로:
+                    var결과파일응답.결과엑셀파일경로,
+
+                폴더처리상태: {
+                    Value: "처리완료"
+                },
+
+                폴더처리오류:
+                    Blank(),
+
+                폴더최종처리일시:
+                    Now()
+            }
+        )
+    ),
+
+    Set(
+        var파일생성오류,
+        FirstError.Message
+    );
+
+    Set(
+        var저장헤더,
+        Patch(
+            접수헤더,
+            LookUp(
+                접수헤더,
+                ID = var저장헤더.ID
+            ),
+            {
+                폴더처리상태: {
+                    Value: "처리실패"
+                },
+
+                폴더처리오류:
+                    var파일생성오류,
+
+                폴더최종처리일시:
+                    Now()
+            }
+        )
+    );
+
+    Notify(
+        "접수 데이터는 수정됐지만 기존 결과 Excel 재작성에 실패했습니다. " &
+        "접수번호: " &
+        var접수번호 &
+        " / 오류: " &
+        var파일생성오류,
+        NotificationType.Error
+    )
+);
+
+                Refresh(
+                    접수헤더
+                );
+
+                Refresh(
+                    접수항목상세
+                );
+
+                Refresh(
+                    접수시료항목매핑
+                );
+
+                Set(
+                    var상세접수,
+                    LookUp(
+                        접수헤더,
+                        ID = var저장헤더.ID
+                    )
+                );
+
+                Notify(
+                    "접수번호 " & var접수번호 &
+                    "의 분석항목과 시료별 배정을 수정했으며 결과 Excel도 갱신했습니다.",
+                    NotificationType.Success
+                );
+
+                Set(
+                    var완료접수수정모드,
+                    false
+                );
+
+                Set(
+                    var이어쓰기,
+                    false
+                );
+
+                Set(
+                    var저장헤더,
+                    Blank()
+                );
+
+                Set(
+                    var접수번호,
+                    Blank()
+                );
+
+                Navigate(
+                    scr접수상세,
+                    ScreenTransition.Fade
+                ),
+
+                Notify(
+                    "접수완료 건 수정 저장 중 오류가 발생했습니다: " &
+                    FirstError.Message,
+                    NotificationType.Error
+                )
+            )
+        ),
+
+        /* =========================================
+           B. 임시작성 이어쓰기 후 최종저장
+           ========================================= */
+
+        If(
+            var이어쓰기 &&
+            !IsBlank(var저장헤더.ID),
+
+            IfError(
+                Set(
+                    var저장헤더,
+                    Patch(
+                        접수헤더,
+                        LookUp(
+                            접수헤더,
+                            ID = var저장헤더.ID
+                        ),
+                        {
+                            의뢰일자:
+                                dp의뢰일자.SelectedDate,
+
+                            '시료명 요약':
+                                txt시료명.Text,
+
+                            시료수:
+                                Value(txt시료수.Text),
+
+                            비고:
+                                txt비고.Text,
+
+                            의뢰구분: {
+                                Value:
+                                    dd의뢰구분.Selected.Value
+                            },
+
+                            접수상태: {
+                                Value: "접수완료"
+                            },
+
+                            '업체/현장':
+                                cmb현장.Selected,
+
+                            '계산서 업체':
+                                LookUp(
+                                    현장마스터,
+                                    ID = cmb현장.Selected.Id,
+                                    '계산서 업체 연결'
+                                )
+                        }
+                    )
+                );
+
+                RemoveIf(
+                    접수항목상세,
+                    접수헤더연결.Id = var저장헤더.ID
+                );
+
+                ForAll(
+                    col선택항목 As 현재항목,
+
+                    Patch(
+                        접수항목상세,
+                        Defaults(접수항목상세),
+                        {
+                            제목:
+                                var접수번호 &
+                                "-" &
+                                현재항목.분석항목명,
+
+                            접수헤더연결:
+                                LookUp(
+                                    Choices(
+                                        접수항목상세.접수헤더연결
+                                    ),
+                                    Id = var저장헤더.ID
+                                ),
+
+                            분석항목:
+                                LookUp(
+                                    Choices(
+                                        접수항목상세.분석항목
+                                    ),
+                                    Id = 현재항목.분석항목ID
+                                ),
+
+                            항목분류:
+                                현재항목.항목분류,
+
+                            수량:
+                                현재항목.입력수량,
+
+                            배정시료명:
+                                Concat(
+                                    Filter(
+                                        col시료항목배정,
+                                        분석항목ID = 현재항목.분석항목ID
+                                    ),
+                                    시료명,
+                                    ", "
+                                ),
+
+                            단가:
+                                현재항목.입력단가,
+
+                            분석상태: {
+                                Value: "대기"
+                            },
+
+                            정산대상여부:
+                                true,
+
+                            표준소요일수:
+                                현재항목.표준소요일수
+                        }
+                    )
+                );
+
+                RemoveIf(
+                    접수시료항목매핑,
+                    접수헤더연결.Id = var저장헤더.ID
+                );
+
+                ForAll(
+                    col시료항목배정 As 현재배정,
+
+                    Patch(
+                        접수시료항목매핑,
+                        Defaults(접수시료항목매핑),
+                        {
+                            제목:
+                                var접수번호 &
+                                "-" &
+                                Text(현재배정.시료순번) &
+                                "-" &
+                                현재배정.분석항목명,
+
+                            접수헤더연결:
+                                LookUp(
+                                    Choices(
+                                        접수시료항목매핑.접수헤더연결
+                                    ),
+                                    Id = var저장헤더.ID
+                                ),
+
+                            시료순번:
+                                현재배정.시료순번,
+
+                            시료명:
+                                현재배정.시료명,
+
+                            분석항목연결:
+                                LookUp(
+                                    Choices(
+                                        접수시료항목매핑.분석항목연결
+                                    ),
+                                    Id = 현재배정.분석항목ID
+                                ),
+
+                            분석항목명복사:
+                                현재배정.분석항목명
+                        }
+                    )
+                );
+
+                IfError(
+                    Set(
+                        var결과파일응답,
+                        TAT_결과파일생성_App.Run(
+                            Round(Value(var저장헤더.ID), 0),
+                            Text(var접수번호),
+                            Text(dd의뢰구분.Selected.Value),
+                            Text(cmb현장.Selected.Value),
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                cmb과제.Selected.제목,
+                                ""
+                            ),
+                            Value(txt시료수.Text),
+                            Text(var시료명목록),
+                            Text(var분석항목목록),
+                            Text(var시료항목매핑),
+                            "신규",
+                            "",
+                            "",
+                            "",
+                            "",
+                            0
+                        )
+                    );
+
+                    Set(
+                        var저장헤더,
+                        Patch(
+                            접수헤더,
+                            LookUp(
+                                접수헤더,
+                                ID = var저장헤더.ID
+                            ),
+                            {
+                                결과폴더명:
+                                    var결과파일응답.결과폴더명,
+
+                                결과폴더경로:
+                                    var결과파일응답.결과폴더경로,
+
+                                결과엑셀파일명:
+                                    var결과파일응답.결과엑셀파일명,
+
+                                결과엑셀파일경로:
+                                    var결과파일응답.결과엑셀파일경로,
+
+                                폴더처리상태: {
+                                    Value: "처리완료"
+                                },
+
+                                폴더처리오류:
+                                    Blank(),
+
+                                폴더최종처리일시:
+                                    Now()
+                            }
+                        )
+                    );
+
+                    Notify(
+                        "최종저장 및 결과파일 생성 완료 / 접수번호: " &
+                        var접수번호 &
+                        " / 상세 " &
+                        Text(CountRows(col선택항목)) &
+                        "건",
+                        NotificationType.Success
+                    ),
+
+                    Set(
+                        var파일생성오류,
+                        FirstError.Message
+                    );
+
+                    Set(
+                        var저장헤더,
+                        Patch(
+                            접수헤더,
+                            LookUp(
+                                접수헤더,
+                                ID = var저장헤더.ID
+                            ),
+                            {
+                                폴더처리상태: {
+                                    Value: "처리실패"
+                                },
+
+                                폴더처리오류:
+                                    var파일생성오류,
+
+                                폴더최종처리일시:
+                                    Now()
+                            }
+                        )
+                    );
+
+                    Notify(
+                        "접수 데이터는 저장됐지만 결과파일 생성에 실패했습니다. 접수번호: " &
+                        var접수번호 &
+                        " / 오류: " &
+                        var파일생성오류,
+                        NotificationType.Error
+                    )
+                );
+
+                Navigate(
+                    scr완료,
+                    ScreenTransition.Fade
+                ),
+
+                Notify(
+                    "이어쓰기 최종저장 중 오류가 발생했습니다: " &
+                    FirstError.Message,
+                    NotificationType.Error
+                )
+            ),
+
+            /* =========================================
+               C. 같은 세션에서 임시저장 후 최종저장
+               ========================================= */
+
+            If(
+                !IsBlank(var저장헤더.ID),
+
+                IfError(
+                    Set(
+                        var저장헤더,
+                        Patch(
+                            접수헤더,
+                            var저장헤더,
+                            {
+                                접수상태: {
+                                    Value: "접수완료"
+                                }
+                            }
+                        )
+                    );
+
+                    RemoveIf(
+                        접수시료항목매핑,
+                        접수헤더연결.Id = var저장헤더.ID
+                    );
+
+                    ForAll(
+                        col시료항목배정 As 현재배정,
+
+                        Patch(
+                            접수시료항목매핑,
+                            Defaults(접수시료항목매핑),
+                            {
+                                제목:
+                                    var접수번호 &
+                                    "-" &
+                                    Text(현재배정.시료순번) &
+                                    "-" &
+                                    현재배정.분석항목명,
+
+                                접수헤더연결:
+                                    LookUp(
+                                        Choices(
+                                            접수시료항목매핑.접수헤더연결
+                                        ),
+                                        Id = var저장헤더.ID
+                                    ),
+
+                                시료순번:
+                                    현재배정.시료순번,
+
+                                시료명:
+                                    현재배정.시료명,
+
+                                분석항목연결:
+                                    LookUp(
+                                        Choices(
+                                            접수시료항목매핑.분석항목연결
+                                        ),
+                                        Id = 현재배정.분석항목ID
+                                    ),
+
+                                분석항목명복사:
+                                    현재배정.분석항목명
+                            }
+                        )
+                    );
+
+                    IfError(
+                        Set(
+                            var결과파일응답,
+                            TAT_결과파일생성_App.Run(
+                                Round(Value(var저장헤더.ID), 0),
+                                Text(var접수번호),
+                                Text(dd의뢰구분.Selected.Value),
+                                Text(cmb현장.Selected.Value),
+                                If(
+                                    dd의뢰구분.Selected.Value = "과제",
+                                    cmb과제.Selected.제목,
+                                    ""
+                                ),
+                                Value(txt시료수.Text),
+                                Text(var시료명목록),
+                                Text(var분석항목목록),
+                                Text(var시료항목매핑),
+                                "신규",
+                                "",
+                                "",
+                                "",
+                                "",
+                                0
+                            )
+                        );
+
+                        Set(
+                            var저장헤더,
+                            Patch(
+                                접수헤더,
+                                LookUp(
+                                    접수헤더,
+                                    ID = var저장헤더.ID
+                                ),
+                                {
+                                    결과폴더명:
+                                        var결과파일응답.결과폴더명,
+
+                                    결과폴더경로:
+                                        var결과파일응답.결과폴더경로,
+
+                                    결과엑셀파일명:
+                                        var결과파일응답.결과엑셀파일명,
+
+                                    결과엑셀파일경로:
+                                        var결과파일응답.결과엑셀파일경로,
+
+                                    폴더처리상태: {
+                                        Value: "처리완료"
+                                    },
+
+                                    폴더처리오류:
+                                        Blank(),
+
+                                    폴더최종처리일시:
+                                        Now()
+                                }
+                            )
+                        );
+
+                        Notify(
+                            "최종저장 및 결과파일 생성 완료 / 접수번호: " &
+                            var접수번호,
+                            NotificationType.Success
+                        ),
+
+                        Set(
+                            var파일생성오류,
+                            FirstError.Message
+                        );
+
+                        Set(
+                            var저장헤더,
+                            Patch(
+                                접수헤더,
+                                LookUp(
+                                    접수헤더,
+                                    ID = var저장헤더.ID
+                                ),
+                                {
+                                    폴더처리상태: {
+                                        Value: "처리실패"
+                                    },
+
+                                    폴더처리오류:
+                                        var파일생성오류,
+
+                                    폴더최종처리일시:
+                                        Now()
+                                }
+                            )
+                        );
+
+                        Notify(
+                            "접수 데이터는 저장됐지만 결과파일 생성에 실패했습니다. 접수번호: " &
+                            var접수번호 &
+                            " / 오류: " &
+                            var파일생성오류,
+                            NotificationType.Error
+                        )
+                    );
+
+                    Navigate(
+                        scr완료,
+                        ScreenTransition.Fade
+                    ),
+
+                    Notify(
+                        "최종저장 중 오류가 발생했습니다: " &
+                        FirstError.Message,
+                        NotificationType.Error
+                    )
+                ),
+
+                /* =========================================
+                   D. 신규 직접 최종저장
+                   ========================================= */
+
+                Set(
+                    var번호발급응답,
+                    Blank()
+                );
+
+                Set(
+                    var접수번호,
+                    Blank()
+                );
+
+                Set(
+                    var저장헤더,
+                    Blank()
+                );
+
+                IfError(
+                    Set(
+                        var번호발급응답,
+                        접수번호발급_App.Run(
+                            dd의뢰구분.Selected.Value,
+                            Text(
+                                dp의뢰일자.SelectedDate,
+                                "yyyy-mm-dd"
+                            ),
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                cmb과제.Selected.ID,
+                                0
+                            )
+                        )
+                    );
+
+                    Set(
+                        var접수번호,
+                        Text(var번호발급응답.접수번호)
+                    );
+
+                    If(
+                        IsBlank(var접수번호),
+
+                        Notify(
+                            "접수번호를 발급받지 못했습니다.",
+                            NotificationType.Error
+                        ),
+
+                        Set(
+                            var저장헤더,
+                            Patch(
+                                접수헤더,
+                                Defaults(접수헤더),
+                                {
+                                    제목:
+                                        var접수번호,
+
+                                    의뢰일자:
+                                        dp의뢰일자.SelectedDate,
+
+                                    '시료명 요약':
+                                        txt시료명.Text,
+
+                                    시료수:
+                                        Value(txt시료수.Text),
+
+                                    비고:
+                                        txt비고.Text,
+
+                                    의뢰구분: {
+                                        Value:
+                                            dd의뢰구분.Selected.Value
+                                    },
+
+                                    접수상태: {
+                                        Value: "접수완료"
+                                    },
+
+                                    '업체/현장':
+                                        cmb현장.Selected,
+
+                                    '계산서 업체':
+                                        LookUp(
+                                            현장마스터,
+                                            ID = cmb현장.Selected.Id,
+                                            '계산서 업체 연결'
+                                        ),
+
+                                    결과발송여부:
+                                        false,
+
+                                    완료여부:
+                                        false,
+
+                                    최초의뢰구분: {
+                                        Value:
+                                            dd의뢰구분.Selected.Value
+                                    },
+
+                                    최초접수번호:
+                                        var접수번호,
+
+                                    이전접수번호:
+                                        Blank(),
+
+                                    구분변경여부:
+                                        false,
+
+                                    폴더처리상태: {
+                                        Value: "미생성"
+                                    },
+
+                                    폴더처리오류:
+                                        Blank()
+                                }
+                            )
+                        );
+
+                        If(
+                            IsBlank(var저장헤더.ID),
+
+                            Notify(
+                                "접수번호는 발급됐지만 접수헤더 저장에 실패했습니다. 발급번호: " &
+                                var접수번호,
+                                NotificationType.Error
+                            ),
+
+                            IfError(
+                                ForAll(
+                                    col선택항목 As 현재항목,
+
+                                    Patch(
+                                        접수항목상세,
+                                        Defaults(접수항목상세),
+                                        {
+                                            제목:
+                                                var접수번호 &
+                                                "-" &
+                                                현재항목.분석항목명,
+
+                                            접수헤더연결:
+                                                LookUp(
+                                                    Choices(
+                                                        접수항목상세.접수헤더연결
+                                                    ),
+                                                    Id = var저장헤더.ID
+                                                ),
+
+                                            분석항목:
+                                                LookUp(
+                                                    Choices(
+                                                        접수항목상세.분석항목
+                                                    ),
+                                                    Id = 현재항목.분석항목ID
+                                                ),
+
+                                            항목분류:
+                                                현재항목.항목분류,
+
+                                            수량:
+                                                현재항목.입력수량,
+
+                                            배정시료명:
+                                                Concat(
+                                                    Filter(
+                                                        col시료항목배정,
+                                                        분석항목ID = 현재항목.분석항목ID
+                                                    ),
+                                                    시료명,
+                                                    ", "
+                                                ),
+
+                                            단가:
+                                                현재항목.입력단가,
+
+                                            분석상태: {
+                                                Value: "대기"
+                                            },
+
+                                            정산대상여부:
+                                                true,
+
+                                            표준소요일수:
+                                                현재항목.표준소요일수
+                                        }
+                                    )
+                                );
+
+                                RemoveIf(
+                                    접수시료항목매핑,
+                                    접수헤더연결.Id = var저장헤더.ID
+                                );
+
+                                ForAll(
+                                    col시료항목배정 As 현재배정,
+
+                                    Patch(
+                                        접수시료항목매핑,
+                                        Defaults(접수시료항목매핑),
+                                        {
+                                            제목:
+                                                var접수번호 &
+                                                "-" &
+                                                Text(현재배정.시료순번) &
+                                                "-" &
+                                                현재배정.분석항목명,
+
+                                            접수헤더연결:
+                                                LookUp(
+                                                    Choices(
+                                                        접수시료항목매핑.접수헤더연결
+                                                    ),
+                                                    Id = var저장헤더.ID
+                                                ),
+
+                                            시료순번:
+                                                현재배정.시료순번,
+
+                                            시료명:
+                                                현재배정.시료명,
+
+                                            분석항목연결:
+                                                LookUp(
+                                                    Choices(
+                                                        접수시료항목매핑.분석항목연결
+                                                    ),
+                                                    Id = 현재배정.분석항목ID
+                                                ),
+
+                                            분석항목명복사:
+                                                현재배정.분석항목명
+                                        }
+                                    )
+                                );
+
+                                IfError(
+                                    Set(
+                                        var결과파일응답,
+                                        TAT_결과파일생성_App.Run(
+                                            Round(Value(var저장헤더.ID), 0),
+                                            Text(var접수번호),
+                                            Text(dd의뢰구분.Selected.Value),
+                                            Text(cmb현장.Selected.Value),
+                                            If(
+                                                dd의뢰구분.Selected.Value = "과제",
+                                                cmb과제.Selected.제목,
+                                                ""
+                                            ),
+                                            Value(txt시료수.Text),
+                                            Text(var시료명목록),
+                                            Text(var분석항목목록),
+                                            Text(var시료항목매핑),
+                                            "신규",
+                                            "",
+                                            "",
+                                            "",
+                                            "",
+                                            0
+                                        )
+                                    );
+
+                                    Set(
+                                        var저장헤더,
+                                        Patch(
+                                            접수헤더,
+                                            LookUp(
+                                                접수헤더,
+                                                ID = var저장헤더.ID
+                                            ),
+                                            {
+                                                결과폴더명:
+                                                    var결과파일응답.결과폴더명,
+
+                                                결과폴더경로:
+                                                    var결과파일응답.결과폴더경로,
+
+                                                결과엑셀파일명:
+                                                    var결과파일응답.결과엑셀파일명,
+
+                                                결과엑셀파일경로:
+                                                    var결과파일응답.결과엑셀파일경로,
+
+                                                폴더처리상태: {
+                                                    Value: "처리완료"
+                                                },
+
+                                                폴더처리오류:
+                                                    Blank(),
+
+                                                폴더최종처리일시:
+                                                    Now()
+                                            }
+                                        )
+                                    );
+
+                                    Notify(
+                                        "최종저장 및 결과파일 생성 완료 / 접수번호: " &
+                                        var접수번호 &
+                                        " / 상세 " &
+                                        Text(CountRows(col선택항목)) &
+                                        "건",
+                                        NotificationType.Success
+                                    ),
+
+                                    Set(
+                                        var파일생성오류,
+                                        FirstError.Message
+                                    );
+
+                                    Set(
+                                        var저장헤더,
+                                        Patch(
+                                            접수헤더,
+                                            LookUp(
+                                                접수헤더,
+                                                ID = var저장헤더.ID
+                                            ),
+                                            {
+                                                폴더처리상태: {
+                                                    Value: "처리실패"
+                                                },
+
+                                                폴더처리오류:
+                                                    var파일생성오류,
+
+                                                폴더최종처리일시:
+                                                    Now()
+                                            }
+                                        )
+                                    );
+
+                                    Notify(
+                                        "접수 데이터는 저장됐지만 결과파일 생성에 실패했습니다. 접수번호: " &
+                                        var접수번호 &
+                                        " / 오류: " &
+                                        var파일생성오류,
+                                        NotificationType.Error
+                                    )
+                                );
+
+                                Navigate(
+                                    scr완료,
+                                    ScreenTransition.Fade
+                                ),
+
+                                Notify(
+                                    "접수헤더는 저장됐지만 상세 항목 저장 중 오류가 발생했습니다. 접수번호: " &
+                                    var접수번호 &
+                                    " / 오류: " &
+                                    FirstError.Message,
+                                    NotificationType.Error
+                                )
+                            )
+                        )
+                    ),
+
+                    Notify(
+                        "최종저장 중 오류가 발생했습니다: " &
+                        FirstError.Message,
+                        NotificationType.Error
+                    )
+                )
+            )
+        )
+    );
+
+    Set(
+        var저장중,
+        false
+    )
+)
