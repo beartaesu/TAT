@@ -1318,3 +1318,48 @@ Power Apps 수식을 변경할 때는 반드시 정확한 화면·트리·컨트
 - 사용자가 수식을 요청하면 기본적으로 전체 교체본을 제공한다.
 - 오류·수식 변경·테스트 결과가 생기면 01~04의 역할에 맞는 문서만 갱신한다.
 - Git 반영은 `AGENTS.md`의 세션 단위 체크포인트 규칙을 따른다.
+
+## 7. 2026-08-10 세션 종료 및 Local Codex 인계
+
+### 운영 방식
+
+- 회사 PC에서 하루 동안 Power Apps·SharePoint·Power Automate 작업과 실제 검증을 이어간다.
+- 작업마다 Git을 반복하지 않고 같은 대화에 성공·실패·미검증 결과를 명확히 남긴다.
+- 하루 업무 종료 후 개인 PC에서 같은 대화를 열고 Local Codex가 `C:\workspace\TAT`의 최신 `origin/main`을 기준으로 문서와 수식을 갱신한다.
+- Local Codex가 구조 검사, `git diff --check`, 관련 파일 확인, 커밋, push, 로컬·원격 SHA 비교까지 수행한다.
+
+### 다음 대화 시작 전 Git 확인
+
+```powershell
+cd C:\workspace\TAT
+git fetch origin
+git pull --ff-only origin main
+git status
+git log -3 --oneline --decorate
+git rev-parse HEAD
+git rev-parse origin/main
+```
+
+- `HEAD`와 `origin/main`이 같고 작업트리가 깨끗해야 GitHub 체크포인트 완료 상태다.
+- 두 SHA가 다르면 새 대화를 시작하기 전에 pull 또는 push 누락을 해결한다.
+- 강제 push는 사용하지 않는다.
+
+### 최신 `btn최종저장.OnSelect` 정적 확인값
+
+- 파일: `formulas/scr검토저장_btn최종저장_OnSelect.powerfx`
+- 현재 저장소 기준 SHA-256: `ca5aba86fcc731b2d811e925f31cebbf77f16d75ba3ae5c4642b1b2576259b97`
+- 전체 줄 수: 1,350줄
+- 직접 `접수헤더연결: { ... }` 레코드: 7곳
+- `의뢰일자복사`, `업체현장ID복사`, `업체현장명복사`, `시료명요약복사`, `분석항목ID복사`: 각각 3곳
+- 문자 그대로의 `\\n`, Markdown 별표 컨트롤명, `TAT\\_결과파일생성\\_App` 형태의 이스케이프 문자열은 없어야 한다.
+- GitHub 일반 렌더링이나 대화에 중복 표시된 수식을 복사하지 말고 GitHub Raw 파일의 단일 전체 수식을 사용한다.
+
+### 다음 세션의 실제 검증 작업
+
+1. 정확한 위치: `scr검토저장 > btn최종저장 > OnSelect`.
+2. GitHub Raw의 전체 파일로 기존 속성을 통째로 교체한다.
+3. 빨간 문법 오류와 Flow 15개 인수 오류가 없는지 먼저 확인한다.
+4. 신규 테스트 한 건만 저장한다.
+5. `접수항목상세.접수헤더연결`과 `접수시료항목매핑.접수헤더연결`이 신규 헤더를 가리키는지 확인한다.
+6. 복사 열 5개와 결과 폴더·Excel 생성, 기존 데이터 미변경을 확인한다.
+7. 성공 전에는 기존 데이터 일괄 보정과 갤러리 복사 열 전환을 진행하지 않는다.
