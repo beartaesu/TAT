@@ -1,6 +1,6 @@
 # 04 TAT FORMULAS · ERRORS · HANDOFF
 
-최종 갱신: 2026-08-05
+최종 갱신: 2026-08-10
 
 ## 문서 역할과 갱신 기준
 
@@ -36,6 +36,790 @@
 - 상태: **제안/미적용**
 - 이 문서의 ‘향후 교체할 Power Apps 응답 수식’ 4개는 실제 적용 완료본이 아니다.
 - 실제 Flow에 반영하고 테스트하기 전까지 최신 적용본으로 취급하지 않는다.
+
+#### `dd접수상태필터.Items`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > dd접수상태필터 > Items`
+- 검증: `전체`, `임시작성`, `접수완료`, `접수취소` 모두 정상
+
+```powerfx
+[
+    "전체",
+    "임시작성",
+    "접수완료",
+    "접수취소"
+]
+```
+
+#### `dd접수상태필터.Default`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > dd접수상태필터 > Default`
+
+```powerfx
+"전체"
+```
+
+#### `gal접수현황.Items` — 접수상태 필터만 적용한 이전본
+
+- 상태: **구버전·적용 금지**
+- 위치: `scr접수현황 > con접수현황전체 > gal접수현황 > Items`
+- 과거 검증: 상태 필터 네 선택지 모두 정상
+- 주의: 아래 수식은 접수상태 필터만 적용한 이전본이다. 2026-08-05 접수번호 검색 필터 추가 후에는 아래 `txt접수현황검색` 반영 수식을 최신 적용본으로 사용한다.
+
+```powerfx
+SortByColumns(
+    Filter(
+        접수헤더,
+        dd접수상태필터.Selected.Value = "전체" ||
+        접수상태.Value = dd접수상태필터.Selected.Value
+    ),
+    "ID",
+    SortOrder.Descending
+)
+```
+
+#### `txt접수현황검색.HintText`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > txt접수현황검색 > HintText`
+
+```powerfx
+"접수번호, 시료명, 업체/현장명 검색"
+```
+
+#### `txt접수현황검색.Default`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > txt접수현황검색 > Default`
+
+```powerfx
+""
+```
+
+#### `gal접수현황.Items` — 접수상태 필터 + 접수번호 검색
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > gal접수현황 > Items`
+- 검증: 검색창 빈 상태, `전체`, `임시작성`, `접수완료`, `접수취소` 상태 필터와 접수번호 검색 조합, 상세보기 이동 모두 정상
+- 주의: 업체/현장명, 시료명 요약 검색은 실제 SharePoint 열명·Lookup 표시 구조 확인 전까지 추가하지 않는다.
+
+```powerfx
+SortByColumns(
+    Filter(
+        접수헤더,
+        (
+            dd접수상태필터.Selected.Value = "전체" ||
+            접수상태.Value = dd접수상태필터.Selected.Value
+        ) &&
+        (
+            IsBlank(Trim(txt접수현황검색.Text)) ||
+            Trim(txt접수현황검색.Text) in 제목
+        )
+    ),
+    "ID",
+    SortOrder.Descending
+)
+```
+
+#### `btn접수현황필터초기화.Text`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > btn접수현황필터초기화 > Text`
+
+```powerfx
+"초기화"
+```
+
+#### `btn접수현황필터초기화.OnSelect`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > btn접수현황필터초기화 > OnSelect`
+- 검증: 상태 필터 초기화, 검색어 초기화, 상태+검색 동시 초기화, 초기화 후 전체 목록 표시, 상세보기 이동 모두 정상
+
+```powerfx
+Reset(dd접수상태필터);
+Reset(txt접수현황검색)
+```
+
+#### `lbl접수현황조회건수.Text`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr접수현황 > con접수현황전체 > con접수현황헤더 > lbl접수현황조회건수 > Text`
+- 검증: 기본 조회 건수 표시, 상태 필터별 건수 변경, 검색어 적용 시 건수 변경, 초기화 후 전체 건수 복원, 상세보기 이동 모두 정상
+
+```powerfx
+"조회 " &
+Text(
+    CountRows(gal접수현황.AllItems),
+    "[$-ko-KR]#,##0"
+) &
+"건"
+```
+
+#### `scr분석진행` 기본 레이아웃 및 갤러리
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 검증: 화면 여백, 헤더·도구·목록 자동 배치, 갤러리 행과 스크롤 표시 정상
+
+##### `con분석진행전체`
+
+- 위치: `scr분석진행 > con분석진행전체`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `X` | `24` |
+| `Y` | `20` |
+| `Width` | `Parent.Width - 48` |
+| `Height` | `Parent.Height - 40` |
+| `LayoutGap` | `8` |
+| `PaddingTop` | `12` |
+| `PaddingBottom` | `12` |
+| `PaddingLeft` | `12` |
+| `PaddingRight` | `12` |
+
+##### 내부 영역 크기
+
+| 위치 | 속성 | 전체 수식 |
+|---|---|---|
+| `con분석진행헤더` | `Height` | `64` |
+| `con분석진행헤더` | `FillPortions` | `0` |
+| `con분석진행헤더` | `AlignInContainer` | `AlignInContainer.Stretch` |
+| `con분석진행도구` | `Height` | `72` |
+| `con분석진행도구` | `FillPortions` | `0` |
+| `con분석진행도구` | `AlignInContainer` | `AlignInContainer.Stretch` |
+| `con분석진행목록` | `FillPortions` | `1` |
+| `con분석진행목록` | `AlignInContainer` | `AlignInContainer.Stretch` |
+| `con분석진행목록헤더` | `Height` | `48` |
+| `con분석진행목록헤더` | `FillPortions` | `0` |
+| `con분석진행목록헤더` | `AlignInContainer` | `AlignInContainer.Stretch` |
+| `gal분석진행항목` | `FillPortions` | `1` |
+| `gal분석진행항목` | `AlignInContainer` | `AlignInContainer.Stretch` |
+
+##### `lbl분석진행제목.Text`
+
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행헤더 > lbl분석진행제목 > Text`
+
+```powerfx
+"분석 진행"
+```
+
+##### `gal분석진행항목.Items`
+
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > gal분석진행항목 > Items`
+
+```powerfx
+SortByColumns(
+    접수항목상세,
+    "ID",
+    SortOrder.Descending
+)
+```
+
+##### `lbl분석진행시료명요약.Text`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > gal분석진행항목 > lbl분석진행시료명요약 > Text`
+- 오류 원인: `접수헤더`의 실제 PowerFx 열명은 `시료명요약`이 아니라 공백이 포함된 `'시료명 요약'`이다.
+- 근거: 최신 최종저장 전체 수식에서 `Patch(접수헤더, ..., {'시료명 요약': ...})` 형식으로 사용 중이다.
+
+```powerfx
+Coalesce(
+    LookUp(
+        접수헤더,
+        ID = ThisItem.접수헤더연결.Id,
+        '시료명 요약'
+    ),
+    ""
+)
+```
+
+##### `gal분석진행항목` 업무 열 레이블
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > gal분석진행항목`
+- 검증: 의뢰번호·시료명요약·분석항목·수량 값 표시 정상. 레이블 위치와 크기 정렬은 다음 작업이다.
+
+###### `lbl분석진행의뢰번호.Text`
+
+```powerfx
+ThisItem.접수헤더연결.Value
+```
+
+###### `lbl분석진행분석항목.Text`
+
+```powerfx
+ThisItem.분석항목.Value
+```
+
+###### `lbl분석진행수량.Text`
+
+```powerfx
+Text(
+    ThisItem.수량,
+    "[$-ko-KR]#,##0"
+)
+```
+
+##### `gal분석진행항목` 행 및 열 정렬
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 검증: 의뢰번호·시료명요약·분석항목·수량이 한 행에 겹침 없이 표시되고 세로 스크롤 정상
+
+###### `gal분석진행항목.TemplateSize`
+
+```powerfx
+56
+```
+
+###### `lbl분석진행의뢰번호`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `X` | `48` |
+| `Y` | `0` |
+| `Width` | `(Parent.TemplateWidth - 64) * 0.22` |
+| `Height` | `Parent.TemplateHeight` |
+| `Wrap` | `false` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+
+###### `lbl분석진행시료명요약`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `X` | `lbl분석진행의뢰번호.X + lbl분석진행의뢰번호.Width` |
+| `Y` | `0` |
+| `Width` | `(Parent.TemplateWidth - 64) * 0.42` |
+| `Height` | `Parent.TemplateHeight` |
+| `Wrap` | `false` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+
+###### `lbl분석진행분석항목`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `X` | `lbl분석진행시료명요약.X + lbl분석진행시료명요약.Width` |
+| `Y` | `0` |
+| `Width` | `(Parent.TemplateWidth - 64) * 0.24` |
+| `Height` | `Parent.TemplateHeight` |
+| `Wrap` | `false` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+
+###### `lbl분석진행수량`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `X` | `lbl분석진행분석항목.X + lbl분석진행분석항목.Width` |
+| `Y` | `0` |
+| `Width` | `Parent.TemplateWidth - Self.X - 16` |
+| `Height` | `Parent.TemplateHeight` |
+| `Wrap` | `false` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+| `Align` | `Align.Center` |
+
+##### `con분석진행목록헤더` 열 제목
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > con분석진행목록헤더`
+- 공통: `AlignInContainer = AlignInContainer.Stretch`, `VerticalAlign = VerticalAlign.Middle`, `FontWeight = FontWeight.Semibold`, `Wrap = false`, `PaddingLeft = 8`. 앞의 네 레이블은 `FillPortions = 0`, 수량 레이블은 `FillPortions = 1`을 사용한다.
+
+| 컨트롤 | `Text` | `Width` | `Align` |
+|---|---|---|---|
+| `lbl분석진행헤더선택` | `"선택"` | `48` | `Align.Center` |
+| `lbl분석진행헤더의뢰번호` | `"의뢰번호"` | `(gal분석진행항목.TemplateWidth - 64) * 0.22` | `Align.Left` |
+| `lbl분석진행헤더시료명요약` | `"시료명요약"` | `(gal분석진행항목.TemplateWidth - 64) * 0.42` | `Align.Left` |
+| `lbl분석진행헤더분석항목` | `"분석항목"` | `(gal분석진행항목.TemplateWidth - 64) * 0.24` | `Align.Left` |
+| `lbl분석진행헤더수량` | `"수량"` | 남은 영역을 사용하도록 `FillPortions = 1` | `Align.Center` |
+
+##### `chk분석진행항목선택`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > gal분석진행항목 > chk분석진행항목선택`
+- 검증: 개별 체크·해제, 컬렉션 중복 방지, 스크롤 후 체크 상태 유지 정상
+
+###### `OnCheck`
+
+```powerfx
+With(
+    {
+        var선택항목ID: ThisItem.ID
+    },
+    If(
+        IsBlank(
+            LookUp(
+                col분석진행선택,
+                ID = var선택항목ID
+            )
+        ),
+        Collect(
+            col분석진행선택,
+            ThisItem
+        )
+    )
+);
+Reset(
+    chk분석진행전체선택
+)
+```
+
+###### `OnUncheck`
+
+```powerfx
+With(
+    {
+        var선택항목ID: ThisItem.ID
+    },
+    RemoveIf(
+        col분석진행선택,
+        ID = var선택항목ID
+    )
+);
+Reset(
+    chk분석진행전체선택
+)
+```
+
+###### `Default`
+
+```powerfx
+!IsBlank(
+    LookUp(
+        col분석진행선택,
+        ID = ThisItem.ID
+    )
+)
+```
+
+###### 위치·크기 최신 적용값
+
+| 속성 | 전체 수식 |
+|---|---|
+| `Text` | `""` |
+| `X` | `0` |
+| `Y` | `0` |
+| `Width` | `48` |
+| `Height` | `Parent.TemplateHeight` |
+| `CheckboxSize` | `36` |
+| `PaddingLeft` | `6` |
+| `PaddingRight` | `6` |
+| `PaddingTop` | `0` |
+| `PaddingBottom` | `0` |
+
+##### 목록 헤더·갤러리 최종 정렬 보정
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- `con분석진행목록헤더`: `LayoutGap = 0`, 네 방향 `Padding = 0`
+- 선택·수량 헤더: 좌우 패딩 `0`, `Align.Center`
+- 의뢰번호·시료명요약·분석항목 헤더 및 행 레이블: `PaddingLeft = 8`, 나머지 패딩 `0`
+- `lbl분석진행헤더수량.FillPortions = 0`
+- `lbl분석진행헤더수량.Width`:
+
+```powerfx
+gal분석진행항목.TemplateWidth -
+48 -
+((gal분석진행항목.TemplateWidth - 64) * 0.22) -
+((gal분석진행항목.TemplateWidth - 64) * 0.42) -
+((gal분석진행항목.TemplateWidth - 64) * 0.24) -
+16
+```
+
+- `gal분석진행항목.TemplatePadding = 0`
+
+##### `lbl분석진행선택건수`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행도구 > lbl분석진행선택건수 > Text`
+- 검증: 선택·해제와 스크롤 후에도 현재 컬렉션 건수를 정상 표시
+
+```powerfx
+"선택 " &
+Text(
+    CountRows(col분석진행선택),
+    "[$-ko-KR]#,##0"
+) &
+"건"
+```
+
+###### 표시 속성
+
+| 속성 | 전체 수식 |
+|---|---|
+| `Width` | `120` |
+| `FillPortions` | `0` |
+| `AlignInContainer` | `AlignInContainer.Stretch` |
+| `Align` | `Align.Center` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+| `Wrap` | `false` |
+
+##### 2026-08-07 세션 종료 재개점
+
+- 완료: `scr분석진행` 기본 레이아웃, `접수항목상세` 갤러리, 의뢰번호·`'시료명 요약'`·분석항목·수량 표시, 헤더·행 정렬, 개별 선택 컬렉션, 선택 건수 표시
+- 다음 작업 1: 전체선택의 대상을 현재 조회 결과로 할지 최종 확정
+- 다음 작업 2: `chk분석진행전체선택` 구현
+- 다음 작업 3: 분석완료일 선택기와 실행 버튼 구현
+- 다음 작업 4: 선택 행만 상태·완료일 갱신하고 미선택 행은 유지되는지 검증
+
+##### `chk분석진행전체선택`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행도구 > chk분석진행전체선택`
+- 범위: SharePoint 전체가 아니라 `gal분석진행항목.AllItems`에 현재 로드된 조회 행
+- 검증: 전체선택·전체해제, 개별 선택과 상단 체크 동기화, 선택 건수, 스크롤 후 상태 유지 정상
+
+###### `OnCheck`
+
+```powerfx
+ClearCollect(
+    col분석진행선택,
+    gal분석진행항목.AllItems
+);
+Set(
+    var분석진행행선택Reset,
+    !Coalesce(
+        var분석진행행선택Reset,
+        false
+    )
+)
+```
+
+###### `OnUncheck`
+
+```powerfx
+Clear(
+    col분석진행선택
+);
+Set(
+    var분석진행행선택Reset,
+    !Coalesce(
+        var분석진행행선택Reset,
+        false
+    )
+)
+```
+
+###### `Default`
+
+```powerfx
+CountRows(
+    gal분석진행항목.AllItems
+) > 0 &&
+CountRows(
+    Filter(
+        gal분석진행항목.AllItems As 현재항목,
+        !IsBlank(
+            LookUp(
+                col분석진행선택,
+                ID = 현재항목.ID
+            )
+        )
+    )
+) =
+CountRows(
+    gal분석진행항목.AllItems
+)
+```
+
+###### 행 체크박스 동기화 속성
+
+- `chk분석진행항목선택.Reset`:
+
+```powerfx
+var분석진행행선택Reset
+```
+
+##### 분석완료일 입력 컨트롤
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행도구`
+- 검증: 오늘 날짜 기본 표시, 달력 날짜 변경 및 유지, 기존 전체선택·선택 건수 기능 정상
+
+###### `lbl분석진행완료일`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `Text` | `"분석완료일"` |
+| `Width` | `110` |
+| `FillPortions` | `0` |
+| `AlignInContainer` | `AlignInContainer.Stretch` |
+| `Align` | `Align.Right` |
+| `VerticalAlign` | `VerticalAlign.Middle` |
+| `Wrap` | `false` |
+
+###### `dp분석일`
+
+| 속성 | 전체 수식 |
+|---|---|
+| `DefaultDate` | `Today()` |
+| `Width` | `180` |
+| `FillPortions` | `0` |
+| `AlignInContainer` | `AlignInContainer.Stretch` |
+| `Format` | `DateTimeFormat.ShortDate` |
+| `StartYear` | `Year(Today()) - 1` |
+| `EndYear` | `Year(Today()) + 1` |
+
+##### `접수항목상세.분석상태` Choice 확인
+
+- 상태: **사용자 실제 SharePoint 열 설정 확인 완료**
+- 확인일: 2026-08-10
+- 값: `대기`, `분석 중`, `분석완료`, `보류`
+- 일괄 완료 버튼에서 사용할 정확한 값: `분석완료`
+
+##### `btn분석진행완료처리.OnSelect`
+
+- 상태: **최신 적용본 및 사용자 검증 완료**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행도구 > btn분석진행완료처리 > OnSelect`
+- 검증: 선택 행의 `분석상태 = 분석완료`, `분석완료일 = dp분석일.SelectedDate`가 SharePoint `접수항목상세`에 정상 반영
+
+```powerfx
+If(
+    CountRows(col분석진행선택) = 0,
+    Notify(
+        "분석완료 처리할 항목을 선택해 주세요.",
+        NotificationType.Warning
+    ),
+    IsBlank(dp분석일.SelectedDate),
+    Notify(
+        "분석완료일을 선택해 주세요.",
+        NotificationType.Warning
+    ),
+    Set(
+        var분석완료처리건수,
+        CountRows(col분석진행선택)
+    );
+    Set(
+        var분석완료처리성공,
+        IfError(
+            ForAll(
+                col분석진행선택 As 선택항목,
+                Patch(
+                    접수항목상세,
+                    LookUp(
+                        접수항목상세,
+                        ID = 선택항목.ID
+                    ),
+                    {
+                        분석상태: {
+                            Value: "분석완료"
+                        },
+                        분석완료일:
+                            dp분석일.SelectedDate
+                    }
+                )
+            );
+            Refresh(접수항목상세);
+            true,
+            Notify(
+                "분석완료 처리 중 오류가 발생했습니다: " &
+                FirstError.Message,
+                NotificationType.Error
+            );
+            false
+        )
+    );
+    If(
+        var분석완료처리성공,
+        Clear(
+            col분석진행선택
+        );
+        Set(
+            var분석진행행선택Reset,
+            !Coalesce(
+                var분석진행행선택Reset,
+                false
+            )
+        );
+        Reset(
+            chk분석진행전체선택
+        );
+        Notify(
+            Text(
+                var분석완료처리건수,
+                "[$-ko-KR]#,##0"
+            ) &
+            "개 분석항목을 분석완료 처리했습니다." &
+            Char(10) &
+            "분석완료일: " &
+            Text(
+                dp분석일.SelectedDate,
+                "[$-ko-KR]yyyy년 m월 d일"
+            ),
+            NotificationType.Success
+        )
+    )
+)
+```
+
+##### `scr분석진행` 필터 컨트롤
+
+- 상태: **컨트롤 및 갤러리 조합 필터 적용, 상세 조합 검증 진행 중**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행필터`
+- 컨트롤: `cmb분석진행업체필터`, `dd분석진행월필터`, `cmb분석진행분석항목필터`
+- UI 보정 완료: `con분석진행필터`를 `con분석진행도구` 위로 이동하고 세 필터에 `AlignInContainer = AlignInContainer.Center`를 적용해 높이·수직 정렬 통일
+
+###### `cmb분석진행업체필터.Items`
+
+```powerfx
+Choices(
+    접수헤더.'업체/현장'
+)
+```
+
+###### `dd분석진행월필터.Items`
+
+```powerfx
+ForAll(
+    Sequence(25) As 월순번,
+    With(
+        {
+            기준월:
+                DateAdd(
+                    Date(
+                        Year(Today()),
+                        Month(Today()),
+                        1
+                    ),
+                    2 - 월순번.Value,
+                    TimeUnit.Months
+                )
+        },
+        {
+            표시:
+                If(
+                    월순번.Value = 1,
+                    "전체",
+                    Text(
+                        기준월,
+                        "[$-ko-KR]yyyy년 m월"
+                    )
+                ),
+            월시작:
+                If(
+                    월순번.Value = 1,
+                    Blank(),
+                    기준월
+                )
+        }
+    )
+)
+```
+
+###### `cmb분석진행분석항목필터.Items`
+
+```powerfx
+Choices(
+    접수항목상세.분석항목
+)
+```
+
+###### `gal분석진행항목.Items` — 업체/현장 + 월 + 분석항목
+
+- 상태: **최신 적용본, 사용자 구현 확인 및 상세 조합 검증 진행 중**
+- 위치: `scr분석진행 > con분석진행전체 > con분석진행목록 > gal분석진행항목 > Items`
+- 사용자 확인: Power Apps에 위임 경고 표시
+- 원인: 연결 헤더를 행별 `LookUp`하는 교차 목록 조회는 SharePoint에 위임되지 않는다.
+- 영향: Power Apps 데이터 행 제한을 넘는 경우 과거 월 또는 일부 업체 행이 조회·전체선택·완료 처리에서 누락될 수 있다.
+
+```powerfx
+With(
+    {
+        var선택업체ID:
+            cmb분석진행업체필터.Selected.Id,
+        var선택월시작:
+            dd분석진행월필터.Selected.월시작,
+        var선택분석항목ID:
+            cmb분석진행분석항목필터.Selected.Id
+    },
+    SortByColumns(
+        Filter(
+            접수항목상세 As 현재항목,
+            With(
+                {
+                    var현재접수헤더:
+                        LookUp(
+                            접수헤더,
+                            ID =
+                                현재항목.접수헤더연결.Id
+                        )
+                },
+                (
+                    IsBlank(var선택업체ID) ||
+                    var현재접수헤더.'업체/현장'.Id =
+                        var선택업체ID
+                ) &&
+                (
+                    IsBlank(var선택월시작) ||
+                    (
+                        var현재접수헤더.의뢰일자 >=
+                            var선택월시작 &&
+                        var현재접수헤더.의뢰일자 <
+                            DateAdd(
+                                var선택월시작,
+                                1,
+                                TimeUnit.Months
+                            )
+                    )
+                ) &&
+                (
+                    IsBlank(var선택분석항목ID) ||
+                    현재항목.분석항목.Id =
+                        var선택분석항목ID
+                )
+            )
+        ),
+        "ID",
+        SortOrder.Descending
+    )
+)
+```
+
+###### 위임 경고 안정화안
+
+- 상태: **SharePoint 열 생성 및 저장소 수식 보완 완료, Power Apps 적용·검증 대기**
+- `접수항목상세`에 다음 복사 열을 추가한다.
+  - `의뢰일자복사`: 날짜 전용
+  - `업체현장ID복사`: 숫자
+  - `업체현장명복사`: 한 줄 텍스트
+  - `시료명요약복사`: 한 줄 텍스트
+  - `분석항목ID복사`: 숫자
+- 신규 저장 시 `접수헤더.의뢰일자`, `접수헤더.'업체/현장'.Id`, `접수헤더.'업체/현장'.Value`를 각 상세 행에 함께 저장한다.
+- 기존 `접수항목상세` 데이터도 복사 열을 일괄 보정해야 월·업체 필터에서 누락되지 않는다.
+- 복사 열 적용 후 갤러리는 교차 `LookUp` 없이 `접수항목상세`의 직접 열만 필터링한다.
+- 기존 데이터 보정은 Power Automate에서 페이지 처리를 사용한다.
+- 기존 데이터 보정이 끝나기 전에는 현재 `gal분석진행항목.Items` 필터 수식을 복사 열 기준으로 교체하지 않는다.
+
+###### 신규 저장 수식 보완
+
+- 상태: **저장소 전체 수식 반영 완료, Power Apps 적용·검증 대기**
+- 전체 수식: [`formulas/scr검토저장_btn최종저장_OnSelect.powerfx`](../formulas/scr검토저장_btn최종저장_OnSelect.powerfx)
+- 대상: `접수항목상세`를 `Defaults(접수항목상세)`로 생성하는 3개 분기
+- 각 생성 레코드에 추가한 값:
+
+```powerfx
+의뢰일자복사:
+    var저장헤더.의뢰일자,
+
+업체현장ID복사:
+    Round(
+        Value(var저장헤더.'업체/현장'.Id),
+        0
+    ),
+
+업체현장명복사:
+    Text(var저장헤더.'업체/현장'.Value),
+
+시료명요약복사:
+    Text(var저장헤더.'시료명 요약'),
+
+분석항목ID복사:
+    Round(
+        Value(현재항목.분석항목ID),
+        0
+    ),
+```
+
+- 적용 전 필수: Power Apps의 `접수항목상세` 데이터 원본 새로고침
+- 적용 방식: 기존 `scr검토저장 > btn최종저장 > OnSelect` 전체 수식을 저장소 전체본으로 교체
 
 ### 1.2 구버전 보관 — 적용 금지
 
@@ -390,6 +1174,54 @@ concat(
 5. 현재 단계에서는 구현하지 않고 향후 작업으로 보류
 
 ## 4. 오류 로그
+
+### 2026-08-10 신규 상세 행 `접수헤더연결` 누락 및 `RemoveIf` 위임 경고
+
+증상:
+
+- 복사 열 5개를 포함한 `btn최종저장.OnSelect` 전체 수식을 적용하면 신규 `접수항목상세` 행은 생성된다.
+- 신규 테스트 행 ID 82·83의 필수 Lookup `접수헤더연결`은 비어 있고 SharePoint에 `필수 정보`가 표시된다.
+- 아래 삭제 수식의 `접수헤더연결.Id` 비교에는 대규모 데이터에서 작동이 보장되지 않는다는 위임 경고가 남는다.
+
+```powerfx
+RemoveIf(
+    접수항목상세,
+    접수헤더연결.Id = var저장헤더.ID
+);
+```
+
+원인 판단:
+
+- 신규 헤더 저장 직후 `Choices(접수항목상세.접수헤더연결)`에서 같은 ID를 다시 찾는 기존 방식이 신규 Lookup 레코드를 반환하지 못한 것으로 판단한다.
+- 앞서 추가한 복사 열 5개에는 접수헤더 숫자 ID가 없으므로 Lookup 하위 `Id`를 사용하는 삭제 조건의 위임 경고는 별도로 남는다.
+
+저장소 교정 수식(미검증):
+
+- 정확한 위치: `scr검토저장 > btn최종저장.OnSelect`
+- 적용 범위: `접수항목상세` 및 `접수시료항목매핑` 생성 분기의 `접수헤더연결` 속성 7곳
+- 기존 `LookUp(Choices(...), Id = var저장헤더.ID)` 전체를 다음 직접 Lookup 레코드로 교체했다.
+
+```powerfx
+접수헤더연결: {
+    Id: var저장헤더.ID,
+    Value: var저장헤더.제목
+},
+```
+
+검증 순서:
+
+1. 저장소의 전체 `btn최종저장.OnSelect` 수식을 Power Apps에 통째로 교체하고 문법 오류가 없는지 확인한다.
+2. 신규 테스트 한 건을 저장한다.
+3. `접수항목상세`와 `접수시료항목매핑`에서 `접수헤더연결`이 같은 신규 헤더를 가리키는지 확인한다.
+4. 신규 상세 행의 복사 열 5개 값도 함께 확인한다.
+5. 검증 완료 전에는 기존 데이터 일괄 보정과 갤러리 복사 열 전환을 진행하지 않는다.
+
+위임 경고 후속안(제안/미적용):
+
+- `접수항목상세`에 숫자 열 `접수헤더ID복사`를 추가하고 인덱스를 생성한다.
+- 신규 상세 저장 시 `Round(Value(var저장헤더.ID), 0)`을 기록한다.
+- 상세 삭제 조건을 직접 숫자 열 동등 비교로 바꾼 뒤 위임 경고를 다시 확인한다.
+- 실제 열 생성 전에는 해당 열을 PowerFx에 참조하지 않는다.
 
 ### 2026-08-05 TriggerInputSchemaMismatch 및 15개 인수 오류
 
