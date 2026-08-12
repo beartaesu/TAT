@@ -348,10 +348,10 @@ IfError(
             Text(var분석항목목록),
             Text(var시료항목매핑),
             "수정",
-            "",
-            "",
-            "",
-            "",
+            Text(LookUp(접수헤더, ID = var저장헤더.ID).의뢰구분.Value),
+            Text(LookUp(접수헤더, ID = var저장헤더.ID).제목),
+            Text(LookUp(접수헤더, ID = var저장헤더.ID).결과폴더경로),
+            Text(LookUp(접수헤더, ID = var저장헤더.ID).결과엑셀파일경로),
             0
         )
     );
