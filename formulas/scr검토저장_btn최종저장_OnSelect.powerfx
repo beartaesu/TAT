@@ -190,7 +190,10 @@ If(
 
                 RemoveIf(
                     접수항목상세,
-                    접수헤더연결.Id = var저장헤더.ID
+                    접수헤더ID복사 = Round(
+                        Value(var저장헤더.ID),
+                        0
+                    )
                 );
 
                 ForAll(
@@ -209,6 +212,12 @@ If(
                                 Id: var저장헤더.ID,
                                 Value: var저장헤더.제목
                             },
+
+                            접수헤더ID복사:
+                                Round(
+                                    Value(var저장헤더.ID),
+                                    0
+                                ),
 
                             분석항목:
                                 LookUp(
@@ -273,7 +282,7 @@ If(
 
                 RemoveIf(
                     접수시료항목매핑,
-                    접수헤더연결.Id = var저장헤더.ID
+                    접수헤더ID복사 = Round(Value(var저장헤더.ID), 0)
                 );
 
                 ForAll(
@@ -295,6 +304,7 @@ If(
                                 Value: var저장헤더.제목
                             },
 
+                            접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
                             시료순번:
                                 현재배정.시료순번,
 
@@ -540,7 +550,10 @@ IfError(
 
                 RemoveIf(
                     접수항목상세,
-                    접수헤더연결.Id = var저장헤더.ID
+                    접수헤더ID복사 = Round(
+                        Value(var저장헤더.ID),
+                        0
+                    )
                 );
 
                 ForAll(
@@ -559,6 +572,8 @@ IfError(
                                 Id: var저장헤더.ID,
                                 Value: var저장헤더.제목
                             },
+
+                            접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
 
                             분석항목:
                                 LookUp(
@@ -623,7 +638,7 @@ IfError(
 
                 RemoveIf(
                     접수시료항목매핑,
-                    접수헤더연결.Id = var저장헤더.ID
+                    접수헤더ID복사 = Round(Value(var저장헤더.ID), 0)
                 );
 
                 ForAll(
@@ -645,6 +660,7 @@ IfError(
                                 Value: var저장헤더.제목
                             },
 
+                            접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
                             시료순번:
                                 현재배정.시료순번,
 
@@ -805,7 +821,10 @@ IfError(
 
                     RemoveIf(
                         접수시료항목매핑,
-                        접수헤더연결.Id = var저장헤더.ID
+                        접수헤더ID복사 = Round(
+                            Value(var저장헤더.ID),
+                            0
+                        )
                     );
 
                     ForAll(
@@ -827,6 +846,7 @@ IfError(
                                     Value: var저장헤더.제목
                                 },
 
+                                접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
                                 시료순번:
                                     현재배정.시료순번,
 
@@ -1107,6 +1127,8 @@ IfError(
                                                 Value: var저장헤더.제목
                                             },
 
+                                            접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
+
                                             분석항목:
                                                 LookUp(
                                                     Choices(
@@ -1170,7 +1192,10 @@ IfError(
 
                                 RemoveIf(
                                     접수시료항목매핑,
-                                    접수헤더연결.Id = var저장헤더.ID
+                                    접수헤더ID복사 = Round(
+                                        Value(var저장헤더.ID),
+                                        0
+                                    )
                                 );
 
                                 ForAll(
@@ -1192,6 +1217,7 @@ IfError(
                                                 Value: var저장헤더.제목
                                             },
 
+                                            접수헤더ID복사: Round(Value(var저장헤더.ID), 0),
                                             시료순번:
                                                 현재배정.시료순번,
 
