@@ -1,0 +1,165 @@
+If(
+    !var관리자,
+    Notify("의뢰구분 변경 권한이 없습니다.", NotificationType.Error),
+    IsBlank(Trim(txt구분변경사유.Text)),
+    Notify("구분 변경 사유를 입력해 주세요.", NotificationType.Warning),
+    !(var상세접수.의뢰구분.Value = "미접수" || var상세접수.의뢰구분.Value = "측정인"),
+    Notify("과제 접수는 의뢰구분을 변경할 수 없습니다.", NotificationType.Warning),
+    IfError(
+        Set(var변경처리성공, false);
+        Set(var구분변경오류, Blank());
+        Set(var변경전의뢰구분, var상세접수.의뢰구분.Value);
+        Set(var변경후의뢰구분, If(var변경전의뢰구분 = "미접수", "측정인", "미접수"));
+        Set(var변경전접수번호, var상세접수.제목);
+        Set(var변경전결과폴더경로, var상세접수.결과폴더경로);
+        Set(var변경전결과엑셀경로, var상세접수.결과엑셀파일경로);
+        Set(
+            var구분변경번호응답,
+            접수번호발급_App.Run(
+                var변경후의뢰구분,
+                Text(var상세접수.의뢰일자, "yyyy-mm-dd"),
+                0
+            )
+        );
+        Set(var변경후접수번호, var구분변경번호응답.접수번호);
+        If(
+            IsBlank(Trim(var변경후접수번호)),
+            Notify("새 접수번호를 발급하지 못했습니다.", NotificationType.Error),
+            Set(
+                var상세접수,
+                Patch(
+                    접수헤더,
+                    LookUp(접수헤더, ID = var상세접수.ID),
+                    {
+                        제목: var변경후접수번호,
+                        의뢰구분: {Value: var변경후의뢰구분},
+                        이전접수번호: var변경전접수번호,
+                        최초접수번호: Coalesce(var상세접수.최초접수번호, var변경전접수번호),
+                        최초의뢰구분: If(
+                            IsBlank(var상세접수.최초의뢰구분.Value),
+                            {Value: var변경전의뢰구분},
+                            var상세접수.최초의뢰구분
+                        ),
+                        구분변경여부: true,
+                        최종구분변경일: Now(),
+                        폴더처리상태: {Value: "처리중"},
+                        폴더처리오류: Blank()
+                    }
+                )
+            );
+            ForAll(
+                Filter(접수시료항목매핑, 접수헤더연결.Id = var상세접수.ID) As 현재매핑,
+                Patch(
+                    접수시료항목매핑,
+                    LookUp(접수시료항목매핑, ID = 현재매핑.ID),
+                    {제목: Substitute(현재매핑.제목, var변경전접수번호, var변경후접수번호)}
+                )
+            );
+            Set(
+                var구분변경이력,
+                Patch(
+                    접수구분변경이력,
+                    Defaults(접수구분변경이력),
+                    {
+                        제목: var변경전접수번호 & " → " & var변경후접수번호,
+                        접수헤더연결: LookUp(
+                            Choices(접수구분변경이력.접수헤더연결),
+                            Id = var상세접수.ID
+                        ),
+                        변경전구분: {Value: var변경전의뢰구분},
+                        변경후구분: {Value: var변경후의뢰구분},
+                        변경전접수번호: var변경전접수번호,
+                        변경후접수번호: var변경후접수번호,
+                        변경일시: Now(),
+                        변경자: User().FullName & " (" & User().Email & ")",
+                        처리결과: {Value: "처리중"},
+                        변경사유: Trim(txt구분변경사유.Text)
+                    }
+                )
+            );
+            IfError(
+                Set(
+                    var구분변경파일응답,
+                    TAT_결과파일생성_App.Run(
+                        Round(Value(var상세접수.ID), 0),
+                        Text(var변경후접수번호),
+                        Text(var변경후의뢰구분),
+                        Text(Substitute(var상세접수.결과폴더명, var변경전접수번호 & "-", "")),
+                        "",
+                        0,
+                        "",
+                        "",
+                        "",
+                        "변경",
+                        Text(var변경전의뢰구분),
+                        Text(var변경전접수번호),
+                        Text(var변경전결과폴더경로),
+                        Text(var변경전결과엑셀경로),
+                        Round(Value(var구분변경이력.ID), 0)
+                    )
+                );
+                Set(
+                    var상세접수,
+                    Patch(
+                        접수헤더,
+                        LookUp(접수헤더, ID = var상세접수.ID),
+                        {
+                            폴더처리상태: {Value: "처리완료"},
+                            폴더처리오류: Blank(),
+                            결과폴더명: var구분변경파일응답.결과폴더명,
+                            결과폴더경로: var구분변경파일응답.결과폴더경로,
+                            결과엑셀파일명: var구분변경파일응답.결과엑셀파일명,
+                            결과엑셀파일경로: var구분변경파일응답.결과엑셀파일경로
+                        }
+                    )
+                );
+                Patch(
+                    접수구분변경이력,
+                    LookUp(접수구분변경이력, ID = var구분변경이력.ID),
+                    {처리결과: {Value: "처리완료"}}
+                );
+                Set(var변경처리성공, true),
+                Set(var구분변경오류, FirstError.Message);
+                Set(
+                    var상세접수,
+                    Patch(
+                        접수헤더,
+                        LookUp(접수헤더, ID = var상세접수.ID),
+                        {
+                            폴더처리상태: {Value: "처리실패"},
+                            폴더처리오류: var구분변경오류
+                        }
+                    )
+                );
+                Patch(
+                    접수구분변경이력,
+                    LookUp(접수구분변경이력, ID = var구분변경이력.ID),
+                    {처리결과: {Value: "처리실패"}}
+                );
+                Notify(
+                    "의뢰구분과 접수번호는 변경되었지만 폴더 처리에 실패했습니다." &
+                    Char(10) & var구분변경오류,
+                    NotificationType.Error
+                )
+            );
+            Refresh(접수헤더);
+            Refresh(접수시료항목매핑);
+            Refresh(접수구분변경이력);
+            If(
+                var변경처리성공,
+                Set(var구분변경패널, false);
+                Reset(txt구분변경사유);
+                Notify(
+                    "의뢰구분을 '" & var변경후의뢰구분 & "'으로 변경했습니다." &
+                    Char(10) & "새 접수번호: " & var변경후접수번호 &
+                    Char(10) & "결과 폴더와 Excel 파일 변경이 완료되었습니다.",
+                    NotificationType.Success
+                )
+            )
+        ),
+        Notify(
+            "의뢰구분 변경 중 오류가 발생했습니다: " & FirstError.Message,
+            NotificationType.Error
+        )
+    )
+)

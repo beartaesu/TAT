@@ -96,3 +96,4 @@
 - 사용자가 별도 브랜치나 PR을 요청하지 않은 TAT 문서 체크포인트는 `beartaesu/TAT main`에 반영한다.
 - 관련 없는 변경은 포함하지 않는다.
 - 반영 후 커밋 SHA와 변경 파일을 확인해 사용자에게 보고한다.
+- `origin`이 없는 Codex Cloud 체크아웃에서 만든 파일·커밋은 회사 PC나 개인 PC에서 직접 가져올 수 있다고 안내하지 않는다. 회사 PC 작업 중에는 대화에 붙여넣기 가능한 전체 수식을 제공하고, 검증 완료 후 개인 PC Local Codex가 `C:\workspace\TAT`에 반영·커밋·`origin/main` push한다. GitHub 파일 또는 Raw URL 사용은 개인 PC에서 push 완료를 확인한 뒤에만 안내한다.
