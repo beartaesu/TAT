@@ -12,6 +12,7 @@
     .meta, .card { background: white; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .ok { color: #08783e; font-weight: 700; }
     .pending { color: #9a5a00; font-weight: 700; }
+    .stop { color: #b42318; font-weight: 700; }
     .path { white-space: pre-wrap; background: #eef3fa; padding: 14px; border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; background: white; }
     th, td { border: 1px solid #d9e0eb; padding: 10px; text-align: left; vertical-align: top; }
@@ -24,97 +25,49 @@
 </head>
 <body>
   <h1>TAT 회사 PC 전달용 현재 작업</h1>
-  <p class="ok">MYBOX 동기화 확인용 파일</p>
+  <p class="ok">MYBOX 동기화 전달 파일</p>
 
   <div class="meta">
-    <div><strong>생성일:</strong> 2026-08-26</div>
-    <div><strong>Git 기준:</strong> main / 483236f</div>
-    <div><strong>현재 작업:</strong> 세금계산서 기본행2 — 발행일자와 내부 발행담당자</div>
-    <div><strong>상태:</strong> <span class="ok">2026-08-26 적용·사용자 검증 완료</span></div>
-  </div>
-
-  <h2>1. 정확한 위치</h2>
-  <div class="path">scr세금계산서관리
-&gt; con세금계산서전체
-&gt; con세금계산서본문
-&gt; con세금계산서상세
-&gt; con세금계산서기본정보
-&gt; con세금계산서기본행2</div>
-
-  <h2>2. 왼쪽부터 추가할 컨트롤</h2>
-  <ol class="card">
-    <li>텍스트 레이블 → <strong>lbl세금계산서발행일자</strong></li>
-    <li>날짜 선택기 → <strong>dp세금계산서발행일자</strong></li>
-    <li>텍스트 레이블 → <strong>lbl세금계산서내부발행담당자</strong></li>
-    <li>텍스트 레이블 → <strong>lbl세금계산서내부발행담당자값</strong></li>
-  </ol>
-
-  <h2>3. 속성별 전체 수식</h2>
-
-  <div class="card">
-    <h3>lbl세금계산서발행일자</h3>
-    <table>
-      <tr><th>속성</th><th>전체 수식</th></tr>
-      <tr><td>Text</td><td>"발행일자"</td></tr>
-      <tr><td>Width</td><td>110</td></tr>
-      <tr><td>FillPortions</td><td>0</td></tr>
-      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
-      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
-      <tr><td>Wrap</td><td>false</td></tr>
-    </table>
+    <div><strong>갱신일:</strong> 2026-08-26</div>
+    <div><strong>Git 기준:</strong> main / 76e9e4e</div>
+    <div><strong>현재 작업:</strong> 실제 화면·트리 재확인</div>
+    <div><strong>상태:</strong> <span class="ok">배정 영역 전체 트리명 확인 완료</span></div>
   </div>
 
   <div class="card">
-    <h3>dp세금계산서발행일자</h3>
-    <table>
-      <tr><th>속성</th><th>전체 수식</th></tr>
-      <tr><td>DefaultDate</td><td>Today()</td></tr>
-      <tr><td>Format</td><td>DateTimeFormat.ShortDate</td></tr>
-      <tr><td>StartYear</td><td>Year(Today()) - 1</td></tr>
-      <tr><td>EndYear</td><td>Year(Today()) + 5</td></tr>
-      <tr><td>FillPortions</td><td>1</td></tr>
-      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
-    </table>
+    <span class="stop">기본행3 비고 신규 생성 안내는 적용하지 마세요.</span>
+    <p><strong>lbl세금계산서비고</strong>와 <strong>txt세금계산서비고</strong>가 이미 구현된 것을 화면과 트리에서 확인했습니다.</p>
   </div>
 
-  <div class="card">
-    <h3>lbl세금계산서내부발행담당자</h3>
-    <table>
-      <tr><th>속성</th><th>전체 수식</th></tr>
-      <tr><td>Text</td><td>"내부 발행담당자"</td></tr>
-      <tr><td>Width</td><td>110</td></tr>
-      <tr><td>FillPortions</td><td>0</td></tr>
-      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
-      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
-      <tr><td>Wrap</td><td>false</td></tr>
-    </table>
-  </div>
+  <h2>확인된 배정 영역 트리</h2>
+  <div class="path">con세금계산서배정영역
+├─ con세금계산서배정도구
+│  ├─ lbl세금계산서배정제목
+│  ├─ lbl세금계산서배정건수
+│  └─ btn세금계산서접수추가
+└─ con세금계산서배정목록
+   └─ con세금계산서배정목록헤더
+      ├─ lbl세금계산서배정헤더접수번호
+      ├─ lbl세금계산서배정헤더업체현장
+      ├─ lbl세금계산서배정헤더기준공급가액
+      ├─ lbl세금계산서배정헤더할인금액
+      ├─ lbl세금계산서배정헤더발행공급가액
+      └─ lbl세금계산서배정헤더삭제</div>
 
-  <div class="card">
-    <h3>lbl세금계산서내부발행담당자값.Text</h3>
-    <textarea id="formula-user" readonly>If(
-    IsBlank(Trim(User().FullName)),
-    Lower(User().Email),
-    User().FullName &amp; " (" &amp; Lower(User().Email) &amp; ")"
-)</textarea>
-    <button type="button" onclick="copyFormula('formula-user', this)">수식 복사</button>
-    <table style="margin-top:14px">
-      <tr><th>속성</th><th>전체 수식</th></tr>
-      <tr><td>FillPortions</td><td>1</td></tr>
-      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
-      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
-      <tr><td>Wrap</td><td>false</td></tr>
-    </table>
-  </div>
-
-  <h2>4. 검증 체크리스트</h2>
+  <h2>화면에서 확인한 열</h2>
   <ul class="card">
-    <li>✅ 오늘 날짜 기본 표시 확인</li>
-    <li>✅ 달력에서 다른 날짜 선택 확인</li>
-    <li>✅ 현재 사용자의 이름과 이메일 표시 확인</li>
-    <li>✅ 빨간 수식 오류 없음</li>
-    <li>✅ 기본행2의 컨트롤 겹침 없음</li>
+    <li>접수번호</li>
+    <li>업체·현장</li>
+    <li>기준공급가액</li>
+    <li>할인금액</li>
+    <li>발행공급가액</li>
+    <li>삭제</li>
   </ul>
+
+  <h2>다음 확인</h2>
+  <div class="card">
+    다음 작업은 <strong>btn세금계산서접수추가</strong>입니다. 수식 작성 전 현재 <strong>OnSelect</strong>, <strong>DisplayMode</strong>와 버튼을 눌렀을 때 열리도록 이미 만든 선택 영역이 있는지 확인합니다.
+  </div>
 
   <script>
     async function copyFormula(id, button) {
