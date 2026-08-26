@@ -29,59 +29,127 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-08-26</div>
-    <div><strong>Git 기준:</strong> main / 0fc6db3</div>
-    <div><strong>현재 작업:</strong> 새 계산서 작성 모드 시작</div>
+    <div><strong>Git 기준:</strong> main / 7ffebd0</div>
+    <div><strong>현재 작업:</strong> 접수 선택 팝업 뼈대·열기·닫기</div>
     <div><strong>상태:</strong> <span class="ok">2026-08-26 적용·사용자 검증 완료</span></div>
   </div>
 
-  <h2>1. btn세금계산서신규.OnSelect</h2>
-  <div class="card">
-    <textarea id="formula-new-onselect" readonly>Set(var세금계산서신규모드, true);
-Reset(cmb세금계산서업체선택);
-Reset(cmb세금계산서외부담당자);
-Reset(dp세금계산서발행일자);
-Reset(txt세금계산서비고);
-Notify("새 계산서 입력을 시작합니다.", NotificationType.Information)</textarea>
-    <button type="button" onclick="copyFormula('formula-new-onselect', this)">수식 복사</button>
-  </div>
-
-  <h2>2. btn세금계산서신규.DisplayMode</h2>
-  <div class="card">
-    <textarea id="formula-new-display" readonly>DisplayMode.Edit</textarea>
-    <button type="button" onclick="copyFormula('formula-new-display', this)">수식 복사</button>
-  </div>
-
-  <h2>3. btn세금계산서접수추가.DisplayMode</h2>
-  <div class="card">
-    <textarea id="formula-add-display" readonly>If(
-    var세금계산서신규모드,
-    DisplayMode.Edit,
-    DisplayMode.Disabled
-)</textarea>
-    <button type="button" onclick="copyFormula('formula-add-display', this)">수식 복사</button>
-  </div>
+  <h2>1. 새로 만들 트리</h2>
+  <div class="path">scr세금계산서관리
+├─ con세금계산서전체 (기존)
+└─ con세금계산서접수선택패널 (신규·수직 컨테이너)
+   └─ con세금계산서접수선택상 (신규·수직 컨테이너)
+      ├─ con세금계산서접수선택헤더 (신규·가로 컨테이너)
+      │  ├─ lbl세금계산서접수선택제목
+      │  └─ btn세금계산서접수선택닫기
+      └─ con세금계산서접수선택본문 (신규·수직 컨테이너)
+         └─ lbl세금계산서접수선택준비안내</div>
 
   <div class="card">
-    <span class="stop">이번 단계에서는 접수 추가 버튼의 OnSelect를 변경하지 않습니다.</span>
-    <p>버튼이 활성화되는지만 확인합니다. 접수 선택 화면과 실제 추가 동작은 다음 작업에서 구현합니다.</p>
+    <strong>중요:</strong> `con세금계산서접수선택패널`은 `con세금계산서전체` 안이 아니라 <strong>scr세금계산서관리 바로 아래</strong>에 만듭니다. 생성 후 패널을 맨 앞으로 가져옵니다.
   </div>
 
-  <h2>4. 적용 순서</h2>
-  <ol class="card">
-    <li><strong>btn세금계산서신규.OnSelect</strong>의 기존 <code>false</code>를 전체 수식으로 교체</li>
-    <li><strong>btn세금계산서신규.DisplayMode</strong>의 기존 <code>DisplayMode.Disabled</code>를 교체</li>
-    <li><strong>btn세금계산서접수추가.DisplayMode</strong>의 기존 <code>DisplayMode.Disabled</code>를 교체</li>
-  </ol>
+  <h2>2. con세금계산서접수선택패널</h2>
+  <table>
+    <tr><th>속성</th><th>전체 수식</th></tr>
+    <tr><td>X</td><td>0</td></tr>
+    <tr><td>Y</td><td>0</td></tr>
+    <tr><td>Width</td><td>Parent.Width</td></tr>
+    <tr><td>Height</td><td>Parent.Height</td></tr>
+    <tr><td>Visible</td><td>var세금계산서접수선택패널</td></tr>
+    <tr><td>Fill</td><td>RGBA(0, 0, 0, 0.35)</td></tr>
+    <tr><td>LayoutAlignItems</td><td>LayoutAlignItems.Center</td></tr>
+    <tr><td>LayoutJustifyContent</td><td>LayoutJustifyContent.Center</td></tr>
+    <tr><td>PaddingTop/Bottom/Left/Right</td><td>24</td></tr>
+  </table>
 
-  <h2>5. 검증 체크리스트</h2>
+  <h2>3. con세금계산서접수선택상</h2>
+  <table>
+    <tr><th>속성</th><th>전체 수식</th></tr>
+    <tr><td>Width</td><td>Min(920, Parent.Width - 80)</td></tr>
+    <tr><td>Height</td><td>Min(620, Parent.Height - 80)</td></tr>
+    <tr><td>FillPortions</td><td>0</td></tr>
+    <tr><td>AlignInContainer</td><td>AlignInContainer.Center</td></tr>
+    <tr><td>Fill</td><td>Color.White</td></tr>
+    <tr><td>LayoutGap</td><td>0</td></tr>
+  </table>
+
+  <h2>4. con세금계산서접수선택헤더</h2>
+  <table>
+    <tr><th>속성</th><th>전체 수식</th></tr>
+    <tr><td>Height</td><td>56</td></tr>
+    <tr><td>FillPortions</td><td>0</td></tr>
+    <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+    <tr><td>LayoutAlignItems</td><td>LayoutAlignItems.Center</td></tr>
+    <tr><td>PaddingLeft</td><td>20</td></tr>
+    <tr><td>PaddingRight</td><td>12</td></tr>
+  </table>
+
+  <h2>5. 헤더 컨트롤</h2>
+  <div class="card">
+    <h3>lbl세금계산서접수선택제목</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>"접수 선택"</td></tr>
+      <tr><td>FillPortions</td><td>1</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
+      <tr><td>FontWeight</td><td>FontWeight.Semibold</td></tr>
+      <tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>btn세금계산서접수선택닫기</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>"닫기"</td></tr>
+      <tr><td>Width</td><td>80</td></tr>
+      <tr><td>FillPortions</td><td>0</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Center</td></tr>
+    </table>
+    <textarea id="formula-close" readonly>Set(var세금계산서접수선택패널, false)</textarea>
+    <button type="button" onclick="copyFormula('formula-close', this)">OnSelect 수식 복사</button>
+  </div>
+
+  <h2>6. 본문과 안내</h2>
+  <div class="card">
+    <h3>con세금계산서접수선택본문</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>FillPortions</td><td>1</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+      <tr><td>LayoutAlignItems</td><td>LayoutAlignItems.Center</td></tr>
+      <tr><td>LayoutJustifyContent</td><td>LayoutJustifyContent.Center</td></tr>
+    </table>
+    <h3>lbl세금계산서접수선택준비안내</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>"다음 단계에서 선택 가능한 접수 목록을 연결합니다."</td></tr>
+      <tr><td>Align</td><td>Align.Center</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+    </table>
+  </div>
+
+  <h2>7. btn세금계산서접수추가.OnSelect</h2>
+  <div class="card">
+    <textarea id="formula-open" readonly>Set(var세금계산서접수선택패널, true)</textarea>
+    <button type="button" onclick="copyFormula('formula-open', this)">수식 복사</button>
+  </div>
+
+  <h2>8. 검증 체크리스트</h2>
   <ul class="card">
-    <li>✅ 앱 실행 직후 새 계산서 버튼 활성 확인</li>
-    <li>✅ 앱 실행 직후 접수 추가 버튼 비활성 확인</li>
-    <li>✅ 새 계산서 버튼 안내 메시지 확인</li>
-    <li>✅ 업체·외부 담당자·발행일자·비고 초기화 확인</li>
-    <li>✅ 새 계산서 버튼 클릭 후 접수 추가 버튼 활성 확인</li>
+    <li>✅ 앱 시작 시 팝업 숨김 확인</li>
+    <li>✅ 접수 추가 시 배경 음영과 중앙 팝업 열기 확인</li>
+    <li>✅ 팝업 제목과 준비 안내 표시 확인</li>
+    <li>✅ 닫기 버튼 동작 확인</li>
+    <li>✅ 기존 세금계산서 화면 배치 유지 확인</li>
     <li>✅ 빨간 수식 오류 없음</li>
   </ul>
+
+  <div class="card">
+    <strong>레이어 오류 해결:</strong> 패널이 기존 화면 뒤에 보이면 `con세금계산서접수선택패널`을 `scr세금계산서관리` 바로 아래의 형제 수준으로 유지한 채 맨 앞으로 가져옵니다.
+  </div>
 
   <script>
     async function copyFormula(id, button) {
