@@ -259,6 +259,28 @@ If(
 - Git 이력 확인 결과 위 하위 트리는 기존 MD에 기록되지 않았으며, 2026-08-26 실제 트리 스크린샷을 정본 근거로 추가했다.
 - 현재 재개 위치: `btn세금계산서접수추가.OnSelect`, `btn세금계산서접수추가.DisplayMode`와 기존 선택 영역 유무를 확인한다.
 
+#### 새 계산서 작성 모드 시작 — 최신 적용본 및 사용자 검증 완료
+
+- 확인된 기본값: `btn세금계산서신규.OnSelect = false`, `btn세금계산서신규.DisplayMode = DisplayMode.Disabled`, `btn세금계산서접수추가.DisplayMode = DisplayMode.Disabled`
+- 신규 변수 정의: `var세금계산서신규모드` Boolean
+- 위치: `scr세금계산서관리 > con세금계산서전체 > con세금계산서헤더 > btn세금계산서신규.OnSelect`
+
+```powerfx
+Set(var세금계산서신규모드, true);
+Reset(cmb세금계산서업체선택);
+Reset(cmb세금계산서외부담당자);
+Reset(dp세금계산서발행일자);
+Reset(txt세금계산서비고);
+Notify("새 계산서 입력을 시작합니다.", NotificationType.Information)
+```
+
+- `btn세금계산서신규.DisplayMode`: `DisplayMode.Edit`
+- `btn세금계산서접수추가.DisplayMode`: `If(var세금계산서신규모드, DisplayMode.Edit, DisplayMode.Disabled)`
+- 2026-08-26 사용자 적용 확인: 세 속성 교체 완료, Power Apps 수식 오류 없음
+- 사용자 동작 검증: 앱 실행 직후 신규 버튼 활성·접수 추가 비활성, 신규 클릭 후 입력값 Reset·안내 메시지·접수 추가 활성화 정상
+- 범위 제한: 이번 단계에서는 `btn세금계산서접수추가.OnSelect`를 변경하지 않고 신규 버튼 클릭 후 활성화만 검증한다.
+- 다음 재개 위치: `btn세금계산서접수추가.OnSelect`와 기존 접수 선택 영역 확인
+
 #### Flow 응답 수식
 
 - 상태: **최신 적용본 및 재제출 복구 검증 완료**

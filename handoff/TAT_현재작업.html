@@ -29,45 +29,59 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-08-26</div>
-    <div><strong>Git 기준:</strong> main / 76e9e4e</div>
-    <div><strong>현재 작업:</strong> 실제 화면·트리 재확인</div>
-    <div><strong>상태:</strong> <span class="ok">배정 영역 전체 트리명 확인 완료</span></div>
+    <div><strong>Git 기준:</strong> main / 0fc6db3</div>
+    <div><strong>현재 작업:</strong> 새 계산서 작성 모드 시작</div>
+    <div><strong>상태:</strong> <span class="ok">2026-08-26 적용·사용자 검증 완료</span></div>
+  </div>
+
+  <h2>1. btn세금계산서신규.OnSelect</h2>
+  <div class="card">
+    <textarea id="formula-new-onselect" readonly>Set(var세금계산서신규모드, true);
+Reset(cmb세금계산서업체선택);
+Reset(cmb세금계산서외부담당자);
+Reset(dp세금계산서발행일자);
+Reset(txt세금계산서비고);
+Notify("새 계산서 입력을 시작합니다.", NotificationType.Information)</textarea>
+    <button type="button" onclick="copyFormula('formula-new-onselect', this)">수식 복사</button>
+  </div>
+
+  <h2>2. btn세금계산서신규.DisplayMode</h2>
+  <div class="card">
+    <textarea id="formula-new-display" readonly>DisplayMode.Edit</textarea>
+    <button type="button" onclick="copyFormula('formula-new-display', this)">수식 복사</button>
+  </div>
+
+  <h2>3. btn세금계산서접수추가.DisplayMode</h2>
+  <div class="card">
+    <textarea id="formula-add-display" readonly>If(
+    var세금계산서신규모드,
+    DisplayMode.Edit,
+    DisplayMode.Disabled
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-add-display', this)">수식 복사</button>
   </div>
 
   <div class="card">
-    <span class="stop">기본행3 비고 신규 생성 안내는 적용하지 마세요.</span>
-    <p><strong>lbl세금계산서비고</strong>와 <strong>txt세금계산서비고</strong>가 이미 구현된 것을 화면과 트리에서 확인했습니다.</p>
+    <span class="stop">이번 단계에서는 접수 추가 버튼의 OnSelect를 변경하지 않습니다.</span>
+    <p>버튼이 활성화되는지만 확인합니다. 접수 선택 화면과 실제 추가 동작은 다음 작업에서 구현합니다.</p>
   </div>
 
-  <h2>확인된 배정 영역 트리</h2>
-  <div class="path">con세금계산서배정영역
-├─ con세금계산서배정도구
-│  ├─ lbl세금계산서배정제목
-│  ├─ lbl세금계산서배정건수
-│  └─ btn세금계산서접수추가
-└─ con세금계산서배정목록
-   └─ con세금계산서배정목록헤더
-      ├─ lbl세금계산서배정헤더접수번호
-      ├─ lbl세금계산서배정헤더업체현장
-      ├─ lbl세금계산서배정헤더기준공급가액
-      ├─ lbl세금계산서배정헤더할인금액
-      ├─ lbl세금계산서배정헤더발행공급가액
-      └─ lbl세금계산서배정헤더삭제</div>
+  <h2>4. 적용 순서</h2>
+  <ol class="card">
+    <li><strong>btn세금계산서신규.OnSelect</strong>의 기존 <code>false</code>를 전체 수식으로 교체</li>
+    <li><strong>btn세금계산서신규.DisplayMode</strong>의 기존 <code>DisplayMode.Disabled</code>를 교체</li>
+    <li><strong>btn세금계산서접수추가.DisplayMode</strong>의 기존 <code>DisplayMode.Disabled</code>를 교체</li>
+  </ol>
 
-  <h2>화면에서 확인한 열</h2>
+  <h2>5. 검증 체크리스트</h2>
   <ul class="card">
-    <li>접수번호</li>
-    <li>업체·현장</li>
-    <li>기준공급가액</li>
-    <li>할인금액</li>
-    <li>발행공급가액</li>
-    <li>삭제</li>
+    <li>✅ 앱 실행 직후 새 계산서 버튼 활성 확인</li>
+    <li>✅ 앱 실행 직후 접수 추가 버튼 비활성 확인</li>
+    <li>✅ 새 계산서 버튼 안내 메시지 확인</li>
+    <li>✅ 업체·외부 담당자·발행일자·비고 초기화 확인</li>
+    <li>✅ 새 계산서 버튼 클릭 후 접수 추가 버튼 활성 확인</li>
+    <li>✅ 빨간 수식 오류 없음</li>
   </ul>
-
-  <h2>다음 확인</h2>
-  <div class="card">
-    다음 작업은 <strong>btn세금계산서접수추가</strong>입니다. 수식 작성 전 현재 <strong>OnSelect</strong>, <strong>DisplayMode</strong>와 버튼을 눌렀을 때 열리도록 이미 만든 선택 영역이 있는지 확인합니다.
-  </div>
 
   <script>
     async function copyFormula(id, button) {
