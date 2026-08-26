@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAT 현재 작업</title>
+  <style>
+    :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
+    body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    h1 { margin-bottom: 6px; }
+    h2 { margin-top: 30px; }
+    .meta, .card { background: white; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
+    .ok { color: #08783e; font-weight: 700; }
+    .pending { color: #9a5a00; font-weight: 700; }
+    .path { white-space: pre-wrap; background: #eef3fa; padding: 14px; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #d9e0eb; padding: 10px; text-align: left; vertical-align: top; }
+    th { background: #eef3fa; }
+    textarea { box-sizing: border-box; width: 100%; min-height: 76px; padding: 10px; font-family: Consolas, monospace; font-size: 14px; resize: vertical; }
+    button { margin-top: 8px; padding: 8px 14px; border: 0; border-radius: 7px; background: #1769e0; color: white; cursor: pointer; }
+    button.done { background: #08783e; }
+    li { margin: 7px 0; }
+  </style>
+</head>
+<body>
+  <h1>TAT 회사 PC 전달용 현재 작업</h1>
+  <p class="ok">MYBOX 동기화 확인용 파일</p>
+
+  <div class="meta">
+    <div><strong>생성일:</strong> 2026-08-26</div>
+    <div><strong>Git 기준:</strong> main / 210f548</div>
+    <div><strong>현재 작업:</strong> 세금계산서 기본행2 — 발행일자와 내부 발행담당자</div>
+    <div><strong>상태:</strong> <span class="pending">제안·미적용 — 회사 PC 검증 필요</span></div>
+  </div>
+
+  <h2>1. 정확한 위치</h2>
+  <div class="path">scr세금계산서관리
+&gt; con세금계산서전체
+&gt; con세금계산서본문
+&gt; con세금계산서상세
+&gt; con세금계산서기본정보
+&gt; con세금계산서기본행2</div>
+
+  <h2>2. 왼쪽부터 추가할 컨트롤</h2>
+  <ol class="card">
+    <li>텍스트 레이블 → <strong>lbl세금계산서발행일자</strong></li>
+    <li>날짜 선택기 → <strong>dp세금계산서발행일자</strong></li>
+    <li>텍스트 레이블 → <strong>lbl세금계산서내부발행담당자</strong></li>
+    <li>텍스트 레이블 → <strong>lbl세금계산서내부발행담당자값</strong></li>
+  </ol>
+
+  <h2>3. 속성별 전체 수식</h2>
+
+  <div class="card">
+    <h3>lbl세금계산서발행일자</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>"발행일자"</td></tr>
+      <tr><td>Width</td><td>110</td></tr>
+      <tr><td>FillPortions</td><td>0</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
+      <tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>dp세금계산서발행일자</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>DefaultDate</td><td>Today()</td></tr>
+      <tr><td>Format</td><td>DateTimeFormat.ShortDate</td></tr>
+      <tr><td>StartYear</td><td>Year(Today()) - 1</td></tr>
+      <tr><td>EndYear</td><td>Year(Today()) + 5</td></tr>
+      <tr><td>FillPortions</td><td>1</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>lbl세금계산서내부발행담당자</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>"내부 발행담당자"</td></tr>
+      <tr><td>Width</td><td>110</td></tr>
+      <tr><td>FillPortions</td><td>0</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
+      <tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>lbl세금계산서내부발행담당자값.Text</h3>
+    <textarea id="formula-user" readonly>If(
+    IsBlank(Trim(User().FullName)),
+    Lower(User().Email),
+    User().FullName &amp; " (" &amp; Lower(User().Email) &amp; ")"
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-user', this)">수식 복사</button>
+    <table style="margin-top:14px">
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>FillPortions</td><td>1</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr>
+      <tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+
+  <h2>4. 검증 체크리스트</h2>
+  <ul class="card">
+    <li>오늘 날짜가 기본 표시되는가</li>
+    <li>달력에서 다른 날짜를 선택할 수 있는가</li>
+    <li>현재 사용자의 이름과 이메일이 표시되는가</li>
+    <li>빨간 수식 오류가 없는가</li>
+    <li>기본행2의 컨트롤이 겹치지 않는가</li>
+  </ul>
+
+  <script>
+    async function copyFormula(id, button) {
+      const field = document.getElementById(id);
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(field.value);
+        copied = true;
+      } catch (_) {
+        field.focus();
+        field.select();
+        copied = document.execCommand('copy');
+      }
+      if (copied) {
+        button.textContent = '복사 완료';
+        button.classList.add('done');
+        setTimeout(() => {
+          button.textContent = '수식 복사';
+          button.classList.remove('done');
+        }, 1600);
+      } else {
+        alert('자동 복사가 차단되었습니다. 수식 칸을 선택해 직접 복사해 주세요.');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -97,3 +97,5 @@
 - 관련 없는 변경은 포함하지 않는다.
 - 반영 후 커밋 SHA와 변경 파일을 확인해 사용자에게 보고한다.
 - `origin`이 없는 Codex Cloud 체크아웃에서 만든 파일·커밋은 회사 PC나 개인 PC에서 직접 가져올 수 있다고 안내하지 않는다. 회사 PC 작업 중에는 대화에 붙여넣기 가능한 전체 수식을 제공하고, 검증 완료 후 개인 PC Local Codex가 `C:\workspace\TAT`에 반영·커밋·`origin/main` push한다. GitHub 파일 또는 Raw URL 사용은 개인 PC에서 push 완료를 확인한 뒤에만 안내한다.
+- 2026-08-26 이후 실제 기기 경계는 다음과 같다. 갤럭시탭의 ChatGPT Remote는 개인 PC의 TAT 저장소에 연결하며, 실제 Power Apps·SharePoint·Power Automate 편집은 외부 ChatGPT·GitHub 접근이 불가능한 회사 PC에서 수행한다. Remote 연결 개인 PC와 회사 PC를 같은 호스트로 간주하지 않는다.
+- 개인 PC에서 회사 PC로 전달할 수식·작업 지침은 저장소의 `handoff/TAT_현재작업.html`에 작성하고, 개인 PC MYBOX 탐색기가 `C:\dev\tat\TAT\handoff`를 MYBOX `개인/TAT_회사전달`과 동기화한다. 회사 PC는 MYBOX 웹에서 해당 HTML을 내려받아 사용한다. 이 경로에는 수식·작업 지침만 포함하고 업체명·시료명·담당자·실행 로그 등 회사 데이터는 올리지 않는다.
