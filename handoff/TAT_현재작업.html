@@ -28,13 +28,212 @@
   <p class="ok">MYBOX 동기화 전달 파일</p>
 
   <div class="meta">
-    <div><strong>갱신일:</strong> 2026-08-26</div>
-    <div><strong>Git 기준:</strong> main / 7ffebd0</div>
-    <div><strong>현재 작업:</strong> 접수 선택 팝업 뼈대·열기·닫기</div>
-    <div><strong>상태:</strong> <span class="ok">2026-08-26 적용·사용자 검증 완료</span></div>
+    <div><strong>갱신일:</strong> 2026-08-27</div>
+    <div><strong>Git 기준:</strong> main / 60bfc0a</div>
+    <div><strong>현재 작업:</strong> 접수 선택 조회 부분 검증 기록</div>
+    <div><strong>상태:</strong> <span class="pending">기본 UI 확인·실데이터 검증 대기(완전 검증 아님)</span></div>
+  </div>
+  <div class="card pending">
+    <strong>중요 기록:</strong> 업체 표시·선택과 패널 열기, 금액 표시는 확인했지만 로우데이터가 없어
+    업체별 제외·정산확정 외 제외·실제 금액 정확성은 검증하지 못했습니다. 이 기능을 100% 완료로 간주하지 않습니다.
+  </div>
+  <h2>실제 데이터 이관 후 재검증 목록</h2>
+  <ul class="card">
+    <li>다른 계산서 업체의 접수가 섞이지 않는지</li>
+    <li>정산확정 외 상태의 접수가 섞이지 않는지</li>
+    <li>공급가액합계 실제 값과 화면 금액이 일치하는지</li>
+    <li>빈 금액은 `금액 미이관`, 실제 0원은 0원으로 구분되는지</li>
+    <li>업체별 외부 담당자가 정확히 매칭되는지</li>
+    <li>대규모 데이터에서 위임으로 인한 누락이 없는지</li>
+  </ul>
+  <div class="card stop">
+    잔여 항목: 계산서 업체 콤보박스의 원인 미확정 노란 경고와 접수 갤러리의 Lookup 위임 경고.
+    실제 배정 저장을 운영 완료로 처리하기 전에 다시 확인합니다.
+  </div>
+  <h2>지금 할 작업 — 수식 변경 없음</h2>
+  <div class="card">
+    계산서 업체 콤보박스의 잔여 노란 경고는 후순위로 보류합니다. 이번에는 아래 기능만 순서대로 확인합니다.
+  </div>
+  <ol class="card">
+    <li>`새로 만들기`를 누릅니다.</li>
+    <li>`계산서 업체`에서 실제 업체 하나를 선택합니다.</li>
+    <li>`외부 담당자` 목록에 그 업체의 사용 중 세금계산서 담당자가 표시되는지 확인합니다.</li>
+    <li>`접수 추가` 버튼이 활성화되는지 확인하고 클릭합니다.</li>
+    <li>팝업에 해당 업체의 `정산확정` 접수만 표시되는지 확인합니다.</li>
+    <li>공급가액이 비어 있는 접수에 `금액 미이관`이 표시되는지 확인합니다.</li>
+  </ol>
+  <div class="card stop">
+    계산서 업체 콤보박스의 잔여 경고와 접수 갤러리의 위임 경고는 서로 다른 항목입니다.
+    지금은 기능 결과를 확인하되, 실제 배정 저장은 아직 진행하지 않습니다.
   </div>
 
-  <h2>1. 새로 만들 트리</h2>
+  <div class="card">
+    <strong>1차 교정 결과:</strong> 표시명 <code>["제목"]</code>을 입력하면 Power Apps가 다시
+    <code>["ComplianceAssetId"]</code>로 자동 변경했습니다. 문자열 필드 배열에는 SharePoint 기본 제목 열의
+    내부 이름 <code>Title</code>을 사용합니다.
+  </div>
+  <h2>접근성 진단 결과</h2>
+  <div class="card">
+    <p><strong>위치:</strong> cmb세금계산서업체선택</p>
+    <table>
+      <tr><th>속성</th><th>현재값</th><th>전체 교체값</th></tr>
+      <tr><td>AccessibleLabel</td><td>""</td><td>"계산서 업체 선택"</td></tr>
+    </table>
+    <p>적용값은 정상 유지됐지만 노란 경고는 사라지지 않았습니다. 이 값은 그대로 유지합니다.</p>
+  </div>
+  <h2>지금 적용할 Items 전체 수식</h2>
+  <div class="card">
+    <p><strong>위치:</strong> cmb세금계산서업체선택</p>
+    <p><strong>속성:</strong> Items — 기존 수식 전체 삭제 후 아래 수식으로 교체</p>
+    <textarea id="formula-company-items" readonly>SortByColumns(
+    Filter(
+        계산서업체마스터,
+        사용여부 = true
+    ),
+    "Title",
+    SortOrder.Ascending
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-company-items', this)">Items 수식 복사</button>
+    <p>업체 목록과 사용 중 필터는 기존과 동일합니다. 적용 후 노란 경고가 사라지는지와 업체명이 계속 표시되는지만 확인합니다.</p>
+  </div>
+  <h2>완료 기록 — Title 교정</h2>
+  <div class="card">
+    <p><strong>위치:</strong> scr세금계산서관리 &gt; con세금계산서전체 &gt; con세금계산서본문 &gt; con세금계산서상세 &gt; con세금계산서기본정보 &gt; con세금계산서기본행1 &gt; cmb세금계산서업체선택</p>
+    <table>
+      <tr><th>속성</th><th>기존값</th><th>전체 교체값</th></tr>
+      <tr><td>DisplayFields</td><td>["ComplianceAssetId"]</td><td>["Title"]</td></tr>
+      <tr><td>SearchFields</td><td>["ComplianceAssetId"]</td><td>["Title"]</td></tr>
+    </table>
+  </div>
+  <ul class="card">
+    <li>✅ 적용 직후 수식 입력창에서 `["Title"]` 유지</li>
+    <li>✅ 계산서 업체명 표시</li>
+    <li>확인 중: 남은 노란 경고</li>
+    <li>업체 선택 후 외부 담당자가 조회되는지</li>
+    <li>접수 추가 버튼이 활성화되는지</li>
+    <li>팝업의 접수 목록이 표시되는지 또는 정산확정 접수가 없다는 안내가 나오는지</li>
+  </ul>
+  <div class="card stop"><strong>이번에는 cmb세금계산서업체선택.Items 한 속성만 변경합니다.</strong> 아래에 남아 있는 이전 단계는 다시 적용하지 않습니다.</div>
+
+  <h2>이번 작업 — 먼저 이것만 적용</h2>
+  <div class="card">
+    <strong>목표:</strong> 선택한 계산서 업체에 연결된 접수 중 <strong>정산확정</strong> 건만 조회되는지 확인합니다.<br>
+    기존 금액은 아직 마이그레이션하지 않았으므로 빈 금액은 <strong>금액 미이관</strong>으로 표시합니다.
+    이번 단계에서는 체크 선택이나 배정 저장을 만들지 않습니다.
+  </div>
+
+  <h2>A. 접수 추가 버튼 활성 조건 보강</h2>
+  <div class="card">
+    <p><strong>위치:</strong> scr세금계산서관리 &gt; con세금계산서전체 &gt; con세금계산서본문 &gt; con세금계산서상세 &gt; con세금계산서배정영역 &gt; con세금계산서배정도구 &gt; btn세금계산서접수추가</p>
+    <p><strong>속성:</strong> DisplayMode</p>
+    <textarea id="formula-add-display" readonly>If(
+    var세금계산서신규모드 &amp;&amp;
+    !IsBlank(cmb세금계산서업체선택.Selected.ID),
+    DisplayMode.Edit,
+    DisplayMode.Disabled
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-add-display', this)">DisplayMode 수식 복사</button>
+  </div>
+
+  <h2>B. 본문에 조회 갤러리 추가</h2>
+  <div class="path">scr세금계산서관리
+└─ con세금계산서접수선택패널
+   └─ con세금계산서접수선택상
+      └─ con세금계산서접수선택본문
+         ├─ lbl세금계산서접수선택준비안내 (기존)
+         └─ gal세금계산서접수선택 (신규·세로 갤러리)
+            ├─ lbl세금계산서접수선택번호
+            ├─ lbl세금계산서접수선택현장
+            └─ lbl세금계산서접수선택금액</div>
+
+  <div class="card">
+    <h3>gal세금계산서접수선택.Items</h3>
+    <textarea id="formula-gallery-items" readonly>With(
+    {
+        var선택계산서업체ID:
+            cmb세금계산서업체선택.Selected.ID
+    },
+    SortByColumns(
+        Filter(
+            접수헤더,
+            '계산서 업체'.Id = var선택계산서업체ID &amp;&amp;
+            정산상태.Value = "정산확정"
+        ),
+        "ID",
+        SortOrder.Descending
+    )
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-gallery-items', this)">Items 수식 복사</button>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>TemplateSize</td><td>56</td></tr>
+      <tr><td>TemplatePadding</td><td>0</td></tr>
+      <tr><td>FillPortions</td><td>1</td></tr>
+      <tr><td>AlignInContainer</td><td>AlignInContainer.Stretch</td></tr>
+    </table>
+  </div>
+
+  <h2>C. 갤러리 행 레이블</h2>
+  <div class="card">
+    <h3>lbl세금계산서접수선택번호</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>ThisItem.제목</td></tr>
+      <tr><td>X</td><td>0</td></tr><tr><td>Y</td><td>0</td></tr>
+      <tr><td>Width</td><td>Parent.TemplateWidth * 0.28</td></tr>
+      <tr><td>Height</td><td>Parent.TemplateHeight</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr><tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>lbl세금계산서접수선택현장</h3>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>Text</td><td>Coalesce(ThisItem.'업체/현장'.Value, "")</td></tr>
+      <tr><td>X</td><td>lbl세금계산서접수선택번호.X + lbl세금계산서접수선택번호.Width</td></tr><tr><td>Y</td><td>0</td></tr>
+      <tr><td>Width</td><td>Parent.TemplateWidth * 0.42</td></tr>
+      <tr><td>Height</td><td>Parent.TemplateHeight</td></tr>
+      <tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr><tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>lbl세금계산서접수선택금액</h3>
+    <textarea id="formula-amount-text" readonly>If(
+    IsBlank(ThisItem.공급가액합계),
+    "금액 미이관",
+    Text(
+        ThisItem.공급가액합계,
+        "[$-ko-KR]#,##0원"
+    )
+)</textarea>
+    <button type="button" onclick="copyFormula('formula-amount-text', this)">Text 수식 복사</button>
+    <table>
+      <tr><th>속성</th><th>전체 수식</th></tr>
+      <tr><td>X</td><td>lbl세금계산서접수선택현장.X + lbl세금계산서접수선택현장.Width</td></tr><tr><td>Y</td><td>0</td></tr>
+      <tr><td>Width</td><td>Parent.TemplateWidth - Self.X - 12</td></tr>
+      <tr><td>Height</td><td>Parent.TemplateHeight</td></tr>
+      <tr><td>Align</td><td>Align.Right</td></tr><tr><td>VerticalAlign</td><td>VerticalAlign.Middle</td></tr><tr><td>Wrap</td><td>false</td></tr>
+    </table>
+  </div>
+
+  <h2>D. 기존 안내 레이블</h2>
+  <table>
+    <tr><th>컨트롤</th><th>속성</th><th>전체 수식</th></tr>
+    <tr><td>lbl세금계산서접수선택준비안내</td><td>Text</td><td>"선택한 업체의 정산확정 접수가 없습니다."</td></tr>
+    <tr><td>lbl세금계산서접수선택준비안내</td><td>Visible</td><td>CountRows(gal세금계산서접수선택.AllItems) = 0</td></tr>
+  </table>
+
+  <h2>E. 이번 검증 결과</h2>
+  <ul class="card">
+    <li>Items 수식에 빨간 오류가 있는지</li>
+    <li>파란색 또는 노란색 위임 경고가 있는지</li>
+    <li>선택한 계산서 업체와 다른 업체의 접수가 섞이는지</li>
+    <li>정산확정 외 상태의 접수가 섞이는지</li>
+    <li>금액이 빈 행에 `금액 미이관`이 표시되는지</li>
+  </ul>
+  <div class="card stop"><strong>중지 기준:</strong> 위임 경고가 나오면 경고를 무시하고 다음 단계로 진행하지 말고 그대로 알려주세요.</div>
+
+  <h2>완료 기록 — 팝업 뼈대</h2>
   <div class="path">scr세금계산서관리
 ├─ con세금계산서전체 (기존)
 └─ con세금계산서접수선택패널 (신규·수직 컨테이너)
