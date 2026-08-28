@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAT 완료·보류 작업</title>
+  <style>
+    :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
+    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    h2 { margin-top: 28px; }
+    .card { background: white; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
+    .ok { color: #08783e; font-weight: 700; }
+    .pending { color: #9a5a00; font-weight: 700; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>TAT 완료·부분검증·보류 작업</h1>
+  <p>이 파일은 과거 작업 확인용입니다. 현재 해야 할 업무는 <strong>TAT_현재작업.html</strong>만 확인하세요.</p>
+
+  <h2>검증 완료</h2>
+  <ul class="card">
+    <li>MYBOX를 통한 개인 PC → 회사 PC HTML 전달과 한글 표시</li>
+    <li>세금계산서 관리 화면 기본 레이아웃과 기본정보 행</li>
+    <li>새 계산서 입력 모드 시작과 입력 컨트롤 초기화</li>
+    <li>접수 선택 팝업 열기·닫기·전면 표시·불투명 배경</li>
+    <li>계산서 업체 콤보박스의 DisplayFields/SearchFields를 Title로 교정하고 업체명 표시</li>
+  </ul>
+
+  <h2>적용 완료·실데이터 검증 대기</h2>
+  <ul class="card pending">
+    <li>선택 계산서 업체의 정산확정 접수 조회</li>
+    <li>빈 공급가액의 금액 미이관 표시</li>
+    <li>접수 행 체크박스·선택 컬렉션·선택 건수·팝업 재열기 초기화</li>
+    <li>실제 데이터 이관 후 업체 혼입, 정산상태 혼입, 실제 금액과 0원 구분 재검증 필요</li>
+  </ul>
+
+  <h2>보류·잔여 확인</h2>
+  <ul class="card pending">
+    <li>계산서 업체 콤보박스의 원인 미확정 노란 경고</li>
+    <li>접수 갤러리의 계산서 업체 Lookup 직접 비교 위임 경고</li>
+    <li>실제 배정 저장·할인·누계·세금계산서 발행 저장 기능</li>
+  </ul>
+
+  <h2>로우데이터 이관에서 확정된 내용</h2>
+  <ul class="card">
+    <li>원본 한 행은 접수번호 × 분석항목 구조</li>
+    <li>총금액은 접수번호 첫 행에 있는 부가세 제외 공급가액 합계</li>
+    <li>접수별 총금액과 행별 공급가액 합계를 대조해 일치 건만 이관</li>
+    <li>접수상태는 접수완료, 정산상태는 정산대기, 세금계산서배정상태는 미배정으로 초기화</li>
+    <li>기존 Excel의 비정형 상태 표시는 이관 작업본에서 명시적 열로 구조화</li>
+  </ul>
+
+  <p>상세 수식·오류·검증 이력의 정본은 저장소의 02~04 문서를 따릅니다.</p>
+</body>
+</html>
