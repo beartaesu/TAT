@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 시험 접수 시료수 불일치 수정</title>
+  <title>TAT 현재 작업 — 과거 시료 매핑 처리 결정</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -22,39 +22,25 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-01</div>
-    <div><strong>Git 기준:</strong> main / 7868f81</div>
-    <div><strong>현재 작업:</strong> 시험 접수의 시료수와 시료명 묶음 수 불일치 확인·수정</div>
-    <div><strong>상태:</strong> 원천 Excel 수정 후 읽기 전용 재검증 필요</div>
+    <div><strong>Git 기준:</strong> main / 348a1c0</div>
+    <div><strong>현재 작업:</strong> 7월까지 과거 자료의 접수시료항목매핑 생성 여부 결정</div>
+    <div><strong>상태:</strong> 사용자 결정 대기</div>
   </div>
 
-  <h2>확정된 승계 규칙</h2>
+  <h2>확정된 과거 시료수 규칙</h2>
   <div class="card">
-    <div>같은 접수번호 안에서 시료명 공란 행은 직전 시료명을 이어받습니다.</div>
-    <div>접수번호가 바뀌면 시료 문맥을 초기화하며 이전 접수의 시료명을 이어받지 않습니다.</div>
-    <div>동일 분석항목 반복행은 시료별 정상 행일 수 있으므로 삭제하거나 합치지 않습니다.</div>
+    <div>2026년 7월까지는 같은 접수번호 행의 <code>수량</code> 최댓값을 <code>접수헤더.시료수</code>로 사용합니다.</div>
+    <div>2026년 8월 이후는 작업본에 입력한 실제 시료수를 사용합니다.</div>
+    <div>시험 접수는 수량 최댓값이 2이므로 현재 시료수 2가 정상입니다. 원천 수정은 필요하지 않습니다.</div>
   </div>
 
-  <h2>시험 접수에서 발견된 불일치</h2>
-  <div class="card stop">
-    원천의 시료수는 2이지만, 시료명이 적힌 서로 다른 묶음은 3개입니다. 어느 값이 맞는지 자동 판단할 수 없습니다.
-  </div>
-
-  <h2>회사 Excel에서 할 작업</h2>
-  <ol class="card">
-    <li>시험에 사용한 접수번호의 행만 필터링합니다.</li>
-    <li>실제 시료가 2개인지 3개인지 원천 업무기록과 대조합니다.</li>
-    <li>잘못된 쪽만 수정합니다. 실제 시료가 3개면 <code>시료수</code>를 3으로, 실제 시료가 2개면 잘못 입력된 시료명 묶음을 수정합니다.</li>
-    <li>저장 후 기존 <code>TAT_이관_시험조회</code> Flow를 같은 접수번호로 다시 실행합니다.</li>
-  </ol>
-
-  <h2>확인 후 알려줄 내용</h2>
+  <h2>결정할 한 가지</h2>
   <ul class="card">
-    <li>수정한 항목: <strong>시료수</strong> 또는 <strong>시료명</strong></li>
-    <li>재실행 성공 여부</li>
-    <li>재실행한 <code>시험접수행필터</code> 원시 출력을 MYBOX에 다시 저장했는지</li>
+    <li><strong>권장안:</strong> 7월까지는 <code>접수시료항목매핑</code>을 만들지 않고, 각 <code>접수항목상세</code> 행에 승계된 시료 문맥만 보존합니다.</li>
+    <li><strong>대안:</strong> 과거 자료도 매핑을 만들려면 시료수와 시료명 구조가 맞지 않는 접수를 사람이 먼저 정리해야 합니다.</li>
   </ul>
 
-  <div class="card stop">시료수와 시료명 묶음 수가 일치할 때까지 SharePoint의 항목 만들기·항목 업데이트를 추가하지 마세요.</div>
+  <div class="card stop">권장안 또는 대안을 결정할 때까지 SharePoint의 항목 만들기·항목 업데이트를 추가하지 마세요.</div>
   <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
 </body>
 </html>
