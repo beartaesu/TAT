@@ -12,10 +12,8 @@
     .meta, .card { background: white; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .pending { color: #9a5a00; font-weight: 700; }
     .stop { color: #b42318; font-weight: 700; }
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { border: 1px solid #d9e0eb; padding: 10px; text-align: left; vertical-align: top; }
-    th { background: #eef3fa; }
     li { margin: 8px 0; }
+    code { background: #eef3fa; padding: 2px 5px; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -23,55 +21,28 @@
   <p class="pending">이 파일에는 지금 해야 할 작업만 있습니다.</p>
 
   <div class="meta">
-    <div><strong>갱신일:</strong> 2026-08-28</div>
-    <div><strong>Git 기준:</strong> main / 7b9ef20</div>
-    <div><strong>최종 이관 대상:</strong> TAT SharePoint 목록</div>
-    <div><strong>현재 작업:</strong> SharePoint 이관 전 Excel 작업본에 상태 열 추가</div>
-    <div><strong>상태:</strong> 회사 PC 작업 대기</div>
+    <div><strong>갱신일:</strong> 2026-09-01</div>
+    <div><strong>Git 기준:</strong> main / c581ead</div>
+    <div><strong>현재 작업:</strong> 시험 이관 Flow용 Excel 원천 준비 확인</div>
+    <div><strong>상태:</strong> 회사 PC 확인 대기</div>
   </div>
 
-  <h2>이 작업의 목적</h2>
-  <div class="card">
-    <p>Excel 데이터를 다른 Excel로 옮기는 작업이 아닙니다. 최종적으로 Power Automate를 사용해 아래 TAT SharePoint 목록으로 나누어 저장합니다.</p>
-    <ul>
-      <li><strong>접수헤더:</strong> 같은 접수번호를 1건으로 묶어 접수 기본정보·업체·계산서 업체·금액·결과발송여부 저장</li>
-      <li><strong>접수항목상세:</strong> 원본의 분석항목 행별로 분석항목·수량·단가·분석상태·분석완료일 저장</li>
-      <li><strong>현장마스터 / 계산서업체마스터 / 분석항목마스터:</strong> 원본 명칭과 대조해 기존 항목의 Lookup ID 연결</li>
-      <li><strong>접수시료항목매핑:</strong> 시료와 분석항목의 실제 연결 규칙을 확인한 후 생성 여부와 방식을 확정</li>
-    </ul>
-    <p><strong>이번 단계에서는 아직 SharePoint로 이관하지 않습니다.</strong> 완료·진행·결과 발송 상태를 추측하지 않도록 이관용 입력값을 먼저 정리하는 단계입니다.</p>
-  </div>
-
-  <h2>지금 회사 PC에서 해야 할 업무</h2>
+  <h2>지금 회사 PC에서 확인할 사항</h2>
   <ol class="card">
-    <li>현재 로우데이터 Excel을 <strong>복사</strong>해 이관 작업본을 만듭니다.</li>
-    <li>원본 파일은 수정하지 않습니다.</li>
-    <li>이관 작업본의 마지막 열 오른쪽에 아래 세 열을 추가합니다.</li>
-    <li>기존에 별도 Excel에 표기했던 완료·진행·결과 발송 정보를 보고 세 열을 채웁니다.</li>
+    <li>이관 작업본이 회사의 <strong>SharePoint 문서함 또는 OneDrive for Business</strong>에 저장되어 있는지 확인합니다.</li>
+    <li>로컬 PC에만 있다면 회사 SharePoint 문서함의 TAT 작업용 폴더로 옮깁니다.</li>
+    <li>Excel에서 데이터 범위 안을 선택하고 표 형식인지 확인합니다. 표가 아니면 <strong>Ctrl+T</strong>로 표를 만듭니다.</li>
+    <li>표 이름을 확인합니다. 새로 만드는 경우 <code>tblTATMigration</code>으로 설정합니다.</li>
   </ol>
 
-  <table>
-    <tr><th>추가 열 이름</th><th>허용값</th><th>입력 기준</th></tr>
-    <tr><td><strong>분석상태이관</strong></td><td>대기 / 분석 중 / 분석완료 / 보류</td><td>분석항목 행별로 입력</td></tr>
-    <tr><td><strong>분석완료일이관</strong></td><td>날짜 또는 공란</td><td>분석완료 행은 확인 가능한 날짜, 나머지는 공란</td></tr>
-    <tr><td><strong>결과발송여부이관</strong></td><td>예 / 아니요</td><td>같은 접수번호의 모든 행에 동일한 값</td></tr>
-  </table>
-
-  <h2>반드시 지킬 규칙</h2>
+  <h2>확인 후 알려줄 내용</h2>
   <ul class="card">
-    <li>날짜·TAT·표준처리기한만 보고 완료 여부를 추정하지 않습니다.</li>
-    <li>같은 접수번호라도 분석항목별 분석상태는 다를 수 있습니다.</li>
-    <li>같은 접수번호의 결과발송여부는 모든 행에서 같아야 합니다.</li>
-    <li>알 수 없는 상태는 임의 입력하지 말고 공란으로 둡니다.</li>
-    <li>실제 데이터가 든 Excel 또는 CSV를 MYBOX 전달 폴더에 올리지 않습니다.</li>
+    <li>저장 위치: SharePoint 또는 OneDrive</li>
+    <li>문서함·폴더의 일반적인 이름</li>
+    <li>Excel 표 이름</li>
+    <li>표의 데이터 행 수</li>
   </ul>
 
-  <h2>작업 완료 후 알려줄 내용</h2>
-  <div class="card">
-    <p><strong>“이관 작업본 복사 및 상태 열 3개 추가 완료”</strong></p>
-    <p>데이터 입력까지 끝났다면 <strong>“상태값 입력도 완료”</strong>라고 함께 알려주세요.</p>
-  </div>
-
-  <div class="card stop">다음 단계에서 Power Automate가 이 작업본을 읽어 접수헤더와 접수항목상세 등 SharePoint 목록으로 분리 저장하도록 시험 이관 Flow를 설계합니다. 위 작업 완료 전에는 SharePoint 전체 이관을 실행하지 않습니다.</div>
+  <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요. 위 네 가지 구조 정보만 알려주세요.</div>
 </body>
 </html>
