@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 시험 조회 원천 확인</title>
+  <title>TAT 현재 작업 — 시료명 승계 규칙 확인</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -22,32 +22,30 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-01</div>
-    <div><strong>Git 기준:</strong> main / 8d208a6</div>
-    <div><strong>현재 작업:</strong> 시험 접수의 완료일 공란과 반복 분석항목 의미 확인</div>
-    <div><strong>상태:</strong> SharePoint 쓰기 전 원천 확인 필요</div>
+    <div><strong>Git 기준:</strong> main / dc6febe</div>
+    <div><strong>현재 작업:</strong> 빈 시료명 행의 시료 문맥 승계 규칙 확인</div>
+    <div><strong>상태:</strong> 한 가지 원천 구조 확인 필요</div>
   </div>
 
-  <h2>시험 조회에서 확인된 내용</h2>
+  <h2>확정된 내용</h2>
   <div class="card">
-    <div>한 접수번호에서 48행이 추출됐고 다른 접수번호 혼입은 없습니다.</div>
-    <div>첫 행의 총금액과 48행의 공급가액 합계가 일치합니다.</div>
-    <div>48행 모두 분석완료지만 분석완료일이관은 전부 공란입니다.</div>
-    <div>분석항목명은 38종이며 8개 이름이 반복됩니다. 일부 반복행은 수량·단가가 다릅니다.</div>
+    <div>과거 분석완료일 공란은 실제 날짜 자료가 없어 정상이며 날짜를 추정하지 않습니다.</div>
+    <div>8월분부터 완료일을 입력할 예정이고 현재 8월분은 아직 준비 중입니다.</div>
+    <div>QA·process 등 서로 다른 시료에 같은 분석항목이 있을 수 있으므로 반복행을 삭제하거나 합치지 않습니다.</div>
   </div>
 
-  <h2>회사 Excel에서 확인할 두 가지</h2>
+  <h2>회사 Excel에서 확인할 한 가지</h2>
   <ol class="card">
-    <li><strong>분석완료일:</strong> 해당 접수의 48행이 모두 분석완료인데 완료일이 전부 비어 있는 것이 실제로 날짜 자료가 없기 때문인지, 작업본 입력 누락인지 확인합니다. 날짜를 임의로 만들지는 마세요.</li>
-    <li><strong>반복 분석항목:</strong> 같은 분석항목명이 2~3행 반복된 것이 서로 다른 시료·세부 시험·별도 청구 행 등 의도된 별도 행인지, 실제 중복 입력인지 확인합니다. 수량이나 단가가 다른 반복행은 삭제하거나 합치지 마세요.</li>
+    <li>시료명 셀에 값이 적힌 행 다음의 시료명 공란 행들은, <strong>다음 시료명이 적힌 행이 나오기 전까지 바로 위의 시료명을 이어받는 구조</strong>인지 확인합니다.</li>
   </ol>
 
   <h2>확인 후 알려줄 내용</h2>
   <ul class="card">
-    <li>완료일 공란: <strong>자료 없음</strong> 또는 <strong>입력 누락</strong></li>
-    <li>반복 분석항목: <strong>의도된 별도 행</strong> 또는 <strong>실제 중복</strong>, 가능하면 반복의 업무 기준</li>
+    <li><strong>맞음:</strong> 공란 행은 직전 시료명을 이어받음</li>
+    <li><strong>아님:</strong> 다른 규칙이 있다면 그 규칙만 설명</li>
   </ul>
 
-  <div class="card stop">두 사항을 확인할 때까지 SharePoint의 항목 만들기·항목 업데이트를 추가하지 마세요.</div>
+  <div class="card stop">이 규칙을 확인할 때까지 SharePoint의 항목 만들기·항목 업데이트를 추가하지 마세요.</div>
   <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
 </body>
 </html>
