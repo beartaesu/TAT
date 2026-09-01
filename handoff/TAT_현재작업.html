@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 과거 시료 매핑 처리 결정</title>
+  <title>TAT 현재 작업 — 8월 접수 읽기 전용 재검증</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -22,25 +22,27 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-01</div>
-    <div><strong>Git 기준:</strong> main / 348a1c0</div>
-    <div><strong>현재 작업:</strong> 7월까지 과거 자료의 접수시료항목매핑 생성 여부 결정</div>
-    <div><strong>상태:</strong> 사용자 결정 대기</div>
+    <div><strong>Git 기준:</strong> main / f1882c8</div>
+    <div><strong>현재 작업:</strong> 8월 접수 한 건의 읽기 전용 재검증</div>
+    <div><strong>상태:</strong> 회사 PC 실행 대기</div>
   </div>
 
-  <h2>확정된 과거 시료수 규칙</h2>
+  <h2>최종 확정된 시료 이관 규칙</h2>
   <div class="card">
-    <div>2026년 7월까지는 같은 접수번호 행의 <code>수량</code> 최댓값을 <code>접수헤더.시료수</code>로 사용합니다.</div>
-    <div>2026년 8월 이후는 작업본에 입력한 실제 시료수를 사용합니다.</div>
-    <div>시험 접수는 수량 최댓값이 2이므로 현재 시료수 2가 정상입니다. 원천 수정은 필요하지 않습니다.</div>
+    <div>2026년 8월 31일까지는 접수번호별 <code>수량</code> 최댓값을 <code>접수헤더.시료수</code>로 사용합니다.</div>
+    <div>같은 기간에는 <code>접수시료항목매핑</code>을 만들지 않고 승계한 시료명을 각 <code>접수항목상세.배정시료명</code>에 보존합니다.</div>
+    <div>2026년 9월 1일부터 실제 시료수와 전체 시료 매핑을 사용합니다.</div>
   </div>
 
-  <h2>결정할 한 가지</h2>
-  <ul class="card">
-    <li><strong>권장안:</strong> 7월까지는 <code>접수시료항목매핑</code>을 만들지 않고, 각 <code>접수항목상세</code> 행에 승계된 시료 문맥만 보존합니다.</li>
-    <li><strong>대안:</strong> 과거 자료도 매핑을 만들려면 시료수와 시료명 구조가 맞지 않는 접수를 사람이 먼저 정리해야 합니다.</li>
-  </ul>
+  <h2>회사 PC에서 할 작업</h2>
+  <ol class="card">
+    <li>기존 <code>TAT_이관_시험조회</code> Flow를 엽니다.</li>
+    <li>원천 Excel에서 실제로 존재하는 <strong>2026년 8월 접수번호 한 건</strong>을 골라 수동 실행합니다.</li>
+    <li>Flow 성공을 확인하고 <code>시험접수행필터</code>의 원시 출력을 저장합니다.</li>
+    <li>파일명을 <code>시험접수행필터_8월.txt</code>로 하여 MYBOX 회사전달 폴더에 올립니다.</li>
+  </ol>
 
-  <div class="card stop">권장안 또는 대안을 결정할 때까지 SharePoint의 항목 만들기·항목 업데이트를 추가하지 마세요.</div>
+  <div class="card stop">이번에도 SharePoint의 항목 만들기·항목 업데이트는 추가하지 마세요.</div>
   <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
 </body>
 </html>
