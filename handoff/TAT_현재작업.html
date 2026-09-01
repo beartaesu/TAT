@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업</title>
+  <title>TAT 현재 작업 — 읽기 전용 시험 조회 Flow</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -22,27 +22,37 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-01</div>
-    <div><strong>Git 기준:</strong> main / c581ead</div>
-    <div><strong>현재 작업:</strong> 시험 이관 Flow용 Excel 원천 준비 확인</div>
-    <div><strong>상태:</strong> 회사 PC 확인 대기</div>
+    <div><strong>Git 기준:</strong> main / c14e5c8</div>
+    <div><strong>현재 작업:</strong> Excel 원천의 읽기 전용 시험 조회 Flow 구성</div>
+    <div><strong>상태:</strong> 제안/미적용 — 회사 PC 구성·실행 대기</div>
   </div>
 
-  <h2>지금 회사 PC에서 확인할 사항</h2>
+  <h2>이번 단계에서 만들 Flow</h2>
+  <div class="card">
+    <div><strong>이름:</strong> <code>TAT_이관_시험조회</code></div>
+    <div><strong>원천:</strong> SharePoint <code>문서</code> 루트 / Excel 파일 <code>개발용</code> / 표 <code>tblTATMigration</code></div>
+    <div><strong>목적:</strong> 접수번호 한 건의 Excel 행 수만 확인</div>
+  </div>
+
+  <h2>회사 PC 작업 순서</h2>
   <ol class="card">
-    <li>이관 작업본이 회사의 <strong>SharePoint 문서함 또는 OneDrive for Business</strong>에 저장되어 있는지 확인합니다.</li>
-    <li>로컬 PC에만 있다면 회사 SharePoint 문서함의 TAT 작업용 폴더로 옮깁니다.</li>
-    <li>Excel에서 데이터 범위 안을 선택하고 표 형식인지 확인합니다. 표가 아니면 <strong>Ctrl+T</strong>로 표를 만듭니다.</li>
-    <li>표 이름을 확인합니다. 새로 만드는 경우 <code>tblTATMigration</code>으로 설정합니다.</li>
+    <li>Power Automate에서 <strong>인스턴트 클라우드 흐름</strong>을 만들고, 트리거는 <strong>수동으로 흐름 트리거</strong>를 선택합니다. Flow 이름은 <code>TAT_이관_시험조회</code>로 합니다.</li>
+    <li>트리거에 <strong>텍스트</strong> 입력을 하나 추가하고 이름을 <code>시험접수번호</code>로 지정합니다.</li>
+    <li>Excel Online (Business)의 <strong>테이블에 있는 행 나열</strong>을 추가합니다. 위치는 현재 TAT SharePoint 사이트, 문서 라이브러리는 <code>문서</code>, 파일은 선택기에서 루트의 <code>개발용</code>, 표는 <code>tblTATMigration</code>으로 선택합니다. 파일 확장자는 직접 추측해 입력하지 않습니다. <strong>Filter Query 등 고급 입력은 모두 비워 둡니다.</strong></li>
+    <li>이 작업의 <strong>설정</strong>에서 페이지 매김을 켜고 임계값을 <code>10000</code>으로 지정합니다.</li>
+    <li><strong>배열 필터링</strong>을 추가하고 이름을 <code>시험접수행필터</code>로 바꿉니다. 원본은 앞 작업의 <code>value</code>, 왼쪽 식은 <code>item()?['접수번호']</code>, 비교는 <strong>같음</strong>, 오른쪽은 트리거의 동적 콘텐츠 <code>시험접수번호</code>로 지정합니다.</li>
+    <li><strong>작성</strong>을 추가하고 이름을 <code>시험접수행수</code>로 바꾼 뒤 식에 <code>length(body('시험접수행필터'))</code>를 입력합니다.</li>
   </ol>
 
-  <h2>확인 후 알려줄 내용</h2>
+  <h2>테스트와 확인</h2>
   <ul class="card">
-    <li>저장 위치: SharePoint 또는 OneDrive</li>
-    <li>문서함·폴더의 일반적인 이름</li>
-    <li>Excel 표 이름</li>
-    <li>표의 데이터 행 수</li>
+    <li>실제로 존재하는 접수번호 한 건을 <code>시험접수번호</code>에 입력해 수동 실행합니다.</li>
+    <li>Flow 전체가 성공했는지 확인합니다.</li>
+    <li><code>시험접수행수</code> 출력이 0보다 큰지 확인합니다.</li>
+    <li>대화에는 성공/실패와 숫자 행 수만 알려주세요.</li>
   </ul>
 
-  <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요. 위 네 가지 구조 정보만 알려주세요.</div>
+  <div class="card stop">이번 단계에서는 SharePoint의 항목 만들기·항목 업데이트, 접수헤더/접수항목상세 저장, 결과파일 생성 Flow 호출을 추가하지 마세요.</div>
+  <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
 </body>
 </html>
