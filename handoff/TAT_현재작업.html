@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 시료명 3개·상세 48행 두 번째 쓰기 시험</title>
+  <title>TAT 현재 작업 — True인데 쓰기 시퀀스 건너뜀 진단</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 960px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     .ok { border-left: 6px solid #2e7d32; background: #f2fff4; }
-    code { font-family: Consolas, monospace; }
+    code, pre { font-family: Consolas, monospace; }
+    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; }
     li { margin: 7px 0; }
   </style>
 </head>
@@ -21,73 +22,58 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / bf52f39</div>
-    <div><strong>현재 작업:</strong> 시료명 3개·상세 48행 접수의 두 번째 쓰기 시험</div>
-    <div><strong>Flow 수정:</strong> 없음</div>
+    <div><strong>Git 기준:</strong> main / c7e0fa7</div>
+    <div><strong>현재 작업:</strong> 조건 True인데 헤더 생성부터 건너뜀 처리된 원인 확인</div>
+    <div><strong>이번 단계:</strong> 확인만 수행, Flow 수정·저장·재실행 금지</div>
   </div>
 
-  <h2>첫 시험 이관 완료</h2>
-  <div class="card ok">
-    접수헤더 1건, 접수항목상세 25건, Lookup·복사 열·시료명·금액·상태·완료일 공란,
-    과거 접수시료항목매핑 0건과 표준소요일수 교정까지 모두 정상입니다.
-  </div>
-
-  <h2>1. 사용할 두 번째 시험값</h2>
+  <h2>현재 확인된 상태</h2>
   <div class="card">
-    이전 읽기 전용 시험에서 확인했던 <strong>상세 48행·비공란 시료명 3개</strong>의 다른 접수번호를 사용합니다.
-    방금 이관한 25행 접수번호를 다시 사용하면 안 됩니다.
+    <code>시험이관가능조건</code>은 True였지만 <code>시험접수헤더생성</code>부터 후속 작업이 모두 건너뜀 처리됐습니다.
+    따라서 두 번째 접수의 헤더·상세는 생성되지 않은 상태로 판단합니다.
   </div>
 
-  <h2>2. 실행 전 확인</h2>
-  <ul class="card">
-    <li>SharePoint <code>접수헤더</code>에 이 48행 시험 접수번호가 아직 없는지 확인</li>
-    <li>Flow <code>TAT_이관_시험조회</code>가 저장된 최신 상태인지 확인</li>
-    <li><code>상세반복_접수항목상세생성 > 표준소요일수</code> 입력이 비어 있는지 확인</li>
-  </ul>
-
-  <h2>3. 한 번만 실행</h2>
+  <h2>1. 실행 기록에서 조건 분기 확인</h2>
   <ol class="card">
-    <li>Power Automate → <code>TAT_이관_시험조회</code>를 실행합니다.</li>
-    <li>수동 입력에 이전 48행 시험 접수번호를 넣습니다.</li>
-    <li>정확히 <strong>한 번만</strong> 실행하고 완료될 때까지 기다립니다.</li>
+    <li>Power Automate → <code>TAT_이관_시험조회</code> → 해당 두 번째 실행 기록을 엽니다.</li>
+    <li><code>시험이관가능조건</code>을 펼칩니다.</li>
+    <li>조건 출력의 결과가 실제 불리언 <code>true</code>인지 확인합니다.</li>
+    <li>실행 기록 화면에서 <strong>True 쪽 분기</strong>와 <strong>False 쪽 분기</strong> 중 어느 쪽이 실행 표시이고 어느 쪽이 회색 건너뜀인지 적어 둡니다.</li>
   </ol>
 
-  <h2>4. 실행 기록 기대값</h2>
+  <h2>2. 시험접수헤더생성 건너뜀 사유 확인</h2>
+  <ol class="card">
+    <li>회색으로 표시된 <code>시험접수헤더생성</code>을 누릅니다.</li>
+    <li>표시되는 <strong>상태 코드 또는 건너뜀 코드</strong>와 <strong>메시지</strong>만 적어 둡니다.</li>
+    <li>입력·출력의 업체명, 시료명, 접수번호 등 회사 데이터는 복사하지 않습니다.</li>
+  </ol>
+
+  <h2>3. 현재 저장 트리 위치 확인</h2>
+  <ol class="card">
+    <li>실행 기록을 닫고 Flow 편집 화면을 엽니다. 아직 아무것도 수정하지 않습니다.</li>
+    <li><code>시험이관가능조건</code>을 펼칩니다.</li>
+    <li><code>시험접수헤더생성</code>이 화면상 <strong>True</strong> 영역 안에 있는지, <strong>False</strong> 영역 안에 있는지 확인합니다.</li>
+    <li>헤더 생성 아래에 <code>시험상세행반복</code>이 같은 분기 안에 있는지도 확인합니다.</li>
+  </ol>
+
+  <h2>4. 실행 후 구성 확인</h2>
+  <ol class="card">
+    <li><code>시험접수헤더생성</code>의 점 3개 메뉴를 엽니다.</li>
+    <li><strong>실행 후 구성(Configure run after)</strong>이 보이면 선택된 상태를 확인합니다.</li>
+    <li>성공 / 실패 / 건너뜀 / 시간 초과 중 무엇이 선택되어 있는지만 적어 둡니다.</li>
+    <li>해당 메뉴가 없으면 <strong>메뉴 없음</strong>이라고 알려주세요.</li>
+  </ol>
+
+  <h2>알려줄 다섯 가지</h2>
   <ul class="card">
-    <li><code>시험접수행수 = 48</code></li>
-    <li><code>기존접수건수 = 0</code></li>
-    <li><code>시험시료명개수확인 = 3</code></li>
-    <li><code>시험시료수확인 = 2</code></li>
-    <li><code>시험분석항목불일치건수 = 0</code></li>
-    <li><code>시험금액일치확인 = true</code></li>
-    <li><code>시험이관가능확인 = true</code>, True 분기 진입</li>
-    <li>접수헤더 생성 성공 및 ID 존재</li>
-    <li>상세 반복 48회 모두 성공</li>
-    <li><code>시험생성상세건수 = 48</code></li>
-    <li>생성 건수 검증 조건 True, Flow 전체 성공</li>
+    <li>조건 출력: 불리언 true인지</li>
+    <li>실행 표시된 분기: True / False</li>
+    <li>헤더 생성의 건너뜀 코드·메시지</li>
+    <li>편집 화면의 헤더 생성 위치: True / False</li>
+    <li>헤더 생성 Run after 선택 상태 또는 메뉴 없음</li>
   </ul>
 
-  <h2>5. SharePoint 직접 확인</h2>
-  <ul class="card">
-    <li><code>접수헤더</code>: 해당 번호 1건, 시료수 2, 시료명 요약에 세 시료명이 순서대로 표시</li>
-    <li><code>접수항목상세</code>: 해당 헤더 연결 행 48건</li>
-    <li>시료명 공란 원천 행은 직전 비공란 시료명이 <code>배정시료명</code>에 이어서 저장됨</li>
-    <li>시료명이 바뀌는 경계에서 이후 행의 <code>배정시료명</code>도 새 시료명으로 변경됨</li>
-    <li>같은 분석항목명이 여러 시료 묶음에 있더라도 행이 합쳐지거나 삭제되지 않음</li>
-    <li><code>표준소요일수</code>와 현재 과거 자료의 <code>분석완료일</code>은 모두 공란</li>
-    <li><code>접수시료항목매핑</code>: 신규 행 0건</li>
-  </ul>
-
-  <h2>알려줄 결과</h2>
-  <ul class="card">
-    <li>Flow 성공/실패</li>
-    <li>행 수·시료명 개수·시료수·상세 생성 건수</li>
-    <li>시료명 세 묶음의 승계 정상 여부</li>
-    <li>반복 분석항목 행 보존 여부</li>
-    <li>표준소요일수·완료일 공란 및 매핑 0건 여부</li>
-  </ul>
-
-  <div class="card stop">실패하거나 일부만 생성되면 같은 접수번호로 재실행하지 마세요.</div>
-  <div class="card stop">업체명·시료명·실제 헤더 ID는 대화에 적지 않고 정상/불일치 여부만 알려주세요.</div>
+  <div class="card stop">확인 전에는 Flow를 다시 실행하지 마세요.</div>
+  <div class="card stop">작업을 이동·삭제·복사하거나 실행 후 구성을 변경하지 마세요.</div>
 </body>
 </html>
