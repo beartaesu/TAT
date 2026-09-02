@@ -3,17 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 첫 SharePoint 쓰기 1회 실행</title>
+  <title>TAT 현재 작업 — 첫 이관 SharePoint 직접 검증</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 940px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     .ok { border-left: 6px solid #2e7d32; background: #f2fff4; }
-    code, pre { font-family: Consolas, monospace; }
-    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; }
+    code { font-family: Consolas, monospace; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #dfe5ef; padding: 9px 10px; text-align: left; vertical-align: top; }
+    th { background: #edf3fb; }
     li { margin: 7px 0; }
   </style>
 </head>
@@ -22,58 +24,79 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / 1db76ba</div>
-    <div><strong>현재 작업:</strong> 시험 접수 1건의 첫 SharePoint 쓰기 실행</div>
-    <div><strong>실행 횟수:</strong> 동일 시험 접수번호로 정확히 1회</div>
+    <div><strong>Git 기준:</strong> main / 051cfed</div>
+    <div><strong>현재 작업:</strong> 첫 시험 이관의 SharePoint 저장값 직접 확인</div>
+    <div><strong>중요:</strong> Flow 재실행 없음</div>
   </div>
 
-  <h2>직전 작업 완료</h2>
+  <h2>실행 기록에서 확인된 성공</h2>
   <div class="card ok">
-    <div>상세 건수 작성·검증 조건을 <code>시험상세행반복</code> 바깥으로 교정했습니다.</div>
-    <div>False 분기를 <code>시험이관실패요약</code> 작성으로 변경했고 Flow 저장에 성공했습니다.</div>
+    <div>접수헤더 생성 성공 및 ID 존재</div>
+    <div>접수항목상세 생성 반복 25회 성공</div>
+    <div>생성 성공 건수 25, 검증 조건 True</div>
+    <div>SharePoint 접수헤더 1건 생성 확인</div>
   </div>
 
-  <h2>1. 첫 쓰기 실행</h2>
+  <h2>1. 접수헤더 직접 확인</h2>
+  <p class="card">SharePoint → <code>접수헤더</code>에서 이번 시험 접수번호 행 1건을 열고 확인합니다.</p>
+  <table>
+    <thead><tr><th>확인 열</th><th>기대값</th></tr></thead>
+    <tbody>
+      <tr><td>제목</td><td>시험 접수번호와 일치</td></tr>
+      <tr><td>의뢰일자</td><td>Excel 원천 의뢰일자와 일치</td></tr>
+      <tr><td>시료명 요약</td><td>앞서 검증한 시료명 요약과 일치</td></tr>
+      <tr><td>시료수</td><td><code>1</code></td></tr>
+      <tr><td>의뢰구분 / 최초의뢰구분</td><td>접수번호 형식으로 판정한 같은 값</td></tr>
+      <tr><td>업체/현장 / 계산서 업체</td><td>원천과 일치하는 Lookup</td></tr>
+      <tr><td>접수상태</td><td><code>접수완료</code></td></tr>
+      <tr><td>정산상태 / 세금계산서배정상태</td><td><code>정산대기 / 미배정</code></td></tr>
+      <tr><td>결과발송여부</td><td>Excel 이관값과 일치</td></tr>
+      <tr><td>공급가액합계</td><td>앞서 검증한 공급가액 합계와 일치</td></tr>
+      <tr><td>배정기준·할인·발행 누계</td><td>각각 <code>0</code></td></tr>
+      <tr><td>세금계산서미배정기준금액</td><td>공급가액합계와 동일</td></tr>
+      <tr><td>폴더처리상태</td><td><code>미생성</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. 접수항목상세 직접 확인</h2>
   <ol class="card">
-    <li>Power Automate → <code>TAT_이관_시험조회</code>를 엽니다.</li>
-    <li>기존 읽기 검증에서 계속 사용한 동일 시험 접수번호를 입력합니다.</li>
-    <li>Flow를 <strong>한 번만</strong> 실행합니다.</li>
-    <li>실행이 끝날 때까지 같은 버튼을 다시 누르지 않습니다.</li>
+    <li>SharePoint → <code>접수항목상세</code>에서 이번 새 헤더에 연결된 행을 조회합니다.</li>
+    <li>전체 행 수가 정확히 <strong>25건</strong>인지 확인합니다.</li>
+    <li>첫 행·중간 행·마지막 행을 각각 열어 아래 필드를 확인합니다.</li>
   </ol>
+  <table>
+    <thead><tr><th>확인 열</th><th>기대값</th></tr></thead>
+    <tbody>
+      <tr><td>접수헤더연결</td><td>이번에 생성된 같은 헤더</td></tr>
+      <tr><td>접수헤더ID복사</td><td>이번 헤더 ID와 동일</td></tr>
+      <tr><td>분석항목 / 분석항목ID복사</td><td>같은 분석항목마스터 행</td></tr>
+      <tr><td>의뢰일자복사</td><td>헤더 의뢰일자와 동일</td></tr>
+      <tr><td>업체현장ID복사 / 업체현장명복사</td><td>헤더의 업체/현장과 동일</td></tr>
+      <tr><td>시료명요약복사</td><td>헤더 시료명 요약과 동일</td></tr>
+      <tr><td>항목분류</td><td>원천의 일반·특정·과불 값과 일치</td></tr>
+      <tr><td>배정시료명</td><td>현재 시험 시료명과 일치</td></tr>
+      <tr><td>수량 / 단가</td><td>각 원천 행과 일치</td></tr>
+      <tr><td>분석상태</td><td>Excel의 분석상태이관 값과 일치</td></tr>
+      <tr><td>분석완료일</td><td>현재 8월 시험에서는 공란</td></tr>
+      <tr><td>정산대상여부</td><td><code>예</code></td></tr>
+      <tr><td>표준소요일수</td><td>분석항목마스터 값이 저장됨</td></tr>
+    </tbody>
+  </table>
 
-  <h2>2. 실행 기록 확인</h2>
-  <ul class="card">
-    <li><code>시험이관가능확인</code>: 입력·출력 <code>true</code></li>
-    <li><code>시험이관가능조건</code>: True 분기</li>
-    <li><code>시험접수헤더생성</code>: 성공, 출력에 양의 정수 ID 존재</li>
-    <li><code>시험상세행반복</code>: 25회 모두 성공</li>
-    <li><code>시험생성상세건수</code>: 입력·출력 <code>25</code></li>
-    <li><code>시험생성건수검증조건</code>: True 분기</li>
-    <li><code>시험이관완료요약</code>: 접수번호·헤더 ID·상세생성 25건 표시</li>
-    <li>Flow 전체: 성공</li>
-  </ul>
-
-  <h2>3. SharePoint 직접 확인</h2>
-  <ul class="card">
-    <li><code>접수헤더</code>: 해당 시험 접수번호가 정확히 1건 생성됐는지</li>
-    <li><code>접수항목상세</code>: 생성된 헤더에 연결된 행이 정확히 25건인지</li>
-    <li>상세의 <code>접수헤더연결</code>과 <code>접수헤더ID복사</code>가 같은 새 헤더 ID인지</li>
-    <li>분석항목 Lookup, 배정시료명, 수량, 단가, 분석상태가 원천과 맞는지</li>
-    <li>현재 8월 자료의 <code>분석완료일</code>이 공란인지</li>
-    <li><code>접수시료항목매핑</code>은 생성되지 않았는지</li>
-  </ul>
+  <h2>3. 과거 시료 매핑 미생성 확인</h2>
+  <div class="card">
+    SharePoint → <code>접수시료항목매핑</code>에서 이번 시험 접수와 연결된 신규 행이 <strong>0건</strong>인지 확인합니다.
+    2026년 8월 31일까지 자료는 이 목록을 생성하지 않는 것이 정상입니다.
+  </div>
 
   <h2>알려줄 결과</h2>
   <ul class="card">
-    <li>Flow 성공 또는 실패</li>
-    <li>헤더 생성 ID 존재 여부만 알려주고 실제 숫자는 적지 않기</li>
-    <li>상세 생성 건수</li>
-    <li>검증 조건 True/False</li>
-    <li>SharePoint 헤더 1건·상세 25건 여부</li>
-    <li>핵심 필드 불일치 또는 공란 오류 여부</li>
+    <li>접수헤더 핵심 필드: 모두 정상 / 불일치 열 이름</li>
+    <li>접수항목상세 실제 건수: 25건인지</li>
+    <li>상세 첫·중간·마지막 행 핵심 필드: 모두 정상 / 불일치 열 이름</li>
+    <li>접수시료항목매핑: 0건인지</li>
   </ul>
 
-  <div class="card stop">실패하거나 일부만 생성되면 같은 시험 접수번호로 재실행하지 마세요.</div>
-  <div class="card stop">실패 시 정확한 실패 작업 이름과 상세 생성 성공 건수만 알려주세요. 헤더 ID 실제 숫자는 대화에 적지 않아도 됩니다.</div>
+  <div class="card stop">이 확인 중에는 Flow를 다시 실행하거나 생성된 시험 데이터를 수정·삭제하지 마세요.</div>
 </body>
 </html>
