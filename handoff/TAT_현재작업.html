@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 시료수·공급가액 일괄 계산</title>
+  <title>TAT 현재 작업 — 의뢰일자·시료명요약·결과발송 준비</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -23,69 +23,79 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / b62b021</div>
-    <div><strong>현재 작업:</strong> 기존 25행 반복으로 시료수 최댓값·공급가액 합계·총금액 일치 계산</div>
-    <div><strong>상태:</strong> 계산 작업을 한 번에 적용·검증</div>
+    <div><strong>Git 기준:</strong> main / 1f6913e</div>
+    <div><strong>현재 작업:</strong> 접수헤더용 의뢰일자·시료명 요약·결과발송여부 준비</div>
+    <div><strong>상태:</strong> 읽기·변환 작업을 한 번에 적용·검증</div>
   </div>
 
   <h2>직전 작업 완료</h2>
   <div class="card">
-    <div><code>시험의뢰구분판정</code>이 접수번호에 맞는 값으로 정상 출력됐습니다.</div>
-    <div><code>시험의뢰구분유효확인</code> 입력·출력은 <code>true</code>입니다.</div>
+    <div><code>시험시료수확인</code> 입력·출력은 1입니다.</div>
+    <div><code>시험금액일치확인</code> 입력·출력은 <code>true</code>입니다.</div>
   </div>
 
   <h2>회사 PC에서 할 작업</h2>
   <div class="card">
     <strong>작업 위치:</strong> Power Automate → 내 흐름 → <code>TAT_이관_시험조회</code> → 편집<br>
-    <strong>추가 위치:</strong> 변수 2개는 <code>분석항목불일치건수초기화</code> 아래·<code>시험분석항목반복</code> 위, 반복 계산은 기존 반복 안의 마지막
+    <strong>추가 위치:</strong> 최상위의 기존 <code>시험금액일치확인</code> 바로 아래
   </div>
 
-  <h2>1. 최상위 변수 2개 추가</h2>
+  <h2>완성할 Flow 트리 하단</h2>
+  <pre>…
+├─ 시험금액일치확인       [데이터 작업 - 작성]
+├─ 시험의뢰일자확인           [데이터 작업 - 작성]
+├─ 시험시료명행필터           [데이터 작업 - 배열 필터링]
+├─ 시험시료명개수확인         [데이터 작업 - 작성]
+├─ 시험시료명선택             [데이터 작업 - 선택]
+├─ 시험시료명고유목록         [데이터 작업 - 작성]
+├─ 시험시료명요약확인         [데이터 작업 - 작성]
+└─ 시험결과발송여부확인       [데이터 작업 - 작성]</pre>
+
+  <h2>1. 의뢰일자 변환</h2>
   <ol class="card">
-    <li><code>분석항목불일치건수초기화</code> 아래, <code>시험분석항목반복</code> 위의 <strong>+</strong>에서 변수 → <strong>변수 초기화</strong>를 추가합니다.</li>
-    <li>작업 이름: <code>시료수최댓값초기화</code>, 변수 이름: <code>var시험시료수최댓값</code>, 형식: <strong>정수</strong>, 값: <code>0</code></li>
-    <li>그 바로 아래에 변수 → <strong>변수 초기화</strong>를 하나 더 추가합니다.</li>
-    <li>작업 이름: <code>공급가액합계초기화</code>, 변수 이름: <code>var시험공급가액합계</code>, 형식: <strong>부동 소수점 수</strong>, 값: <code>0</code></li>
+    <li><code>시험금액일치확인</code> 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험의뢰일자확인</code></li>
+    <li>입력의 <strong>식</strong>:<br><code>formatDateTime(addDays('1899-12-30', int(first(body('시험접수행필터'))?['의뢰일자'])), 'yyyy-MM-dd')</code></li>
   </ol>
 
-  <h2>2. 기존 반복 안에 시료수 최댓값 갱신 추가</h2>
+  <h2>2. 비공란 시료명 필터와 개수</h2>
   <ol class="card">
-    <li><code>시험분석항목반복</code> 안의 기존 <code>반복_분석항목불일치조건</code> 전체 아래, 같은 반복 수준에 제어 → <strong>조건</strong>을 추가합니다.</li>
-    <li>작업 이름: <code>반복_시료수최댓값갱신조건</code></li>
-    <li>왼쪽 <strong>식</strong>: <code>int(items('시험분석항목반복')?['수량'])</code></li>
-    <li>연산자: <strong>다음보다 큼</strong>, 오른쪽 <strong>식</strong>: <code>variables('var시험시료수최댓값')</code></li>
-    <li><strong>Yes</strong> 안에 변수 → <strong>변수 설정</strong>을 추가합니다. 작업 이름: <code>반복_시료수최댓값설정</code></li>
-    <li>변수: <code>var시험시료수최댓값</code>, 값의 <strong>식</strong>: <code>int(items('시험분석항목반복')?['수량'])</code></li>
-    <li><strong>No</strong>는 비워 둡니다.</li>
+    <li><code>시험의뢰일자확인</code> 바로 아래에 데이터 작업 → <strong>배열 필터링</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험시료명행필터</code>, 시작 값의 <strong>식</strong>: <code>body('시험접수행필터')</code></li>
+    <li>왼쪽 <strong>식</strong>: <code>empty(trim(string(item()?['시료명'])))</code>, 연산자: <strong>같음</strong>, 오른쪽 값: <code>false</code></li>
+    <li>그 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험시료명개수확인</code>, 입력의 <strong>식</strong>: <code>length(body('시험시료명행필터'))</code></li>
   </ol>
 
-  <h2>3. 기존 반복 안에 공급가액 누적 추가</h2>
+  <h2>3. 시료명 텍스트 선택·고유화·요약</h2>
   <ol class="card">
-    <li><code>반복_시료수최댓값갱신조건</code> 전체 아래, 같은 반복 수준에 변수 → <strong>변수 증가</strong>를 추가합니다.</li>
-    <li>작업 이름: <code>반복_공급가액합계증가</code></li>
-    <li>변수: <code>var시험공급가액합계</code></li>
-    <li>값의 <strong>식</strong>:<br><code>if(empty(items('시험분석항목반복')?['공급가액']), 0, float(items('시험분석항목반복')?['공급가액']))</code></li>
+    <li><code>시험시료명개수확인</code> 바로 아래에 데이터 작업 → <strong>선택</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험시료명선택</code>, 시작 값의 <strong>식</strong>: <code>body('시험시료명행필터')</code></li>
+    <li>맵 영역을 <strong>텍스트 모드로 전환</strong>하고 식 <code>trim(string(item()?['시료명']))</code>만 입력합니다.</li>
+    <li>그 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가하고 이름을 <code>시험시료명고유목록</code>으로 바꿉니다.</li>
+    <li>입력의 <strong>식</strong>: <code>union(body('시험시료명선택'), body('시험시료명선택'))</code></li>
+    <li>그 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가하고 이름을 <code>시험시료명요약확인</code>으로 바꿉니다.</li>
+    <li>입력의 <strong>식</strong>: <code>join(outputs('시험시료명고유목록'), ', ')</code></li>
   </ol>
 
-  <h2>4. 반복 아래 최상위에 작성 4개 추가</h2>
+  <h2>4. 결과발송여부 불리언 확인</h2>
   <ol class="card">
-    <li>기존 <code>시험의뢰구분유효확인</code> 바로 아래에 데이터 작업 → <strong>작성</strong> 4개를 순서대로 추가합니다.</li>
-    <li><code>시험시료수확인</code> — <code>variables('var시험시료수최댓값')</code></li>
-    <li><code>시험공급가액합계확인</code> — <code>variables('var시험공급가액합계')</code></li>
-    <li><code>시험총금액확인</code> — <code>float(first(body('시험접수행필터'))?['총금액'])</code></li>
-    <li><code>시험금액일치확인</code> — <code>equals(float(outputs('시험공급가액합계확인')), float(outputs('시험총금액확인')))</code></li>
+    <li><code>시험시료명요약확인</code> 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험결과발송여부확인</code></li>
+    <li>입력의 <strong>식</strong>: <code>equals(first(body('시험접수행필터'))?['결과발송여부이관'], '예')</code></li>
     <li>Flow를 저장하고 같은 시험값으로 한 번 실행합니다.</li>
   </ol>
 
   <h2>알려줄 결과</h2>
   <ul class="card">
-    <li><code>시험시료수확인</code> 입력·출력이 <strong>1</strong>인지</li>
-    <li><code>시험금액일치확인</code> 입력·출력이 <code>true</code>인지</li>
+    <li><code>시험의뢰일자확인</code>이 Excel 의뢰일자와 같은 날짜인지</li>
+    <li><code>시험시료명개수확인</code> 입력·출력이 <strong>1</strong>인지</li>
+    <li><code>시험시료명요약확인</code>이 비공란이고 Excel의 시료명과 같은지</li>
+    <li><code>시험결과발송여부확인</code>이 Excel의 예·아니요와 일치하는 <code>true</code>·<code>false</code인지</li>
     <li>Flow 전체 성공 여부</li>
   </ul>
 
-  <div class="card stop">공급가액 합계와 총금액 실제 숫자는 대화에 적지 말고 일치 여부만 알려주세요.</div>
-  <div class="card stop"><code>시험분석항목반복</code>의 동시성 제어는 끄거나 병렬 처리 수 <code>1</code>을 유지하세요.</div>
+  <div class="card stop">실제 시료명·의뢰일자는 대화에 적지 말고 일치 여부만 알려주세요.</div>
   <div class="card stop">현재는 SharePoint 접수헤더·접수항목상세 항목을 만들지 마세요.</div>
 </body>
 </html>
