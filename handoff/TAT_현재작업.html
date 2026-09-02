@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 의뢰구분 이관 규칙 확인</title>
+  <title>TAT 현재 작업 — 의뢰구분 판정 2개 작업</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -23,9 +23,9 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / e2d4d99</div>
-    <div><strong>현재 작업:</strong> SharePoint 저장 전 의뢰구분 이관 규칙 확정</div>
-    <div><strong>상태:</strong> 사용자 확인 대기 — Flow는 수정하지 않음</div>
+    <div><strong>Git 기준:</strong> main / 3ff2219</div>
+    <div><strong>현재 작업:</strong> 접수번호로 의뢰구분 판정·유효 확인</div>
+    <div><strong>상태:</strong> 작성 2개를 한 번에 적용·검증</div>
   </div>
 
   <h2>직전 작업 완료</h2>
@@ -35,21 +35,50 @@
     <div>25행 모두 <code>분석항목마스터.Title</code>에 유일하게 매칭되었습니다.</div>
   </div>
 
-  <h2>확정이 필요한 이유</h2>
+  <h2>확정된 이관 규칙</h2>
   <div class="card">
-    <div>원천 Excel의 <code>구분</code> 값에는 <code>일반</code>이 있습니다.</div>
-    <div>현재 TAT SharePoint <code>의뢰구분</code>의 확정 값은 <code>미접수</code>, <code>측정인</code>, <code>과제</code>입니다.</div>
-    <div><code>일반</code>은 현재 사용하지 않는 값이므로 그대로 저장하거나 임의로 바꾸지 않습니다.</div>
+    <div>원천 <code>구분</code>은 분석항목 분류 <code>일반 / 특정 / 과불</code>이며 의뢰구분이 아닙니다.</div>
+    <div><code>ES-DR-</code> 시작 → <code>미접수</code></div>
+    <div><code>ENE-</code> 시작 → <code>측정인</code></div>
+    <div>그 외 → <code>이관제외</code>. 과제 접수는 현재 보류합니다.</div>
   </div>
 
-  <h2>사용자가 확정할 항목</h2>
+  <h2>회사 PC에서 할 작업</h2>
+  <div class="card">
+    <strong>작업 위치:</strong> Power Automate → 내 흐름 → <code>TAT_이관_시험조회</code> → 편집<br>
+    <strong>추가 위치:</strong> 최상위의 <code>시험분석항목불일치건수</code> 바로 아래
+  </div>
+
+  <h2>완성할 트리 하단</h2>
+  <pre>…
+├─ 시험분석항목반복
+├─ 시험분석항목불일치건수   [데이터 작업 - 작성]
+├─ 시험의뢰구분판정             [데이터 작업 - 작성] ← 1
+└─ 시험의뢰구분유효확인         [데이터 작업 - 작성] ← 2</pre>
+
+  <h2>1. 시험의뢰구분판정</h2>
   <ol class="card">
-    <li>기존 Excel의 <code>구분 = 일반</code>은 TAT의 <code>미접수</code>와 <code>측정인</code> 중 어느 쪽입니까?</li>
-    <li>구분은 Excel <code>구분</code> 열을 우선합니까, 아니면 접수번호 형식으로 판정합니까?</li>
-    <li>과제 접수는 기존 Excel에서 어떤 값 또는 접수번호 형식으로 구분합니까?</li>
+    <li><code>시험분석항목불일치건수</code> 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험의뢰구분판정</code></li>
+    <li>입력의 <strong>식</strong>:<br><code>if(startsWith(outputs('시험접수번호확인'), 'ES-DR-'), '미접수', if(startsWith(outputs('시험접수번호확인'), 'ENE-'), '측정인', '이관제외'))</code></li>
   </ol>
 
-  <div class="card stop">이 규칙을 확정하기 전에는 Power Automate에 새 작업을 추가하지 마세요.</div>
-  <div class="card stop">지금은 SharePoint 접수헤더·접수항목상세 항목을 만들지 마세요.</div>
+  <h2>2. 시험의뢰구분유효확인</h2>
+  <ol class="card">
+    <li><code>시험의뢰구분판정</code> 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
+    <li>작업 이름: <code>시험의뢰구분유효확인</code></li>
+    <li>입력의 <strong>식</strong>:<br><code>or(equals(outputs('시험의뢰구분판정'), '미접수'), equals(outputs('시험의뢰구분판정'), '측정인'))</code></li>
+    <li>Flow를 저장하고 같은 시험값으로 한 번 실행합니다.</li>
+  </ol>
+
+  <h2>알려줄 결과</h2>
+  <ul class="card">
+    <li><code>시험의뢰구분판정</code> 출력이 접수번호에 맞는 <code>미접수</code> 또는 <code>측정인</code>인지</li>
+    <li><code>시험의뢰구분유효확인</code> 입력·출력이 <code>true</code>인지</li>
+    <li>Flow 전체 성공 여부</li>
+  </ul>
+
+  <div class="card stop">원천 <code>구분</code> 열은 의뢰구분 판정에 사용하지 마세요.</div>
+  <div class="card stop">현재는 SharePoint 접수헤더·접수항목상세 항목을 만들지 마세요.</div>
 </body>
 </html>
