@@ -3,17 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 상세 분석항목 조회 이름 정정</title>
+  <title>TAT 현재 작업 — 접수항목상세 전체 매핑</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 900px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 1080px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     .ok { border-left: 6px solid #2e7d32; background: #f2fff4; }
     code, pre { font-family: Consolas, monospace; }
-    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; }
+    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; overflow-wrap: anywhere; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #dfe5ef; padding: 9px 10px; text-align: left; vertical-align: top; }
+    th { background: #edf3fb; }
     li { margin: 7px 0; }
   </style>
 </head>
@@ -22,45 +25,100 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / 916df0a</div>
-    <div><strong>현재 작업:</strong> 새 상세 반복의 분석항목 조회 작업 이름 정정</div>
-    <div><strong>이번 단계:</strong> 이름 변경·저장만 하고 Flow 실행 금지</div>
+    <div><strong>Git 기준:</strong> main / 06db679</div>
+    <div><strong>현재 작업:</strong> 25개 접수항목상세 생성 작업의 전체 필드 매핑</div>
+    <div><strong>이번 단계:</strong> 구성·저장만 하고 Flow 실행 금지</div>
   </div>
 
-  <h2>확인된 문제</h2>
-  <div class="card">
-    상단의 기존 <code>시험분석항목반복</code> 안에 이미 <code>반복_분석항목조회</code>가 있습니다.
-    아래쪽 새 <code>시험상세행반복</code>에도 같은 이름을 사용하도록 안내한 것은 잘못입니다.
-    저장되더라도 Power Automate 내부 이름에 자동 접미사가 붙어 이후 식 참조가 불명확해질 수 있습니다.
+  <h2>직전 작업 완료</h2>
+  <div class="card ok">
+    <div>상단 기존 조회는 <code>반복_분석항목조회</code>로 유지했습니다.</div>
+    <div>아래쪽 새 상세 조회는 <code>상세반복_분석항목조회</code>로 정정했습니다.</div>
   </div>
 
   <h2>회사 PC에서 할 작업</h2>
-  <ol class="card">
-    <li>Power Automate → <code>TAT_이관_시험조회</code> → 편집으로 들어갑니다.</li>
-    <li>정확한 위치: <code>시험이관가능조건 → True → 시험상세행반복</code></li>
-    <li>그 안의 새 SharePoint 조회 작업 <code>반복_분석항목조회</code> 이름만 아래와 같이 변경합니다.</li>
-  </ol>
-  <pre>기존 이름: 반복_분석항목조회
-새 이름:   상세반복_분석항목조회</pre>
+  <div class="card">
+    <strong>제품:</strong> Power Automate<br>
+    <strong>Flow:</strong> <code>TAT_이관_시험조회</code><br>
+    <strong>정확한 위치:</strong> <code>시험이관가능조건 → True → 시험상세행반복</code> 안의 <code>상세반복_분석항목조회</code> 바로 아래<br>
+    <strong>추가할 작업:</strong> SharePoint → <strong>항목 만들기(Create item)</strong><br>
+    <strong>작업 이름:</strong> <code>상세반복_접수항목상세생성</code>
+  </div>
 
-  <h2>변경 후 관련 트리</h2>
-  <pre>시험분석항목반복
-└─ 반복_분석항목조회          ← 기존 상단 작업, 변경 금지
-
-시험이관가능조건
+  <h2>완성할 관련 트리</h2>
+  <pre>시험이관가능조건
 └─ True
-   ├─ 시험접수헤더생성
-   └─ 시험상세행반복
+   ├─ 시험접수헤더생성                 [SharePoint - 항목 만들기]
+   └─ 시험상세행반복                   [제어 - 각각에 적용 / 동시성 1]
       ├─ 반복_시료명존재조건
-      └─ 상세반복_분석항목조회 ← 새 아래쪽 작업</pre>
+      │  ├─ Yes → 반복_현재시료명설정
+      │  └─ No  → 작업 없음
+      ├─ 상세반복_분석항목조회         [SharePoint - 2개 이상의 항목 가져오기]
+      └─ 상세반복_접수항목상세생성     [SharePoint - 항목 만들기]</pre>
 
-  <h2>확인</h2>
+  <h2>1. 대상 목록 선택</h2>
+  <ol class="card">
+    <li><code>상세반복_분석항목조회</code> 바로 아래에 SharePoint → <strong>항목 만들기</strong>를 추가합니다.</li>
+    <li>작업 이름을 <code>상세반복_접수항목상세생성</code>으로 바꿉니다.</li>
+    <li>사이트 주소: 기존 조회 작업과 같은 TAT SharePoint 사이트</li>
+    <li>목록 이름: <code>접수항목상세</code></li>
+    <li>고급 매개 변수에서 아래 표의 열을 모두 표시합니다.</li>
+  </ol>
+
+  <h2>2. 접수항목상세 전체 매핑</h2>
+  <table>
+    <thead><tr><th>접수항목상세 열</th><th>입력 방식</th><th>입력할 값</th></tr></thead>
+    <tbody>
+      <tr><td>제목</td><td>식</td><td><code>concat(outputs('시험접수번호확인'), '-', trim(string(items('시험상세행반복')?['분석항목'])))</code></td></tr>
+      <tr><td>접수헤더연결 Id</td><td>식</td><td><code>int(body('시험접수헤더생성')?['ID'])</code></td></tr>
+      <tr><td>접수헤더ID복사</td><td>식</td><td><code>int(body('시험접수헤더생성')?['ID'])</code></td></tr>
+      <tr><td>분석항목 Id</td><td>식</td><td><code>int(first(body('상세반복_분석항목조회')?['value'])?['ID'])</code></td></tr>
+      <tr><td>의뢰일자복사</td><td>식</td><td><code>outputs('시험의뢰일자확인')</code></td></tr>
+      <tr><td>업체현장ID복사</td><td>식</td><td><code>int(outputs('시험현장ID확인'))</code></td></tr>
+      <tr><td>업체현장명복사</td><td>식</td><td><code>outputs('시험업체명확인')</code></td></tr>
+      <tr><td>시료명요약복사</td><td>식</td><td><code>outputs('시험시료명요약확인')</code></td></tr>
+      <tr><td>분석항목ID복사</td><td>식</td><td><code>int(first(body('상세반복_분석항목조회')?['value'])?['ID'])</code></td></tr>
+      <tr><td>항목분류</td><td>사용자 지정 값/식</td><td><code>trim(string(items('시험상세행반복')?['구분']))</code></td></tr>
+      <tr><td>수량</td><td>식</td><td><code>float(items('시험상세행반복')?['수량'])</code></td></tr>
+      <tr><td>배정시료명</td><td>식</td><td><code>variables('var시험현재시료명')</code></td></tr>
+      <tr><td>단가</td><td>식</td><td><code>float(items('시험상세행반복')?['단가'])</code></td></tr>
+      <tr><td>분석상태</td><td>사용자 지정 값/식</td><td><code>trim(string(items('시험상세행반복')?['분석상태이관']))</code></td></tr>
+      <tr><td>분석완료일</td><td>식</td><td>아래의 전체 날짜 식</td></tr>
+      <tr><td>정산대상여부</td><td>고정 선택</td><td><code>예</code></td></tr>
+      <tr><td>표준소요일수</td><td>식</td><td><code>int(first(body('상세반복_분석항목조회')?['value'])?['OData__xd45c__xc2dc__xc21c__xc11c_'])</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. 분석완료일 전체 식</h2>
+  <p class="card">현재 8월 시험 데이터는 공란이므로 SharePoint에도 공란으로 저장합니다. 값이 있는 행은 의뢰일자와 동일한 Excel 날짜 일련번호 방식으로 변환합니다.</p>
+  <pre>if(
+  empty(trim(string(items('시험상세행반복')?['분석완료일이관']))),
+  null,
+  formatDateTime(
+    addDays(
+      '1899-12-30',
+      int(float(items('시험상세행반복')?['분석완료일이관']))
+    ),
+    'yyyy-MM-dd'
+  )
+)</pre>
+
+  <h2>4. 이번 단계의 확인</h2>
+  <ol class="card">
+    <li>위 필드를 모두 입력한 뒤 Flow를 <strong>저장</strong>합니다.</li>
+    <li>표에 없는 필드가 빨간 별표로 필수 표시되면 해당 필드 이름을 알려주세요.</li>
+    <li>저장 오류가 있으면 <code>상세반복_접수항목상세생성</code>에서 오류가 표시된 열 이름과 메시지를 알려주세요.</li>
+  </ol>
+
+  <h2>알려줄 결과</h2>
   <ul class="card">
-    <li>상단 기존 이름은 <code>반복_분석항목조회</code> 그대로인지</li>
-    <li>아래쪽 새 이름은 <code>상세반복_분석항목조회</code>인지</li>
-    <li>Flow 저장이 성공하는지</li>
+    <li><code>상세반복_접수항목상세생성</code>이 조회 아래·반복 안에 있는지</li>
+    <li>표의 전체 필드 입력 완료 여부</li>
+    <li>Flow 저장 성공 여부</li>
+    <li>표에 없던 추가 필수 필드가 표시됐는지</li>
   </ul>
 
-  <div class="card stop">이번에도 Flow를 테스트하거나 실행하지 마세요.</div>
+  <div class="card stop">중요: 아직 테스트하거나 Flow를 실행하지 마세요.</div>
+  <div class="card stop">다음 단계에서 생성된 헤더·상세 건수를 다시 조회하는 사후검증 작업을 추가한 뒤 첫 쓰기 테스트를 실행합니다.</div>
 </body>
 </html>
