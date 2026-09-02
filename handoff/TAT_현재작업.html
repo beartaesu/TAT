@@ -3,15 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — True인데 쓰기 시퀀스 건너뜀 진단</title>
+  <title>TAT 현재 작업 — 분기 위치와 첫 실행 조건 감사</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 900px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
-    .ok { border-left: 6px solid #2e7d32; background: #f2fff4; }
     code, pre { font-family: Consolas, monospace; }
     pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; }
     li { margin: 7px 0; }
@@ -22,58 +21,47 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / c7e0fa7</div>
-    <div><strong>현재 작업:</strong> 조건 True인데 헤더 생성부터 건너뜀 처리된 원인 확인</div>
-    <div><strong>이번 단계:</strong> 확인만 수행, Flow 수정·저장·재실행 금지</div>
+    <div><strong>Git 기준:</strong> main / fd9a95f</div>
+    <div><strong>현재 작업:</strong> 쓰기 시퀀스의 실제 분기 위치와 첫 실행 조건 결과 확인</div>
+    <div><strong>이번 단계:</strong> 확인만 수행, 수정·저장·재실행 금지</div>
   </div>
 
-  <h2>현재 확인된 상태</h2>
+  <h2>건너뜀 코드의 의미</h2>
   <div class="card">
-    <code>시험이관가능조건</code>은 True였지만 <code>시험접수헤더생성</code>부터 후속 작업이 모두 건너뜀 처리됐습니다.
-    따라서 두 번째 접수의 헤더·상세는 생성되지 않은 상태로 판단합니다.
+    <code>ActionBranchingConditionNotSatisfied</code>는 해당 작업이 선택되지 않은 조건 분기에 있어서 건너뛰었다는 뜻입니다.
+    현재 조건 결과가 True인데 헤더가 건너뛰었다면 헤더·상세 쓰기 시퀀스가 False 분기에 있을 가능성이 큽니다.
   </div>
 
-  <h2>1. 실행 기록에서 조건 분기 확인</h2>
+  <h2>1. 현재 편집 화면의 분기 위치 확인</h2>
   <ol class="card">
-    <li>Power Automate → <code>TAT_이관_시험조회</code> → 해당 두 번째 실행 기록을 엽니다.</li>
+    <li>Power Automate → <code>TAT_이관_시험조회</code> → 편집으로 들어갑니다.</li>
     <li><code>시험이관가능조건</code>을 펼칩니다.</li>
-    <li>조건 출력의 결과가 실제 불리언 <code>true</code>인지 확인합니다.</li>
-    <li>실행 기록 화면에서 <strong>True 쪽 분기</strong>와 <strong>False 쪽 분기</strong> 중 어느 쪽이 실행 표시이고 어느 쪽이 회색 건너뜀인지 적어 둡니다.</li>
+    <li><code>시험접수헤더생성</code>과 <code>시험상세행반복</code>이 <strong>True</strong> 영역인지 <strong>False</strong> 영역인지 확인합니다.</li>
+    <li>아무 작업도 이동하거나 수정하지 않습니다.</li>
   </ol>
 
-  <h2>2. 시험접수헤더생성 건너뜀 사유 확인</h2>
+  <h2>2. 첫 25행 쓰기 실행 기록 확인</h2>
   <ol class="card">
-    <li>회색으로 표시된 <code>시험접수헤더생성</code>을 누릅니다.</li>
-    <li>표시되는 <strong>상태 코드 또는 건너뜀 코드</strong>와 <strong>메시지</strong>만 적어 둡니다.</li>
-    <li>입력·출력의 업체명, 시료명, 접수번호 등 회사 데이터는 복사하지 않습니다.</li>
+    <li>Flow의 실행 기록에서 접수헤더 1건·상세 25건을 실제로 만들었던 첫 쓰기 실행을 엽니다.</li>
+    <li><code>시험이관가능확인</code>의 출력이 <code>true</code>인지 <code>false</code>인지 확인합니다.</li>
+    <li><code>시험이관가능조건</code>에서 실행된 분기가 True인지 False인지 확인합니다.</li>
   </ol>
 
-  <h2>3. 현재 저장 트리 위치 확인</h2>
-  <ol class="card">
-    <li>실행 기록을 닫고 Flow 편집 화면을 엽니다. 아직 아무것도 수정하지 않습니다.</li>
-    <li><code>시험이관가능조건</code>을 펼칩니다.</li>
-    <li><code>시험접수헤더생성</code>이 화면상 <strong>True</strong> 영역 안에 있는지, <strong>False</strong> 영역 안에 있는지 확인합니다.</li>
-    <li>헤더 생성 아래에 <code>시험상세행반복</code>이 같은 분기 안에 있는지도 확인합니다.</li>
-  </ol>
+  <h2>3. 첫 시험 상세의 선두 시료명 확인</h2>
+  <div class="card">
+    첫 실행의 <code>시험이관가능확인</code>이 <code>false</code>였다면 SharePoint <code>접수항목상세</code>에서
+    첫 번째 원천 시료명이 나오기 전 상세 행의 <code>배정시료명</code>이 공란인지 확인합니다.
+    출력이 <code>true</code>였다면 이 확인은 생략합니다.
+  </div>
 
-  <h2>4. 실행 후 구성 확인</h2>
-  <ol class="card">
-    <li><code>시험접수헤더생성</code>의 점 3개 메뉴를 엽니다.</li>
-    <li><strong>실행 후 구성(Configure run after)</strong>이 보이면 선택된 상태를 확인합니다.</li>
-    <li>성공 / 실패 / 건너뜀 / 시간 초과 중 무엇이 선택되어 있는지만 적어 둡니다.</li>
-    <li>해당 메뉴가 없으면 <strong>메뉴 없음</strong>이라고 알려주세요.</li>
-  </ol>
-
-  <h2>알려줄 다섯 가지</h2>
+  <h2>알려줄 세 가지</h2>
   <ul class="card">
-    <li>조건 출력: 불리언 true인지</li>
-    <li>실행 표시된 분기: True / False</li>
-    <li>헤더 생성의 건너뜀 코드·메시지</li>
-    <li>편집 화면의 헤더 생성 위치: True / False</li>
-    <li>헤더 생성 Run after 선택 상태 또는 메뉴 없음</li>
+    <li>현재 헤더·상세 쓰기 시퀀스 위치: True / False</li>
+    <li>첫 25행 쓰기의 <code>시험이관가능확인</code>: true / false</li>
+    <li>첫 25행 실행에서 실제 실행된 분기: True / False</li>
   </ul>
 
-  <div class="card stop">확인 전에는 Flow를 다시 실행하지 마세요.</div>
-  <div class="card stop">작업을 이동·삭제·복사하거나 실행 후 구성을 변경하지 마세요.</div>
+  <div class="card stop">지금은 조건을 뒤집거나 작업을 다른 분기로 옮기지 마세요.</div>
+  <div class="card stop">두 번째 48행 접수를 다시 실행하지 마세요.</div>
 </body>
 </html>
