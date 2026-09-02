@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 기존접수건수 작성 추가</title>
+  <title>TAT 현재 작업 — 시험계산서업체명확인 작성 추가</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -22,22 +22,22 @@
   <p class="pending">이 파일에는 지금 해야 할 작업만 있습니다.</p>
 
   <div class="meta">
-    <div><strong>갱신일:</strong> 2026-09-01</div>
-    <div><strong>Git 기준:</strong> main / 3e37678</div>
-    <div><strong>현재 작업:</strong> 기존접수조회 바로 아래에 기존접수건수 작성 추가</div>
+    <div><strong>갱신일:</strong> 2026-09-02</div>
+    <div><strong>Git 기준:</strong> main / 50562a4</div>
+    <div><strong>현재 작업:</strong> 시험현장ID확인 바로 아래에 시험계산서업체명확인 작성 추가</div>
     <div><strong>상태:</strong> 한 작업만 적용·검증</div>
   </div>
 
   <h2>직전 작업 완료</h2>
   <div class="card">
-    <div><code>기존접수조회</code>는 SharePoint <strong>2개 이상의 항목 가져오기</strong>로 정확히 실행됐습니다.</div>
-    <div>응답 200, 출력 0건이므로 시험 접수는 현재 접수헤더에 없습니다.</div>
+    <div><code>시험현장ID확인</code> 입력·출력이 같은 양의 정수로 확인됐습니다.</div>
+    <div>원천 업체명에서 Lookup용 현장마스터 ID까지의 연결을 검증했습니다. 이제 계산서 업체명을 읽습니다.</div>
   </div>
 
   <h2>회사 PC에서 할 작업</h2>
   <div class="card">
     <strong>작업 위치:</strong> Power Automate → 내 흐름 → <code>TAT_이관_시험조회</code> → 편집<br>
-    <strong>추가 위치:</strong> 기존 <code>기존접수조회</code> 작업 바로 아래의 <strong>+</strong>
+    <strong>추가 위치:</strong> 기존 <code>시험현장ID확인</code> 작업 바로 아래의 <strong>+</strong>
   </div>
 
   <h2>완성할 Flow 트리</h2>
@@ -50,23 +50,29 @@
       ├─ 시험접수행필터             [데이터 작업 - 배열 필터링]
       ├─ 시험접수행수               [데이터 작업 - 작성]
       ├─ 기존접수조회               [SharePoint - 2개 이상의 항목 가져오기]
-      └─ 기존접수건수               [데이터 작업 - 작성] ← 지금 추가</pre>
+      ├─ 기존접수건수               [데이터 작업 - 작성]
+      ├─ 시험업체명확인             [데이터 작업 - 작성]
+      ├─ 시험현장조회               [SharePoint - 2개 이상의 항목 가져오기]
+      ├─ 시험현장건수               [데이터 작업 - 작성]
+      ├─ 시험현장ID확인             [데이터 작업 - 작성]
+      └─ 시험계산서업체명확인       [데이터 작업 - 작성] ← 지금 추가</pre>
 
   <h2>정확한 추가 순서</h2>
   <ol class="card">
-    <li><code>기존접수조회</code> 바로 아래의 <strong>+</strong>를 누르고 <strong>작업 추가</strong>를 선택합니다.</li>
+    <li><code>시험현장ID확인</code> 바로 아래의 <strong>+</strong>를 누르고 <strong>작업 추가</strong>를 선택합니다.</li>
     <li><strong>데이터 작업</strong> → <strong>작성</strong>을 선택합니다.</li>
-    <li>새 작성 작업의 이름을 <code>기존접수건수</code>로 바꿉니다.</li>
-    <li>입력에서 <strong>식</strong>을 선택해 아래 전체 식을 입력합니다.<br><code>length(body('기존접수조회')?['value'])</code></li>
+    <li>새 작성 작업의 이름을 <code>시험계산서업체명확인</code>으로 바꿉니다.</li>
+    <li>입력에서 <strong>식</strong>을 선택해 아래 전체 식을 입력합니다.<br><code>first(body('시험접수행필터'))?['계산서 업체']</code></li>
     <li>Flow를 저장하고 앞에서 사용한 같은 시험값으로 수동 실행합니다.</li>
   </ol>
 
   <h2>알려줄 결과</h2>
   <ul class="card">
-    <li><code>기존접수건수</code> 출력이 <strong>0</strong>인지</li>
+    <li><code>시험계산서업체명확인</code> 입력·출력이 공란이 아닌지</li>
     <li>Flow 전체 성공 여부</li>
   </ul>
 
+  <div class="card stop">계산서 업체명과 실제 ID는 대화나 MYBOX 파일에 적지 말고, 공란 여부만 알려주세요.</div>
   <div class="card stop">지금은 SharePoint 항목 만들기·업데이트를 추가하지 마세요.</div>
   <div class="card stop">Power Apps 화면이나 컨트롤 트리에는 아무것도 추가하지 않습니다.</div>
   <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
