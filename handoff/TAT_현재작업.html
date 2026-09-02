@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 반복 내부 Terminate 저장 오류 교정</title>
+  <title>TAT 현재 작업 — 첫 SharePoint 쓰기 1회 실행</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 940px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     .ok { border-left: 6px solid #2e7d32; background: #f2fff4; }
     code, pre { font-family: Consolas, monospace; }
-    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; overflow-wrap: anywhere; }
+    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 16px; border-radius: 10px; }
     li { margin: 7px 0; }
   </style>
 </head>
@@ -22,106 +22,58 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / 148418a</div>
-    <div><strong>현재 작업:</strong> foreach 내부 Terminate 저장 오류 교정</div>
-    <div><strong>이번 단계:</strong> 트리 교정·저장만 하고 실행 금지</div>
+    <div><strong>Git 기준:</strong> main / 1db76ba</div>
+    <div><strong>현재 작업:</strong> 시험 접수 1건의 첫 SharePoint 쓰기 실행</div>
+    <div><strong>실행 횟수:</strong> 동일 시험 접수번호로 정확히 1회</div>
   </div>
 
-  <h2>확정 원인</h2>
-  <div class="card">
-    오류 <code>InvalidWorkflowRunAction</code>은 <code>시험이관실패종료(Terminate)</code>가
-    <code>시험상세행반복(foreach)</code> 내부에 중첩되어 발생했습니다.
-    Code 입력이 원인이 아닙니다. 이번 교정에서는 Terminate와 Code를 사용하지 않습니다.
+  <h2>직전 작업 완료</h2>
+  <div class="card ok">
+    <div>상세 건수 작성·검증 조건을 <code>시험상세행반복</code> 바깥으로 교정했습니다.</div>
+    <div>False 분기를 <code>시험이관실패요약</code> 작성으로 변경했고 Flow 저장에 성공했습니다.</div>
   </div>
 
-  <h2>최종 정상 트리</h2>
-  <pre>시험이관가능조건
-├─ True
-│  ├─ 시험접수헤더생성
-│  ├─ 시험상세행반복                      [각각에 적용]
-│  │  ├─ 반복_시료명존재조건
-│  │  ├─ 상세반복_분석항목조회
-│  │  ├─ 상세반복_접수항목상세생성
-│  │  └─ 상세반복_생성건수증가
-│  ├─ 시험생성상세건수                    [작성 / 반복 바깥]
-│  └─ 시험생성건수검증조건                [조건 / 반복 바깥]
-│     ├─ True
-│     │  └─ 시험이관완료요약              [작성]
-│     └─ False
-│        └─ 시험이관실패요약              [작성]
-└─ False: 작업 없음</pre>
-
-  <h2>1. 반복 내부의 잘못된 사후검증 삭제</h2>
+  <h2>1. 첫 쓰기 실행</h2>
   <ol class="card">
-    <li><code>시험상세행반복</code>을 펼칩니다.</li>
-    <li>반복 안에는 아래 네 작업만 남겨야 합니다.
-      <ul>
-        <li><code>반복_시료명존재조건</code></li>
-        <li><code>상세반복_분석항목조회</code></li>
-        <li><code>상세반복_접수항목상세생성</code></li>
-        <li><code>상세반복_생성건수증가</code></li>
-      </ul>
-    </li>
-    <li>반복 안에 들어간 <code>시험생성상세건수</code>와 <code>시험생성건수검증조건</code>을 삭제합니다. 조건을 삭제하면 그 안의 완료·실패 작업도 함께 삭제됩니다.</li>
+    <li>Power Automate → <code>TAT_이관_시험조회</code>를 엽니다.</li>
+    <li>기존 읽기 검증에서 계속 사용한 동일 시험 접수번호를 입력합니다.</li>
+    <li>Flow를 <strong>한 번만</strong> 실행합니다.</li>
+    <li>실행이 끝날 때까지 같은 버튼을 다시 누르지 않습니다.</li>
   </ol>
 
-  <h2>2. 시험생성상세건수를 반복 바깥에 다시 추가</h2>
-  <ol class="card">
-    <li><code>시험상세행반복</code> 전체 카드의 아래쪽 <strong>+</strong>를 누릅니다. 반복 카드 내부의 +가 아닙니다.</li>
-    <li>위치는 <code>시험이관가능조건</code>의 True 안이면서 <code>시험상세행반복</code>과 같은 들여쓰기여야 합니다.</li>
-    <li>데이터 작업 → <strong>작성</strong>, 이름: <code>시험생성상세건수</code></li>
-    <li>입력의 <strong>식</strong>: <code>variables('var시험생성상세건수')</code></li>
-  </ol>
-
-  <h2>3. 검증 조건을 반복 바깥에 다시 추가</h2>
-  <ol class="card">
-    <li><code>시험생성상세건수</code> 바로 아래에 제어 → <strong>조건</strong>을 추가합니다.</li>
-    <li>이름: <code>시험생성건수검증조건</code></li>
-    <li>왼쪽: <code>시험생성상세건수</code>의 출력 동적 콘텐츠</li>
-    <li>연산자: <strong>같음</strong></li>
-    <li>오른쪽 <strong>식</strong>: <code>int(outputs('시험접수행수'))</code></li>
-  </ol>
-
-  <h2>4. True에 완료 요약 작성</h2>
-  <ol class="card">
-    <li>검증 조건의 <strong>True</strong> 안에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
-    <li>이름: <code>시험이관완료요약</code></li>
-    <li>입력의 전체 <strong>식</strong>:</li>
-  </ol>
-  <pre>concat(
-  '접수번호=',
-  string(outputs('시험접수번호확인')),
-  ' / 헤더ID=',
-  string(body('시험접수헤더생성')?['ID']),
-  ' / 상세생성=',
-  string(outputs('시험생성상세건수')),
-  '건'
-)</pre>
-
-  <h2>5. False에는 Terminate 대신 실패 요약 작성</h2>
-  <ol class="card">
-    <li>검증 조건의 <strong>False</strong> 안에 데이터 작업 → <strong>작성</strong>을 추가합니다.</li>
-    <li>이름: <code>시험이관실패요약</code></li>
-    <li>Code 입력란과 종료 작업은 사용하지 않습니다.</li>
-    <li>입력의 전체 <strong>식</strong>:</li>
-  </ol>
-  <pre>concat(
-  '원천 행 수 ',
-  string(outputs('시험접수행수')),
-  '건과 상세 생성 성공 ',
-  string(outputs('시험생성상세건수')),
-  '건이 일치하지 않습니다. 헤더 ID=',
-  string(body('시험접수헤더생성')?['ID'])
-)</pre>
-
-  <h2>6. 저장 확인</h2>
+  <h2>2. 실행 기록 확인</h2>
   <ul class="card">
-    <li><code>시험상세행반복</code> 안에는 네 작업만 있는지</li>
-    <li><code>시험생성상세건수</code>와 검증 조건이 반복 카드와 같은 들여쓰기인지</li>
-    <li>False가 <code>시험이관실패요약</code> 작성인지</li>
-    <li>Flow 저장이 성공하는지</li>
+    <li><code>시험이관가능확인</code>: 입력·출력 <code>true</code></li>
+    <li><code>시험이관가능조건</code>: True 분기</li>
+    <li><code>시험접수헤더생성</code>: 성공, 출력에 양의 정수 ID 존재</li>
+    <li><code>시험상세행반복</code>: 25회 모두 성공</li>
+    <li><code>시험생성상세건수</code>: 입력·출력 <code>25</code></li>
+    <li><code>시험생성건수검증조건</code>: True 분기</li>
+    <li><code>시험이관완료요약</code>: 접수번호·헤더 ID·상세생성 25건 표시</li>
+    <li>Flow 전체: 성공</li>
   </ul>
 
-  <div class="card stop">이번에는 저장 성공만 확인하고 아직 실행하지 마세요.</div>
+  <h2>3. SharePoint 직접 확인</h2>
+  <ul class="card">
+    <li><code>접수헤더</code>: 해당 시험 접수번호가 정확히 1건 생성됐는지</li>
+    <li><code>접수항목상세</code>: 생성된 헤더에 연결된 행이 정확히 25건인지</li>
+    <li>상세의 <code>접수헤더연결</code>과 <code>접수헤더ID복사</code>가 같은 새 헤더 ID인지</li>
+    <li>분석항목 Lookup, 배정시료명, 수량, 단가, 분석상태가 원천과 맞는지</li>
+    <li>현재 8월 자료의 <code>분석완료일</code>이 공란인지</li>
+    <li><code>접수시료항목매핑</code>은 생성되지 않았는지</li>
+  </ul>
+
+  <h2>알려줄 결과</h2>
+  <ul class="card">
+    <li>Flow 성공 또는 실패</li>
+    <li>헤더 생성 ID 존재 여부만 알려주고 실제 숫자는 적지 않기</li>
+    <li>상세 생성 건수</li>
+    <li>검증 조건 True/False</li>
+    <li>SharePoint 헤더 1건·상세 25건 여부</li>
+    <li>핵심 필드 불일치 또는 공란 오류 여부</li>
+  </ul>
+
+  <div class="card stop">실패하거나 일부만 생성되면 같은 시험 접수번호로 재실행하지 마세요.</div>
+  <div class="card stop">실패 시 정확한 실패 작업 이름과 상세 생성 성공 건수만 알려주세요. 헤더 ID 실제 숫자는 대화에 적지 않아도 됩니다.</div>
 </body>
 </html>
