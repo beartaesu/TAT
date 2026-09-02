@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 분석항목마스터 25행 일괄 검증</title>
+  <title>TAT 현재 작업 — 의뢰구분 이관 규칙 확인</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
@@ -23,102 +23,33 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-02</div>
-    <div><strong>Git 기준:</strong> main / a3a9967</div>
-    <div><strong>현재 작업:</strong> 25개 원천 행의 분석항목마스터 유일 매칭을 반복 검증</div>
-    <div><strong>상태:</strong> 반복·조건·변수를 한 묶음으로 적용하고 1회 실행으로 검증</div>
+    <div><strong>Git 기준:</strong> main / e2d4d99</div>
+    <div><strong>현재 작업:</strong> SharePoint 저장 전 의뢰구분 이관 규칙 확정</div>
+    <div><strong>상태:</strong> 사용자 확인 대기 — Flow는 수정하지 않음</div>
   </div>
 
   <h2>직전 작업 완료</h2>
   <div class="card">
-    <div><code>시험계산서업체조회</code>·<code>시험계산서업체건수</code>·<code>시험계산서업체ID확인</code>이 모두 정상입니다.</div>
-    <div>계산서업체마스터 연결을 완료했습니다. 이제 25행을 사람이 하나씩 확인하지 않고 Flow가 분석항목 불일치 건수만 계산합니다.</div>
+    <div><code>시험분석항목반복</code> 입력 25행, 분석항목 공란 0행을 확인했습니다.</div>
+    <div><code>시험분석항목불일치건수</code> 입력·출력이 0입니다.</div>
+    <div>25행 모두 <code>분석항목마스터.Title</code>에 유일하게 매칭되었습니다.</div>
   </div>
 
-  <h2>회사 PC에서 할 작업</h2>
+  <h2>확정이 필요한 이유</h2>
   <div class="card">
-    <strong>작업 위치:</strong> Power Automate → 내 흐름 → <code>TAT_이관_시험조회</code> → 편집<br>
-    <strong>추가 위치:</strong> 기존 <code>시험계산서업체ID확인</code> 작업 바로 아래의 <strong>+</strong>
+    <div>원천 Excel의 <code>구분</code> 값에는 <code>일반</code>이 있습니다.</div>
+    <div>현재 TAT SharePoint <code>의뢰구분</code>의 확정 값은 <code>미접수</code>, <code>측정인</code>, <code>과제</code>입니다.</div>
+    <div><code>일반</code>은 현재 사용하지 않는 값이므로 그대로 저장하거나 임의로 바꾸지 않습니다.</div>
   </div>
 
-  <h2>완성할 Flow 트리</h2>
-  <pre>Power Automate
-└─ 내 흐름
-   └─ TAT_이관_시험조회 (편집)
-      ├─ 수동으로 흐름 트리거
-      ├─ 시험접수번호확인          [데이터 작업 - 작성]
-      ├─ 테이블에 있는 행 나열     [Excel Online (Business)]
-      ├─ 시험접수행필터             [데이터 작업 - 배열 필터링]
-      ├─ 시험접수행수               [데이터 작업 - 작성]
-      ├─ 기존접수조회               [SharePoint - 2개 이상의 항목 가져오기]
-      ├─ 기존접수건수               [데이터 작업 - 작성]
-      ├─ 시험업체명확인             [데이터 작업 - 작성]
-      ├─ 시험현장조회               [SharePoint - 2개 이상의 항목 가져오기]
-      ├─ 시험현장건수               [데이터 작업 - 작성]
-      ├─ 시험현장ID확인             [데이터 작업 - 작성]
-      ├─ 시험계산서업체명확인       [데이터 작업 - 작성]
-      ├─ 시험계산서업체조회         [SharePoint - 2개 이상의 항목 가져오기]
-      ├─ 시험계산서업체건수         [데이터 작업 - 작성]
-      ├─ 시험계산서업체ID확인       [데이터 작업 - 작성]
-      ├─ 분석항목불일치건수초기화       [변수 - 변수 초기화]
-      ├─ 시험분석항목반복             [제어 - 각각에 적용]
-      │  ├─ 반복_분석항목조회        [SharePoint - 2개 이상의 항목 가져오기]
-      │  └─ 반복_분석항목불일치조건  [제어 - 조건]
-      │     ├─ Yes: 분석항목불일치건수증가 [변수 - 변수 증가]
-      │     └─ No: 작업 없음
-      └─ 시험분석항목불일치건수     [데이터 작업 - 작성]</pre>
-
-  <h2>1. 불일치 건수 변수 초기화</h2>
+  <h2>사용자가 확정할 항목</h2>
   <ol class="card">
-    <li><code>시험계산서업체ID확인</code> 바로 아래에 <strong>변수 → 변수 초기화</strong>를 추가합니다.</li>
-    <li>작업 이름: <code>분석항목불일치건수초기화</code></li>
-    <li>변수 이름: <code>var분석항목불일치건수</code></li>
-    <li>형식: <strong>정수</strong>, 값: <code>0</code></li>
+    <li>기존 Excel의 <code>구분 = 일반</code>은 TAT의 <code>미접수</code>와 <code>측정인</code> 중 어느 쪽입니까?</li>
+    <li>구분은 Excel <code>구분</code> 열을 우선합니까, 아니면 접수번호 형식으로 판정합니까?</li>
+    <li>과제 접수는 기존 Excel에서 어떤 값 또는 접수번호 형식으로 구분합니까?</li>
   </ol>
 
-  <h2>2. 25행 반복 추가</h2>
-  <ol class="card">
-    <li><code>분석항목불일치건수초기화</code> 바로 아래에 <strong>제어 → 각각에 적용</strong>을 추가합니다.</li>
-    <li>작업 이름: <code>시험분석항목반복</code></li>
-    <li>이전 단계의 출력 선택은 <strong>식</strong>으로 <code>body('시험접수행필터')</code>를 입력합니다.</li>
-    <li>변수 증가를 안전하게 처리하려면 반복의 <strong>설정 → 동시성 제어</strong>를 클 때는 끈 상태로 두거나, 켤다면 병렬 처리 수를 <code>1</code>로 설정합니다.</li>
-  </ol>
-
-  <h2>3. 반복 안에 분석항목 조회 추가</h2>
-  <ol class="card">
-    <li><code>시험분석항목반복</code> 내부에 SharePoint → <strong>2개 이상의 항목 가져오기</strong>를 추가합니다.</li>
-    <li>작업 이름: <code>반복_분석항목조회</code></li>
-    <li>사이트: 기존과 같은 TAT 사이트, 목록: <code>분석항목마스터</code>, 상위 개수: <code>2</code></li>
-    <li>필터 쿼리의 <strong>식</strong>:<br><code>concat('Title eq ''', replace(items('시험분석항목반복')?['분석항목'], '''', ''''''), '''')</code></li>
-  </ol>
-
-  <h2>4. 반복 안에 불일치 조건과 증가 추가</h2>
-  <ol class="card">
-    <li><code>반복_분석항목조회</code> 바로 아래에 <strong>제어 → 조건</strong>을 추가하고 이름을 <code>반복_분석항목불일치조건</code>으로 바꿉니다.</li>
-    <li>왼쪽 값의 <strong>식</strong>: <code>length(body('반복_분석항목조회')?['value'])</code></li>
-    <li>연산자: <strong>같지 않음</strong>, 오른쪽 값: <code>1</code></li>
-    <li><strong>Yes</strong> 내부에 <strong>변수 → 변수 증가</strong>를 추가하고 이름을 <code>분석항목불일치건수증가</code>로 바꿉니다.</li>
-    <li>이름: <code>var분석항목불일치건수</code>, 값: <code>1</code></li>
-    <li><strong>No</strong>는 비워 둡니다.</li>
-  </ol>
-
-  <h2>5. 반복 아래에 최종 건수 출력 추가</h2>
-  <ol class="card">
-    <li><code>시험분석항목반복</code> 전체 컨테이너 바로 아래에 데이터 작업 → <strong>작성</strong>을 추가합니다. 반복 안이 아닙니다.</li>
-    <li>작업 이름: <code>시험분석항목불일치건수</code></li>
-    <li>입력의 <strong>식</strong>: <code>variables('var분석항목불일치건수')</code></li>
-    <li>Flow를 저장하고 같은 시험값으로 한 번 실행합니다.</li>
-  </ol>
-
-  <h2>알려줄 결과</h2>
-  <ul class="card">
-    <li><code>시험분석항목반복</code>의 반복 횟수가 <strong>25</strong>인지</li>
-    <li><code>시험분석항목불일치건수</code> 입력·출력이 <strong>0</strong>인지</li>
-    <li>Flow 전체 성공 여부</li>
-  </ul>
-
-  <div class="card stop">분석항목명·마스터 행·실제 ID는 대화나 MYBOX 파일에 적지 말고, 반복 횟수와 불일치 건수만 알려주세요.</div>
-  <div class="card stop">지금은 SharePoint 항목 만들기·업데이트를 추가하지 마세요.</div>
-  <div class="card stop">Power Apps 화면이나 컨트롤 트리에는 아무것도 추가하지 않습니다.</div>
-  <div class="card stop">업체명·시료명·담당자·실제 행 데이터는 대화나 MYBOX에 올리지 마세요.</div>
+  <div class="card stop">이 규칙을 확정하기 전에는 Power Automate에 새 작업을 추가하지 마세요.</div>
+  <div class="card stop">지금은 SharePoint 접수헤더·접수항목상세 항목을 만들지 마세요.</div>
 </body>
 </html>
