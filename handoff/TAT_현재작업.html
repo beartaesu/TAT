@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 현장마스터 최소 열 추가</title>
+  <title>TAT 현재 작업 — 기존 현장 선택 컨트롤 확인</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
-    .goal { border-left: 6px solid #1565c0; background: #f1f7ff; }
+    .ok { border-left: 6px solid #2e7d32; background: #f3fff5; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
-    code { font-family: Consolas, monospace; }
-    table { width: 100%; border-collapse: collapse; background: #fff; }
-    th, td { border: 1px solid #dfe5ef; padding: 10px 12px; text-align: left; vertical-align: top; }
-    th { background: #eaf0f8; }
+    code, pre { font-family: Consolas, monospace; }
+    pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 14px; border-radius: 10px; }
     li { margin: 8px 0; }
   </style>
 </head>
@@ -24,54 +22,77 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-03</div>
-    <div><strong>현재 작업:</strong> 현장 자동 추가를 위한 최소 열 2개 생성</div>
-    <div><strong>이번 단계:</strong> 기존 현장마스터에 열만 추가</div>
+    <div><strong>현재 작업:</strong> 기존 <code>cmb현장</code> 트리와 속성 확인</div>
+    <div><strong>이번 단계:</strong> 데이터 원본 새로고침과 확인만 수행</div>
   </div>
 
-  <div class="card goal">
-    별도 <code>업체마스터</code>는 만들지 않습니다. 기존 <code>현장마스터</code>는 앱이 자동으로 기본 현장과 사용자 현장을 저장하고,
-    다음 접수에서 다시 보여주기 위한 내부 목록으로만 사용합니다. 사용자가 현장 행을 미리 일일이 만들 필요는 없습니다.
+  <div class="card ok">
+    <code>현장마스터.업체명복사</code>와 <code>기본현장여부</code> 생성은 완료됐습니다.
+    기존 저장 기능을 깨뜨리지 않도록 현재 <code>cmb현장</code> 구조를 확인한 뒤 업체·현장 UI 전체 수식을 작성합니다.
   </div>
 
-  <h2>1. 기존 현장마스터 열 추가</h2>
+  <h2>1. 현장마스터 데이터 원본 새로고침</h2>
   <ol class="card">
-    <li>SharePoint → <code>현장마스터</code> 목록을 엽니다.</li>
-    <li><strong>열 추가</strong>를 눌러 아래 두 열만 만듭니다.</li>
+    <li>Power Apps Studio에서 TAT 앱을 엽니다.</li>
+    <li>왼쪽 <strong>데이터</strong> 패널을 엽니다.</li>
+    <li><code>현장마스터</code> 오른쪽의 더보기 메뉴 → <strong>새로 고침</strong>을 누릅니다.</li>
+    <li>오류가 표시되면 이후 확인을 중단하고 오류 문구만 알려주세요.</li>
   </ol>
 
-  <table>
-    <thead><tr><th>열 이름</th><th>형식</th><th>설정</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><code>업체명복사</code></td>
-        <td>한 줄 텍스트</td>
-        <td>필수 아니요, 고유 값 적용 아니요, 기본값 없음</td>
-      </tr>
-      <tr>
-        <td><code>기본현장여부</code></td>
-        <td>예/아니요</td>
-        <td>기본값 아니요</td>
-      </tr>
-    </tbody>
-  </table>
+  <h2>2. 정확한 트리 위치 확인</h2>
+  <ol class="card">
+    <li>트리 보기에서 <code>scr접수기본정보</code>를 펼칩니다.</li>
+    <li><code>cmb현장</code>을 찾습니다.</li>
+    <li>화면부터 <code>cmb현장</code>까지의 부모 이름을 순서대로 적습니다.</li>
+    <li><code>cmb현장</code>과 같은 부모 바로 아래에 있는 컨트롤 이름을 위에서 아래 순서대로 적습니다.</li>
+  </ol>
 
-  <h2>이번에는 하지 않는 것</h2>
+  <h2>3. cmb현장 현재 속성 확인</h2>
+  <div class="card">
+    속성 선택 드롭다운에서 아래 항목을 각각 선택하고, 수식 입력창에 보이는 값을 그대로 복사합니다.
+    속성이 보이지 않으면 <strong>없음</strong>이라고 적습니다.
+  </div>
   <ul class="card">
-    <li><code>업체마스터</code> 목록 생성하지 않음</li>
-    <li><code>업체연결</code> Lookup 생성하지 않음</li>
-    <li><code>업체ID복사</code> 숫자 열 생성하지 않음</li>
-    <li>인덱스 생성하지 않음</li>
-    <li>기존 현장마스터 행 수정하지 않음</li>
-    <li>Power Apps·Power Automate 수정 또는 실행하지 않음</li>
+    <li><code>Items</code></li>
+    <li><code>DefaultSelectedItems</code></li>
+    <li><code>OnChange</code></li>
+    <li><code>DisplayFields</code></li>
+    <li><code>SearchFields</code></li>
+    <li><code>SelectMultiple</code></li>
+    <li><code>IsSearchable</code></li>
   </ul>
 
-  <h2>완료 후 알려줄 내용</h2>
-  <ul class="card">
-    <li><code>업체명복사</code> 생성 완료 / 오류</li>
-    <li><code>기본현장여부</code> 생성 완료 / 오류</li>
-    <li>동일한 이름의 기존 열이 있었다면 그 열의 현재 형식</li>
-  </ul>
+  <h2>MYBOX TXT 작성 형식</h2>
+  <pre>트리 위치:
+scr접수기본정보 &gt; ... &gt; cmb현장
 
-  <div class="card stop">업체나 현장 데이터 행은 아직 입력하지 마세요.</div>
+같은 부모의 자식 순서:
+1. ...
+2. cmb현장
+3. ...
+
+Items:
+전체 수식
+
+DefaultSelectedItems:
+전체 수식
+
+OnChange:
+전체 수식
+
+DisplayFields:
+전체 값
+
+SearchFields:
+전체 값
+
+SelectMultiple:
+값 또는 없음
+
+IsSearchable:
+값 또는 없음</pre>
+
+  <div class="card stop">실제 업체명·현장명은 TXT에 넣지 마세요.</div>
+  <div class="card stop">이번에는 컨트롤을 추가하거나 수식을 바꾸지 마세요.</div>
 </body>
 </html>
