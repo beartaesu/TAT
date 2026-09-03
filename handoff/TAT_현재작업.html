@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 기존 현장 선택 컨트롤 확인</title>
+  <title>TAT 현재 작업 — 업체 선택 영역 1차 추가</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 960px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
-    .ok { border-left: 6px solid #2e7d32; background: #f3fff5; }
+    .scope { border-left: 6px solid #1565c0; background: #f1f7ff; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     code, pre { font-family: Consolas, monospace; }
     pre { white-space: pre-wrap; background: #101827; color: #eef4ff; padding: 14px; border-radius: 10px; }
@@ -22,77 +22,133 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-03</div>
-    <div><strong>현재 작업:</strong> 기존 <code>cmb현장</code> 트리와 속성 확인</div>
-    <div><strong>이번 단계:</strong> 데이터 원본 새로고침과 확인만 수행</div>
+    <div><strong>현재 작업:</strong> 접수 기본정보 행2에 업체 선택 영역 추가</div>
+    <div><strong>이번 단계:</strong> 업체 후보 표시만 검증, 현장 필터·자동 생성은 아직 연결하지 않음</div>
   </div>
 
-  <div class="card ok">
-    <code>현장마스터.업체명복사</code>와 <code>기본현장여부</code> 생성은 완료됐습니다.
-    기존 저장 기능을 깨뜨리지 않도록 현재 <code>cmb현장</code> 구조를 확인한 뒤 업체·현장 UI 전체 수식을 작성합니다.
+  <div class="card scope">
+    기존 <code>cmb현장</code>과 <code>txt계산서업체</code>는 변경하지 않습니다.
+    먼저 업체 선택 영역만 추가해 기존 현장 행이 업체 후보로 정상 표시되는지 확인합니다.
   </div>
 
-  <h2>1. 현장마스터 데이터 원본 새로고침</h2>
-  <ol class="card">
-    <li>Power Apps Studio에서 TAT 앱을 엽니다.</li>
-    <li>왼쪽 <strong>데이터</strong> 패널을 엽니다.</li>
-    <li><code>현장마스터</code> 오른쪽의 더보기 메뉴 → <strong>새로 고침</strong>을 누릅니다.</li>
-    <li>오류가 표시되면 이후 확인을 중단하고 오류 문구만 알려주세요.</li>
-  </ol>
-
-  <h2>2. 정확한 트리 위치 확인</h2>
-  <ol class="card">
-    <li>트리 보기에서 <code>scr접수기본정보</code>를 펼칩니다.</li>
-    <li><code>cmb현장</code>을 찾습니다.</li>
-    <li>화면부터 <code>cmb현장</code>까지의 부모 이름을 순서대로 적습니다.</li>
-    <li><code>cmb현장</code>과 같은 부모 바로 아래에 있는 컨트롤 이름을 위에서 아래 순서대로 적습니다.</li>
-  </ol>
-
-  <h2>3. cmb현장 현재 속성 확인</h2>
+  <h2>정확한 추가 위치와 트리</h2>
   <div class="card">
-    속성 선택 드롭다운에서 아래 항목을 각각 선택하고, 수식 입력창에 보이는 값을 그대로 복사합니다.
-    속성이 보이지 않으면 <strong>없음</strong>이라고 적습니다.
+    <code>scr접수기본정보</code><br>
+    &gt; <code>con접수기본전체</code><br>
+    &gt; <code>con접수기본본문</code><br>
+    &gt; <code>con접수기본카드</code><br>
+    &gt; <code>con접수기본행2</code>
   </div>
+
+  <p class="card">완료 후 자식 순서는 아래와 같아야 합니다.</p>
+  <pre>con접수기본행2
+├─ con업체영역
+│  ├─ lbl업체
+│  └─ cmb업체
+├─ con현장영역
+│  ├─ lbl현장
+│  └─ cmb현장
+└─ con계산서업체영역
+   ├─ lbl계산서업체
+   └─ txt계산서업체</pre>
+
+  <h2>1. 기존 영역 복제·이름 변경</h2>
+  <ol class="card">
+    <li>트리에서 <code>con현장영역</code>을 선택해 복사한 뒤 <code>con접수기본행2</code> 안에 붙여넣습니다.</li>
+    <li>복제된 컨테이너 이름을 <code>con업체영역</code>으로 변경합니다.</li>
+    <li>복제된 자식 레이블 이름을 <code>lbl업체</code>로 변경합니다.</li>
+    <li>복제된 자식 콤보박스 이름을 <code>cmb업체</code>로 변경합니다.</li>
+    <li>트리에서 <code>con업체영역</code>을 <code>con현장영역</code> 바로 위로 이동합니다.</li>
+  </ol>
+
+  <h2>2. lbl업체 전체 속성</h2>
+  <p><code>Text</code></p>
+  <pre>"업체"</pre>
+
+  <h2>3. cmb업체 전체 속성</h2>
+  <p><code>Items</code></p>
+  <pre>SortByColumns(
+    Filter(
+        현장마스터,
+        기본현장여부 = true ||
+        IsBlank(업체명복사)
+    ),
+    "Title",
+    SortOrder.Ascending
+)</pre>
+
+  <p><code>DefaultSelectedItems</code></p>
+  <pre>If(
+    var완료접수수정모드 || var이어쓰기,
+    With(
+        {
+            loc현재현장: LookUp(
+                현장마스터,
+                ID = var저장헤더.'업체/현장'.Id
+            )
+        },
+        If(
+            IsBlank(loc현재현장),
+            Blank(),
+            [
+                If(
+                    IsBlank(loc현재현장.업체명복사),
+                    loc현재현장,
+                    With(
+                        {
+                            loc기본현장: LookUp(
+                                현장마스터,
+                                업체명복사 = loc현재현장.업체명복사 &&
+                                기본현장여부 = true
+                            )
+                        },
+                        If(
+                            IsBlank(loc기본현장),
+                            loc현재현장,
+                            loc기본현장
+                        )
+                    )
+                )
+            ]
+        )
+    ),
+    Blank()
+)</pre>
+
+  <p><code>OnChange</code></p>
+  <pre>false</pre>
+
+  <p><code>DisplayFields</code></p>
+  <pre>["Title"]</pre>
+
+  <p><code>SearchFields</code></p>
+  <pre>["Title"]</pre>
+
+  <p><code>SelectMultiple</code></p>
+  <pre>false</pre>
+
+  <p><code>IsSearchable</code></p>
+  <pre>true</pre>
+
+  <h2>4. 저장 후 이번 단계 검증</h2>
   <ul class="card">
-    <li><code>Items</code></li>
-    <li><code>DefaultSelectedItems</code></li>
-    <li><code>OnChange</code></li>
-    <li><code>DisplayFields</code></li>
-    <li><code>SearchFields</code></li>
-    <li><code>SelectMultiple</code></li>
-    <li><code>IsSearchable</code></li>
+    <li>빨간 수식 오류가 없는지 확인합니다.</li>
+    <li>행2에 업체·현장·계산서 업체 세 영역이 겹치지 않고 표시되는지 확인합니다.</li>
+    <li>신규 입력 상태에서 <code>cmb업체</code>를 열면 기존 현장마스터 행들이 업체 후보로 표시되는지 확인합니다.</li>
+    <li>기존 <code>cmb현장</code>에서 현장을 선택하면 <code>txt계산서업체</code>가 이전처럼 표시되는지 확인합니다.</li>
+    <li>수정 또는 이어쓰기 화면에서 저장된 현장이 업체 기본 선택으로 표시되는지 확인합니다.</li>
   </ul>
 
-  <h2>MYBOX TXT 작성 형식</h2>
-  <pre>트리 위치:
-scr접수기본정보 &gt; ... &gt; cmb현장
+  <h2>알려줄 결과</h2>
+  <ul class="card">
+    <li>수식 오류: 없음 / 있음</li>
+    <li>행2 배치: 정상 / 겹침</li>
+    <li>업체 후보: 표시됨 / 0건 / 중복 이상</li>
+    <li>기존 현장 선택 후 계산서 업체 표시: 정상 / 비정상</li>
+    <li>수정·이어쓰기 업체 기본 선택: 정상 / 미확인 / 비정상</li>
+  </ul>
 
-같은 부모의 자식 순서:
-1. ...
-2. cmb현장
-3. ...
-
-Items:
-전체 수식
-
-DefaultSelectedItems:
-전체 수식
-
-OnChange:
-전체 수식
-
-DisplayFields:
-전체 값
-
-SearchFields:
-전체 값
-
-SelectMultiple:
-값 또는 없음
-
-IsSearchable:
-값 또는 없음</pre>
-
-  <div class="card stop">실제 업체명·현장명은 TXT에 넣지 마세요.</div>
-  <div class="card stop">이번에는 컨트롤을 추가하거나 수식을 바꾸지 마세요.</div>
+  <div class="card stop">이번에는 cmb현장과 txt계산서업체 수식을 바꾸지 마세요.</div>
+  <div class="card stop">업체·현장 자동 생성과 최종저장 수식도 아직 변경하지 마세요.</div>
 </body>
 </html>
