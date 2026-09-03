@@ -1,0 +1,117 @@
+Refresh(
+    현장마스터
+);
+
+With(
+    {
+        var입력시료명수:
+            CountRows(
+                Filter(
+                    ForAll(
+                        Split(
+                            Substitute(
+                                Substitute(
+                                    Substitute(
+                                        Trim(txt시료명.Text),
+                                        Char(13),
+                                        ""
+                                    ),
+                                    Char(10),
+                                    "|"
+                                ),
+                                ",",
+                                "|"
+                            ),
+                            "|"
+                        ),
+                        {
+                            시료명:
+                                Trim(Value)
+                        }
+                    ),
+                    !IsBlank(시료명)
+                )
+            )
+    },
+    If(
+        IsBlank(dd의뢰구분.Selected.Value),
+
+        Notify(
+            "의뢰구분을 선택해 주세요.",
+            NotificationType.Warning
+        ),
+
+        IsBlank(dp의뢰일자.SelectedDate),
+
+        Notify(
+            "의뢰일자를 선택해 주세요.",
+            NotificationType.Warning
+        ),
+
+        dd의뢰구분.Selected.Value = "과제" &&
+        IsBlank(cmb과제.Selected),
+
+        Notify(
+            "과제 접수는 과제를 선택해야 합니다.",
+            NotificationType.Warning
+        ),
+
+        IsBlank(cmb현장.Selected),
+
+        Notify(
+            "업체/현장을 선택해 주세요.",
+            NotificationType.Warning
+        ),
+
+        IsBlank(cmb현장.Selected.'계산서 업체 연결'),
+
+        Notify(
+            "선택한 현장 """ &
+            cmb현장.Selected.제목 &
+            """에 계산서 업체가 연결되어 있지 않습니다. " &
+            "현장마스터에서 계산서 업체를 연결한 후 다시 시도해 주세요.",
+            NotificationType.Error
+        ),
+
+        IsBlank(Trim(txt시료명.Text)),
+
+        Notify(
+            "시료명을 입력해 주세요.",
+            NotificationType.Warning
+        ),
+
+        !IsNumeric(txt시료수.Text) ||
+        Value(txt시료수.Text) < 1,
+
+        Notify(
+            "시료수는 1 이상의 숫자로 입력해 주세요.",
+            NotificationType.Warning
+        ),
+
+        Value(txt시료수.Text) <> var입력시료명수,
+
+        Notify(
+            "입력한 시료수는 " &
+            Text(
+                Value(txt시료수.Text),
+                "[$-ko-KR]#,##0"
+            ) &
+            "개이지만 시료명은 " &
+            Text(
+                var입력시료명수,
+                "[$-ko-KR]#,##0"
+            ) &
+            "개입니다." &
+            Char(10) &
+            "시료수와 시료명 개수를 일치시켜 주세요." &
+            Char(10) &
+            "시료명은 줄바꿈 또는 쉼표로 구분할 수 있습니다.",
+            NotificationType.Warning
+        ),
+
+        Navigate(
+            scr항목선택,
+            ScreenTransition.Fade
+        )
+    )
+)
