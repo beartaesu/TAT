@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 업체·현장 SharePoint 구조 준비</title>
+  <title>TAT 현재 작업 — 현장마스터 최소 열 추가</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 940px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
@@ -24,54 +24,28 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-03</div>
-    <div><strong>현재 작업:</strong> 업체 선택 → 기본/사용자 현장 자동 생성 구조의 SharePoint 기반 준비</div>
-    <div><strong>이번 단계:</strong> 목록·열만 생성, 기존 데이터 보정과 앱·Flow 수정은 아직 하지 않음</div>
+    <div><strong>현재 작업:</strong> 현장 자동 추가를 위한 최소 열 2개 생성</div>
+    <div><strong>이번 단계:</strong> 기존 현장마스터에 열만 추가</div>
   </div>
 
   <div class="card goal">
-    사용자가 모든 현장을 미리 만들지 않습니다. 업체를 선택하면 업체명이 기본 현장명이 되고,
-    사용자가 다른 현장명을 입력하면 최초 저장 때 생성됩니다. 다음부터 같은 업체의 현장 드롭다운에 표시됩니다.
+    별도 <code>업체마스터</code>는 만들지 않습니다. 기존 <code>현장마스터</code>는 앱이 자동으로 기본 현장과 사용자 현장을 저장하고,
+    다음 접수에서 다시 보여주기 위한 내부 목록으로만 사용합니다. 사용자가 현장 행을 미리 일일이 만들 필요는 없습니다.
   </div>
 
-  <h2>1. 새 SharePoint 목록 만들기</h2>
+  <h2>1. 기존 현장마스터 열 추가</h2>
   <ol class="card">
-    <li>TAT SharePoint 사이트 → <strong>사이트 콘텐츠</strong> → <strong>새로 만들기</strong> → <strong>목록</strong> → <strong>빈 목록</strong>을 선택합니다.</li>
-    <li>목록 이름을 정확히 <code>업체마스터</code>로 입력해 만듭니다.</li>
-    <li>기본 <code>제목</code> 열의 표시 이름을 <code>업체명</code>으로 바꿉니다. 열 종류는 한 줄 텍스트를 유지합니다.</li>
-    <li><code>업체명</code>은 필수 <strong>예</strong>, 고유 값 적용 <strong>예</strong>로 설정합니다.</li>
+    <li>SharePoint → <code>현장마스터</code> 목록을 엽니다.</li>
+    <li><strong>열 추가</strong>를 눌러 아래 두 열만 만듭니다.</li>
   </ol>
 
-  <h2>2. 업체마스터 열 추가</h2>
   <table>
     <thead><tr><th>열 이름</th><th>형식</th><th>설정</th></tr></thead>
     <tbody>
       <tr>
-        <td><code>기본계산서업체연결</code></td>
-        <td>조회(Lookup)</td>
-        <td>원본 목록 <code>계산서업체마스터</code>, 원본 열 <code>제목</code>, 여러 값 허용 아니요, 필수 아니요</td>
-      </tr>
-      <tr>
-        <td><code>사용여부</code></td>
-        <td>예/아니요</td>
-        <td>기본값 예</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>3. 기존 현장마스터 열 추가</h2>
-  <p class="card">기존 <code>제목</code>과 <code>계산서 업체 연결</code> 열은 삭제하거나 이름을 바꾸지 않습니다.</p>
-  <table>
-    <thead><tr><th>열 이름</th><th>형식</th><th>설정</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><code>업체연결</code></td>
-        <td>조회(Lookup)</td>
-        <td>원본 목록 <code>업체마스터</code>, 원본 열 <code>업체명(제목)</code>, 여러 값 허용 아니요, <strong>현재는 필수 아니요</strong></td>
-      </tr>
-      <tr>
-        <td><code>업체ID복사</code></td>
-        <td>숫자</td>
-        <td>소수 자릿수 0, 필수 아니요, 기본값 없음. 생성 후 이 열에 인덱스를 만듭니다.</td>
+        <td><code>업체명복사</code></td>
+        <td>한 줄 텍스트</td>
+        <td>필수 아니요, 고유 값 적용 아니요, 기본값 없음</td>
       </tr>
       <tr>
         <td><code>기본현장여부</code></td>
@@ -81,24 +55,23 @@
     </tbody>
   </table>
 
-  <h2>4. 인덱스 만들기</h2>
-  <ol class="card">
-    <li><code>현장마스터</code> → 설정 → 목록 설정 → 인덱싱된 열로 이동합니다.</li>
-    <li>새 인덱스에서 기본 열로 <code>업체ID복사</code>를 선택해 저장합니다.</li>
-  </ol>
+  <h2>이번에는 하지 않는 것</h2>
+  <ul class="card">
+    <li><code>업체마스터</code> 목록 생성하지 않음</li>
+    <li><code>업체연결</code> Lookup 생성하지 않음</li>
+    <li><code>업체ID복사</code> 숫자 열 생성하지 않음</li>
+    <li>인덱스 생성하지 않음</li>
+    <li>기존 현장마스터 행 수정하지 않음</li>
+    <li>Power Apps·Power Automate 수정 또는 실행하지 않음</li>
+  </ul>
 
   <h2>완료 후 알려줄 내용</h2>
   <ul class="card">
-    <li><code>업체마스터</code> 목록 생성 완료 여부</li>
-    <li>업체명 고유 값 적용 완료 여부</li>
-    <li><code>기본계산서업체연결</code>, <code>사용여부</code> 생성 완료 여부</li>
-    <li>현장마스터의 <code>업체연결</code>, <code>업체ID복사</code>, <code>기본현장여부</code> 생성 완료 여부</li>
-    <li><code>업체ID복사</code> 인덱스 생성 완료 여부</li>
-    <li>동일한 이름의 기존 열이 발견되거나 설정이 다른 경우 그 열 이름과 현재 형식</li>
+    <li><code>업체명복사</code> 생성 완료 / 오류</li>
+    <li><code>기본현장여부</code> 생성 완료 / 오류</li>
+    <li>동일한 이름의 기존 열이 있었다면 그 열의 현재 형식</li>
   </ul>
 
-  <div class="card stop">업체마스터 데이터 행은 아직 일일이 입력하지 마세요.</div>
-  <div class="card stop">기존 현장마스터 행도 아직 수정하지 마세요.</div>
-  <div class="card stop">Power Apps와 Power Automate도 아직 수정·실행하지 마세요.</div>
+  <div class="card stop">업체나 현장 데이터 행은 아직 입력하지 마세요.</div>
 </body>
 </html>
