@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 — 9월 이관 시작 건 현장마스터 정비</title>
+  <title>TAT 현재 작업 — 업체·현장 SharePoint 구조 준비</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
+    body { max-width: 940px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; }
     h1 { margin-bottom: 10px; }
     h2 { margin-top: 28px; }
     .meta, .card { background: #fff; border: 1px solid #dfe5ef; border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
-    .priority { border-left: 6px solid #1565c0; background: #f1f7ff; }
+    .goal { border-left: 6px solid #1565c0; background: #f1f7ff; }
     .stop { border-left: 6px solid #c62828; background: #fff4f4; font-weight: 700; }
     code { font-family: Consolas, monospace; }
     table { width: 100%; border-collapse: collapse; background: #fff; }
-    th, td { border: 1px solid #dfe5ef; padding: 10px 12px; text-align: left; }
+    th, td { border: 1px solid #dfe5ef; padding: 10px 12px; text-align: left; vertical-align: top; }
     th { background: #eaf0f8; }
     li { margin: 8px 0; }
   </style>
@@ -24,48 +24,81 @@
 
   <div class="meta">
     <div><strong>갱신일:</strong> 2026-09-03</div>
-    <div><strong>현재 작업:</strong> 9월 우선 이관 시작 건의 현장마스터 연결 정비</div>
-    <div><strong>이번 단계:</strong> SharePoint 마스터 확인·추가만 수행, Flow 실행 금지</div>
+    <div><strong>현재 작업:</strong> 업체 선택 → 기본/사용자 현장 자동 생성 구조의 SharePoint 기반 준비</div>
+    <div><strong>이번 단계:</strong> 목록·열만 생성, 기존 데이터 보정과 앱·Flow 수정은 아직 하지 않음</div>
   </div>
 
-  <div class="card priority">
-    과거 48행 시험은 후순위로 보류합니다. 지금부터는 아래 두 시작점을 포함한 미접수·측정인 이관을 먼저 완성합니다.
+  <div class="card goal">
+    사용자가 모든 현장을 미리 만들지 않습니다. 업체를 선택하면 업체명이 기본 현장명이 되고,
+    사용자가 다른 현장명을 입력하면 최초 저장 때 생성됩니다. 다음부터 같은 업체의 현장 드롭다운에 표시됩니다.
   </div>
 
+  <h2>1. 새 SharePoint 목록 만들기</h2>
+  <ol class="card">
+    <li>TAT SharePoint 사이트 → <strong>사이트 콘텐츠</strong> → <strong>새로 만들기</strong> → <strong>목록</strong> → <strong>빈 목록</strong>을 선택합니다.</li>
+    <li>목록 이름을 정확히 <code>업체마스터</code>로 입력해 만듭니다.</li>
+    <li>기본 <code>제목</code> 열의 표시 이름을 <code>업체명</code>으로 바꿉니다. 열 종류는 한 줄 텍스트를 유지합니다.</li>
+    <li><code>업체명</code>은 필수 <strong>예</strong>, 고유 값 적용 <strong>예</strong>로 설정합니다.</li>
+  </ol>
+
+  <h2>2. 업체마스터 열 추가</h2>
   <table>
-    <thead><tr><th>구분</th><th>포함 시작점</th><th>적용 규칙</th></tr></thead>
+    <thead><tr><th>열 이름</th><th>형식</th><th>설정</th></tr></thead>
     <tbody>
-      <tr><td>측정인</td><td><code>ENE-260901-330</code></td><td>작업본 실제 시료수 + 전체 접수시료항목매핑</td></tr>
-      <tr><td>미접수</td><td>의뢰일자 표기 <code>260828</code>, <code>ES-DR-2026-236</code></td><td>작업본 실제 시료수 + 전체 접수시료항목매핑</td></tr>
+      <tr>
+        <td><code>기본계산서업체연결</code></td>
+        <td>조회(Lookup)</td>
+        <td>원본 목록 <code>계산서업체마스터</code>, 원본 열 <code>제목</code>, 여러 값 허용 아니요, 필수 아니요</td>
+      </tr>
+      <tr>
+        <td><code>사용여부</code></td>
+        <td>예/아니요</td>
+        <td>기본값 예</td>
+      </tr>
     </tbody>
   </table>
 
-  <h2>이번 단일 작업 — 두 시작 건의 현장마스터 준비</h2>
-  <ol class="card">
-    <li>SharePoint에서 <code>현장마스터</code> 목록을 엽니다.</li>
-    <li>Excel 작업본에서 각 시작 접수번호의 첫 행에 있는 <code>업체</code> 값을 확인합니다.</li>
-    <li><code>현장마스터.제목(Title)</code>에 글자 전체가 정확히 같은 행이 있는지 검색합니다.</li>
-    <li>정확히 같은 행이 없으면 새 항목을 만들고 <code>제목</code>을 Excel의 업체 값과 정확히 같게 입력합니다.</li>
-    <li>그 현장 행의 <code>계산서 업체 연결</code>에는 같은 접수의 Excel <code>계산서 업체</code>와 일치하는 기존 <code>계산서업체마스터</code> 행을 선택합니다.</li>
-    <li>이미 같은 현장 행이 있으면 새로 만들지 말고 <code>계산서 업체 연결</code>이 맞는지만 확인합니다.</li>
-    <li>두 시작 건의 현장이 같다면 현장마스터 행은 한 건만 유지합니다.</li>
-  </ol>
+  <h2>3. 기존 현장마스터 열 추가</h2>
+  <p class="card">기존 <code>제목</code>과 <code>계산서 업체 연결</code> 열은 삭제하거나 이름을 바꾸지 않습니다.</p>
+  <table>
+    <thead><tr><th>열 이름</th><th>형식</th><th>설정</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>업체연결</code></td>
+        <td>조회(Lookup)</td>
+        <td>원본 목록 <code>업체마스터</code>, 원본 열 <code>업체명(제목)</code>, 여러 값 허용 아니요, <strong>현재는 필수 아니요</strong></td>
+      </tr>
+      <tr>
+        <td><code>업체ID복사</code></td>
+        <td>숫자</td>
+        <td>소수 자릿수 0, 필수 아니요, 기본값 없음. 생성 후 이 열에 인덱스를 만듭니다.</td>
+      </tr>
+      <tr>
+        <td><code>기본현장여부</code></td>
+        <td>예/아니요</td>
+        <td>기본값 아니요</td>
+      </tr>
+    </tbody>
+  </table>
 
-  <h2>입력 중 다른 필수 열이 나타나는 경우</h2>
-  <div class="card">
-    <code>제목</code>과 <code>계산서 업체 연결</code> 외에 필수 입력 표시가 있는 열은 임의로 채우지 마세요.
-    저장을 중단하고 실제 업체 값은 제외한 <strong>필수 열 이름만</strong> 대화로 알려주세요.
-  </div>
+  <h2>4. 인덱스 만들기</h2>
+  <ol class="card">
+    <li><code>현장마스터</code> → 설정 → 목록 설정 → 인덱싱된 열로 이동합니다.</li>
+    <li>새 인덱스에서 기본 열로 <code>업체ID복사</code>를 선택해 저장합니다.</li>
+  </ol>
 
   <h2>완료 후 알려줄 내용</h2>
   <ul class="card">
-    <li>측정인 시작 건 현장마스터: 기존 행 확인 / 새 행 생성 / 추가 필수 열 때문에 중단</li>
-    <li>측정인 시작 건의 계산서 업체 연결: 설정 완료 / 미완료</li>
-    <li>미접수 시작 건 현장마스터: 기존 행 확인 / 새 행 생성 / 추가 필수 열 때문에 중단</li>
-    <li>미접수 시작 건의 계산서 업체 연결: 설정 완료 / 미완료</li>
+    <li><code>업체마스터</code> 목록 생성 완료 여부</li>
+    <li>업체명 고유 값 적용 완료 여부</li>
+    <li><code>기본계산서업체연결</code>, <code>사용여부</code> 생성 완료 여부</li>
+    <li>현장마스터의 <code>업체연결</code>, <code>업체ID복사</code>, <code>기본현장여부</code> 생성 완료 여부</li>
+    <li><code>업체ID복사</code> 인덱스 생성 완료 여부</li>
+    <li>동일한 이름의 기존 열이 발견되거나 설정이 다른 경우 그 열 이름과 현재 형식</li>
   </ul>
 
-  <div class="card stop">실제 업체명과 계산서 업체명은 대화나 MYBOX 파일에 적지 마세요.</div>
-  <div class="card stop">현재 Flow는 과거 예외 구조라 접수시료항목매핑을 만들지 않습니다. 아직 실행하지 마세요.</div>
+  <div class="card stop">업체마스터 데이터 행은 아직 일일이 입력하지 마세요.</div>
+  <div class="card stop">기존 현장마스터 행도 아직 수정하지 마세요.</div>
+  <div class="card stop">Power Apps와 Power Automate도 아직 수정·실행하지 마세요.</div>
 </body>
 </html>
