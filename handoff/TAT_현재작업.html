@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - 현장 저장 연결</title>
+  <title>TAT 현재작업 - 콤보 표시 스키마 고정</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
-    h1, h2, h3 { color: #102a43; }
+    h1, h2 { color: #102a43; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .warn { border-left: 5px solid #d9822b; }
     .ok { border-left: 5px solid #18864b; }
@@ -17,212 +17,133 @@
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — 실제 현장 저장 연결</h1>
+  <h1>TAT 현재작업 — 콤보 표시 스키마 고정</h1>
   <div class="card warn">
-    아래 6개 속성을 순서대로 <strong>전체 교체</strong>합니다. 이번 검증은 현장마스터에 시험 현장 한 건을 만들 수 있으므로,
-    실제로 추가해도 되는 현장명으로 시험하세요. <code>btn최종저장</code>은 아직 누르지 않습니다.
+    <code>Title</code> 표시 속성을 반복 수정하지 않습니다. Items에서 표시 전용 열
+    <code>DisplayName</code>을 직접 만들고, Items와 DefaultSelectedItems가 같은 스키마를 반환하게 합니다.
+    SharePoint 데이터는 변경하지 않습니다.
   </div>
 
-  <h2>1. cmb업체.Items</h2>
-  <p><strong>위치:</strong> <code>scr접수기본정보 &gt; con접수기본전체 &gt; con접수기본본문 &gt; con접수기본카드 &gt; con접수기본행2 &gt; con업체영역 &gt; cmb업체</code></p>
+  <h2>1. cmb업체.Items 전체 수식</h2>
   <div class="card">
-    <pre>SortByColumns(
-    Filter(
-        현장마스터,
-        기본현장여부 = true ||
-        업체명복사 = Blank()
-    ),
-    "Title",
-    SortOrder.Ascending
-)</pre>
-    <p>기존 레거시 행은 <code>업체명복사</code>가 비어 있어 계속 업체 후보로 보이고, 이후 생성되는 사용자 현장은 <code>기본현장여부 = false</code>이므로 업체 후보에서 제외됩니다.</p>
-  </div>
-
-  <h2>2. cmb업체.OnChange</h2>
-  <div class="card">
-    <pre>Set(var신규현장ID, Blank());
-Reset(cmb현장)</pre>
-  </div>
-
-  <h2>3. cmb현장.Items</h2>
-  <p><strong>위치:</strong> <code>con현장영역 &gt; con현장입력행 &gt; cmb현장</code></p>
-  <div class="card">
-    <pre>If(
-    IsBlank(cmb업체.Selected),
-    Filter(
-        현장마스터,
-        ID = -1
-    ),
-    With(
-        {
-            loc업체명:
-                Coalesce(
-                    cmb업체.Selected.업체명복사,
-                    cmb업체.Selected.제목
-                )
-        },
+    <pre>Sort(
+    AddColumns(
         Filter(
             현장마스터,
-            ID = cmb업체.Selected.ID ||
-            업체명복사 = loc업체명
-        )
-    )
+            기본현장여부 = true
+        ),
+        DisplayName,
+        제목
+    ),
+    DisplayName,
+    SortOrder.Ascending
 )</pre>
   </div>
 
-  <h2>4. cmb현장.DefaultSelectedItems</h2>
+  <h2>2. cmb업체.DefaultSelectedItems 전체 수식</h2>
   <div class="card">
     <pre>If(
-    !IsBlank(var신규현장ID),
-    [
-        LookUp(
-            현장마스터,
-            ID = var신규현장ID
-        )
-    ],
-    If(
-        var완료접수수정모드 || var이어쓰기,
-        [
-            LookUp(
+    var완료접수수정모드 || var이어쓰기,
+    With(
+        {
+            loc저장현장:
+                LookUp(
+                    현장마스터,
+                    ID = var저장헤더.'업체/현장'.Id
+                )
+        },
+        AddColumns(
+            Filter(
                 현장마스터,
-                ID = var저장헤더.'업체/현장'.Id
-            )
-        ],
+                기본현장여부 = true &amp;&amp;
+                업체명복사 = loc저장현장.업체명복사
+            ),
+            DisplayName,
+            제목
+        )
+    ),
+    Blank()
+)</pre>
+  </div>
+
+  <h2>3. cmb업체 표시 속성</h2>
+  <div class="card">
+    <p><strong>DisplayFields 전체값</strong></p>
+    <pre>["DisplayName"]</pre>
+    <p><strong>SearchFields 전체값</strong></p>
+    <pre>["DisplayName"]</pre>
+    <p><strong>OnChange 전체 수식</strong></p>
+    <pre>Reset(cmb현장)</pre>
+    <p><strong>OnSelect 전체 수식</strong></p>
+    <pre>false</pre>
+  </div>
+
+  <h2>4. cmb현장.Items 전체 수식</h2>
+  <div class="card">
+    <pre>Sort(
+    AddColumns(
         If(
             IsBlank(cmb업체.Selected),
-            Blank(),
-            [cmb업체.Selected]
-        )
-    )
+            Filter(
+                현장마스터,
+                ID = -1
+            ),
+            Filter(
+                현장마스터,
+                업체명복사 = cmb업체.Selected.업체명복사
+            )
+        ),
+        DisplayName,
+        제목
+    ),
+    DisplayName,
+    SortOrder.Ascending
 )</pre>
   </div>
 
-  <h2>5. btn현장추가저장.DisplayMode</h2>
-  <p><strong>위치:</strong> <code>scr접수기본정보 &gt; con현장추가패널 &gt; con현장추가카드 &gt; con현장추가버튼행 &gt; btn현장추가저장</code></p>
+  <h2>5. cmb현장.DefaultSelectedItems 전체 수식</h2>
   <div class="card">
     <pre>If(
-    IsBlank(cmb업체.Selected) ||
-    IsBlank(Trim(txt현장추가명.Text)),
-    DisplayMode.Disabled,
-    DisplayMode.Edit
-)</pre>
-  </div>
-
-  <h2>6. btn현장추가저장.OnSelect</h2>
-  <div class="card">
-    <pre>With(
-    {
-        loc업체명:
-            Coalesce(
-                cmb업체.Selected.업체명복사,
-                cmb업체.Selected.제목
-            ),
-        loc현장명:
-            Trim(txt현장추가명.Text)
-    },
-    Set(var현장저장성공, false);
-    Set(var신규현장ID, Blank());
-
-    IfError(
-        Patch(
+    var완료접수수정모드 || var이어쓰기,
+    AddColumns(
+        Filter(
             현장마스터,
-            cmb업체.Selected,
-            {
-                업체명복사: loc업체명,
-                기본현장여부: true
-            }
-        );
-
-        Refresh(현장마스터);
-
-        ClearCollect(
-            col동일업체현장,
-            FirstN(
-                Filter(
-                    현장마스터,
-                    업체명복사 = loc업체명 &amp;&amp;
-                    제목 = loc현장명
-                ),
-                2
-            )
-        );
-
-        If(
-            CountRows(col동일업체현장) &gt; 1,
-            Notify(
-                "같은 업체에 동일한 현장명이 2건 이상 있습니다. 현장마스터를 확인해 주세요.",
-                NotificationType.Error
-            ),
-
-            CountRows(col동일업체현장) = 1,
-            Set(
-                var신규현장ID,
-                First(col동일업체현장).ID
-            );
-            Set(var현장저장성공, true),
-
-            Set(
-                var신규현장ID,
-                Patch(
-                    현장마스터,
-                    Defaults(현장마스터),
-                    {
-                        제목: loc현장명,
-                        업체명복사: loc업체명,
-                        기본현장여부: false,
-                        '계산서 업체 연결':
-                            cmb업체.Selected.'계산서 업체 연결'
-                    }
-                ).ID
-            );
-            Set(var현장저장성공, true)
+            ID = var저장헤더.'업체/현장'.Id
         ),
-
-        Notify(
-            "현장 저장 중 오류가 발생했습니다: " &amp;
-            FirstError.Message,
-            NotificationType.Error
-        )
-    );
-
+        DisplayName,
+        제목
+    ),
     If(
-        var현장저장성공,
-        Refresh(현장마스터);
-        Reset(cmb현장);
-        Reset(txt현장추가명);
-        Set(var현장추가패널, false);
-        Notify(
-            "현장이 선택되었습니다.",
-            NotificationType.Success
-        )
+        IsBlank(cmb업체.Selected),
+        Blank(),
+        [cmb업체.Selected]
     )
 )</pre>
   </div>
 
-  <h2>7. 적용 직후 먼저 확인</h2>
-  <div class="card warn">
-    <ol>
-      <li>빨간 수식 오류가 없는지 확인합니다.</li>
-      <li><code>cmb업체.Items</code>와 <code>cmb현장.Items</code>에 위임 경고가 생겼는지 확인합니다.</li>
-      <li>오류 또는 위임 경고가 있으면 아직 저장 버튼을 누르지 말고, 발생한 정확한 속성을 알려주세요.</li>
-    </ol>
+  <h2>6. cmb현장 표시 속성</h2>
+  <div class="card">
+    <p><strong>DisplayFields 전체값</strong></p>
+    <pre>["DisplayName"]</pre>
+    <p><strong>SearchFields 전체값</strong></p>
+    <pre>["DisplayName"]</pre>
   </div>
 
-  <h2>8. 오류·경고가 없을 때 실제 검증</h2>
+  <h2>7. 검증</h2>
   <div class="card ok">
     <ol>
-      <li>업체를 선택하면 기존처럼 업체명과 같은 기본 현장이 자동 선택된다.</li>
-      <li>현장 추가 팝업을 열고 해당 업체에 실제로 추가해도 되는 새 현장명을 입력해 저장한다.</li>
-      <li>성공 알림 후 팝업이 닫히고 새 현장이 <code>cmb현장</code>에 자동 선택된다.</li>
-      <li>계산서 업체가 선택 업체의 기존 연결값으로 표시된다.</li>
-      <li>SharePoint 현장마스터에서 선택 업체 기본 행은 <code>업체명복사 = 업체명</code>, <code>기본현장여부 = 예</code>로 보정된다.</li>
-      <li>새 현장 행은 입력한 제목, 같은 업체명복사, <code>기본현장여부 = 아니요</code>, 같은 계산서 업체 연결값으로 생성된다.</li>
-      <li>같은 현장명을 다시 저장하면 새 행을 중복 생성하지 않고 기존 현장을 선택한다.</li>
-      <li>업체 콤보박스를 다시 열었을 때 사용자 추가 현장이 업체 후보로 나타나지 않는다.</li>
-      <li><code>btn접수기본다음</code>으로 다음 화면 이동까지 정상인지 확인한다. <code>btn최종저장</code>은 아직 누르지 않는다.</li>
+      <li>빨간 수식 오류가 없는지 먼저 확인합니다.</li>
+      <li>업체 콤보의 모든 행에 업체명이 보이고 각 행을 선택할 수 있습니다.</li>
+      <li>업체 선택값도 흰색 공란이 아니라 업체명으로 남습니다.</li>
+      <li>현장 콤보에 같은 업체의 현장명이 표시되고 기본 현장이 선택됩니다.</li>
+      <li>업체 변경 시 현장과 계산서 업체가 함께 변경됩니다.</li>
+      <li>수정·이어쓰기에서 업체와 저장 현장이 각각 정상 표시됩니다.</li>
+      <li>DisplayFields/SearchFields를 다시 조회해도 <code>["DisplayName"]</code>이 유지되고 <code>ComplianceAssetId</code>로 바뀌지 않습니다.</li>
+      <li>위임 경고가 있으면 정확한 컨트롤과 속성만 알려주세요. 목록은 500건 이하이므로 이번 단계에서는 데이터를 변경하지 않습니다.</li>
+      <li><code>+ 현장 추가</code>는 팝업을 열고 팝업 저장 버튼은 계속 비활성 상태입니다.</li>
     </ol>
   </div>
 
-  <p>위 결과를 알려주세요. 성공하면 마지막으로 <code>btn최종저장.OnSelect</code>의 구형 현장 참조 8곳을 전체 수식으로 교체합니다.</p>
+  <p>이 표시 구조가 유지되는 것을 확인한 뒤 실제 신규 현장 저장을 연결합니다.</p>
 </body>
 </html>
