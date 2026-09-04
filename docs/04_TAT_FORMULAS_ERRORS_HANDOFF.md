@@ -750,6 +750,8 @@ and(
 - 1회 정규화 검증 후 `cmb업체.Items = Filter(현장마스터, 기본현장여부 = true)`, `cmb현장.Items = Filter(현장마스터, 업체명복사 = cmb업체.Selected.업체명복사)`의 단순 구조로 전환한다. 신규 현장 저장은 그 다음 작업에서 정확한 팝업 저장 버튼에 연결한다.
 - 2026-09-04 공란 레거시 행 144건 정규화 성공 및 단순 필터 속성 적용 완료.
 - 정규화 뒤 콤보 표시 필드가 `Title`에서 `ComplianceAssetId`로 자동 재선택되어 공란 목록처럼 보이는 현상이 재발했다. 이는 SharePoint 숨김 시스템 열을 Studio가 표시 필드로 재추론하는 문제로 판단한다. 최신 작업은 두 콤보의 Items에 `AddColumns(..., 표시명, 제목)`을 적용하고 `DisplayFields/SearchFields = ["표시명"]`으로 고정하며, 수정·이어쓰기 DefaultSelectedItems에도 같은 표시명 열을 포함해 반환 스키마를 통일하는 것이다.
+- 2026-09-04 표시 스키마 수정 검증 완료: 실제 적용 열 이름은 `DisplayName`이며 업체·현장 Items와 수정/이어쓰기 DefaultSelectedItems가 같은 계산 열을 반환한다. 두 콤보의 표시·선택·연동, `DisplayFields/SearchFields = ["DisplayName"]` 유지, 오류·위임 경고 없음이 정상이다.
+- 다음 저장식은 `var신규현장ID`를 항상 숫자 `0`으로 초기화해 자료형을 고정한다. 기본 화면 `btn현장추가`는 패널 열기만 수행하고, 실제 Patch는 팝업 내부 `btn현장추가저장`에만 둔다.
 
 #### Flow 응답 수식
 

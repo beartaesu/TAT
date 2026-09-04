@@ -1,0 +1,72 @@
+With(
+    {
+        loc업체명:
+            cmb업체.Selected.업체명복사,
+        loc현장명:
+            Trim(txt현장추가명.Text)
+    },
+    Set(var현장저장성공, false);
+    Set(var신규현장ID, 0);
+
+    ClearCollect(
+        col동일업체현장,
+        FirstN(
+            Filter(
+                현장마스터,
+                업체명복사 = loc업체명 &&
+                제목 = loc현장명
+            ),
+            2
+        )
+    );
+
+    If(
+        CountRows(col동일업체현장) > 1,
+        Notify(
+            "같은 업체에 동일한 현장명이 2건 이상 있습니다. 현장마스터를 확인해 주세요.",
+            NotificationType.Error
+        ),
+
+        CountRows(col동일업체현장) = 1,
+        Set(
+            var신규현장ID,
+            First(col동일업체현장).ID
+        );
+        Set(var현장저장성공, true),
+
+        IfError(
+            Set(
+                var신규현장ID,
+                Patch(
+                    현장마스터,
+                    Defaults(현장마스터),
+                    {
+                        제목: loc현장명,
+                        업체명복사: loc업체명,
+                        기본현장여부: false,
+                        '계산서 업체 연결':
+                            cmb업체.Selected.'계산서 업체 연결'
+                    }
+                ).ID
+            );
+            Set(var현장저장성공, true),
+            Notify(
+                "현장 저장 중 오류가 발생했습니다: " &
+                FirstError.Message,
+                NotificationType.Error
+            )
+        )
+    );
+
+    If(
+        var현장저장성공,
+        Refresh(현장마스터);
+        Reset(cmb현장);
+        Reset(txt현장추가명);
+        Set(var현장추가패널, false);
+        Notify(
+            "현장이 선택되었습니다.",
+            NotificationType.Success
+        )
+    )
+)
