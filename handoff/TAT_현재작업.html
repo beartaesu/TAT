@@ -3,138 +3,226 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - 현장 추가 팝업 뼈대</title>
+  <title>TAT 현재작업 - 현장 저장 연결</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
     h1, h2, h3 { color: #102a43; }
-    h2 { margin-top: 30px; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .warn { border-left: 5px solid #d9822b; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
-    pre { overflow-x: auto; background: #101827; color: #f3f7ff; border-radius: 9px; padding: 14px; line-height: 1.45; }
+    pre { overflow-x: auto; white-space: pre-wrap; background: #101827; color: #f3f7ff; border-radius: 9px; padding: 14px; line-height: 1.45; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업</h1>
+  <h1>TAT 현재작업 — 실제 현장 저장 연결</h1>
   <div class="card warn">
-    <strong>이번 작업은 현장 추가 팝업의 화면·열기·닫기만 만듭니다.</strong><br>
-    실제 SharePoint 저장은 아직 연결하지 않습니다. 아래 <code>btn현장추가저장</code>은 반드시 비활성 상태로 두고,
-    이번 검증 중에는 <code>btn최종저장</code>을 누르지 마세요.
+    아래 6개 속성을 순서대로 <strong>전체 교체</strong>합니다. 이번 검증은 현장마스터에 시험 현장 한 건을 만들 수 있으므로,
+    실제로 추가해도 되는 현장명으로 시험하세요. <code>btn최종저장</code>은 아직 누르지 않습니다.
   </div>
 
-  <h2>1. 추가할 트리</h2>
+  <h2>1. cmb업체.Items</h2>
+  <p><strong>위치:</strong> <code>scr접수기본정보 &gt; con접수기본전체 &gt; con접수기본본문 &gt; con접수기본카드 &gt; con접수기본행2 &gt; con업체영역 &gt; cmb업체</code></p>
   <div class="card">
-    <pre>scr접수기본정보
-├─ con접수기본전체
-│  └─ con접수기본본문
-│     └─ con접수기본카드
-│        └─ con접수기본행2
-│           └─ con현장영역
-│              ├─ lbl현장
-│              ├─ cmb현장
-│              └─ btn현장추가              ← 신규 버튼
-└─ con현장추가패널                          ← 화면 루트의 신규 일반 컨테이너
-   └─ con현장추가카드                       ← 신규 세로 컨테이너
-      ├─ lbl현장추가제목
-      ├─ lbl현장추가안내
-      ├─ txt현장추가명
-      └─ con현장추가버튼행                  ← 신규 가로 컨테이너
-         ├─ btn현장추가취소
-         └─ btn현장추가저장</pre>
-    <p><code>con현장추가패널</code>은 <code>con접수기본전체</code> 안에 넣지 말고 <code>scr접수기본정보</code> 바로 아래에 만드세요. 만든 뒤 트리에서 맨 앞으로 이동하여 기존 화면 위에 표시되게 합니다.</p>
+    <pre>SortByColumns(
+    Filter(
+        현장마스터,
+        기본현장여부 = true ||
+        업체명복사 = Blank()
+    ),
+    "Title",
+    SortOrder.Ascending
+)</pre>
+    <p>기존 레거시 행은 <code>업체명복사</code>가 비어 있어 계속 업체 후보로 보이고, 이후 생성되는 사용자 현장은 <code>기본현장여부 = false</code>이므로 업체 후보에서 제외됩니다.</p>
   </div>
 
-  <h2>2. 현장 추가 버튼</h2>
+  <h2>2. cmb업체.OnChange</h2>
   <div class="card">
-    <h3>정확한 위치</h3>
-    <p><code>scr접수기본정보 &gt; con접수기본전체 &gt; con접수기본본문 &gt; con접수기본카드 &gt; con접수기본행2 &gt; con현장영역 &gt; btn현장추가</code></p>
-    <p><strong>Text 전체값</strong></p>
-    <pre>"+ 현장 추가"</pre>
-    <p><strong>DisplayMode 전체 수식</strong></p>
-    <pre>DisplayMode.Edit</pre>
-    <p><strong>OnSelect 전체 수식</strong></p>
+    <pre>Set(var신규현장ID, Blank());
+Reset(cmb현장)</pre>
+  </div>
+
+  <h2>3. cmb현장.Items</h2>
+  <p><strong>위치:</strong> <code>con현장영역 &gt; con현장입력행 &gt; cmb현장</code></p>
+  <div class="card">
     <pre>If(
     IsBlank(cmb업체.Selected),
-    Notify(
-        "업체를 먼저 선택해 주세요.",
-        NotificationType.Warning
+    Filter(
+        현장마스터,
+        ID = -1
     ),
-    Set(var현장추가패널, true);
-    Reset(txt현장추가명)
+    With(
+        {
+            loc업체명:
+                Coalesce(
+                    cmb업체.Selected.업체명복사,
+                    cmb업체.Selected.제목
+                )
+        },
+        Filter(
+            현장마스터,
+            ID = cmb업체.Selected.ID ||
+            업체명복사 = loc업체명
+        )
+    )
 )</pre>
   </div>
 
-  <h2>3. 화면 루트 팝업</h2>
+  <h2>4. cmb현장.DefaultSelectedItems</h2>
   <div class="card">
-    <h3>con현장추가패널</h3>
-    <ul>
-      <li><strong>Visible 전체 수식:</strong> <code>var현장추가패널</code></li>
-      <li><strong>X:</strong> <code>0</code></li>
-      <li><strong>Y:</strong> <code>0</code></li>
-      <li><strong>Width:</strong> <code>Parent.Width</code></li>
-      <li><strong>Height:</strong> <code>Parent.Height</code></li>
-      <li><strong>Fill:</strong> <code>RGBA(0, 0, 0, 0.35)</code></li>
-    </ul>
-    <p>패널이 기존 화면 뒤에 보이면 트리에서 <strong>맨 앞으로 이동</strong>하세요.</p>
-
-    <h3>con현장추가카드</h3>
-    <ul>
-      <li>세로 컨테이너 권장</li>
-      <li><strong>Width:</strong> <code>520</code></li>
-      <li><strong>Height:</strong> <code>280</code></li>
-      <li><strong>X:</strong> <code>(Parent.Width - Self.Width) / 2</code></li>
-      <li><strong>Y:</strong> <code>(Parent.Height - Self.Height) / 2</code></li>
-      <li><strong>Fill:</strong> <code>Color.White</code></li>
-      <li>안쪽 여백은 20, 컨트롤 간 간격은 12 정도로 설정</li>
-    </ul>
-  </div>
-
-  <h2>4. 팝업 내부 컨트롤</h2>
-  <div class="card">
-    <h3>lbl현장추가제목.Text</h3>
-    <pre>"현장 추가"</pre>
-
-    <h3>lbl현장추가안내.Text</h3>
-    <pre>"선택 업체: " &amp; cmb업체.Selected.제목</pre>
-
-    <h3>txt현장추가명.Default</h3>
-    <pre>Coalesce(
-    cmb업체.Selected.업체명복사,
-    cmb업체.Selected.제목
+    <pre>If(
+    !IsBlank(var신규현장ID),
+    [
+        LookUp(
+            현장마스터,
+            ID = var신규현장ID
+        )
+    ],
+    If(
+        var완료접수수정모드 || var이어쓰기,
+        [
+            LookUp(
+                현장마스터,
+                ID = var저장헤더.'업체/현장'.Id
+            )
+        ],
+        If(
+            IsBlank(cmb업체.Selected),
+            Blank(),
+            [cmb업체.Selected]
+        )
+    )
 )</pre>
-    <p><strong>HintText</strong>가 있는 입력 컨트롤이면 전체값을 <code>"현장명을 입력해 주세요."</code>로 설정하세요.</p>
-
-    <h3>btn현장추가취소.Text</h3>
-    <pre>"취소"</pre>
-    <h3>btn현장추가취소.OnSelect 전체 수식</h3>
-    <pre>Set(var현장추가패널, false);
-Reset(txt현장추가명)</pre>
-
-    <h3>btn현장추가저장.Text</h3>
-    <pre>"저장"</pre>
-    <h3>btn현장추가저장.DisplayMode 전체 수식</h3>
-    <pre>DisplayMode.Disabled</pre>
-    <h3>btn현장추가저장.OnSelect 전체 수식</h3>
-    <pre>false</pre>
   </div>
 
-  <h2>5. 검증할 항목</h2>
-  <div class="card ok">
+  <h2>5. btn현장추가저장.DisplayMode</h2>
+  <p><strong>위치:</strong> <code>scr접수기본정보 &gt; con현장추가패널 &gt; con현장추가카드 &gt; con현장추가버튼행 &gt; btn현장추가저장</code></p>
+  <div class="card">
+    <pre>If(
+    IsBlank(cmb업체.Selected) ||
+    IsBlank(Trim(txt현장추가명.Text)),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)</pre>
+  </div>
+
+  <h2>6. btn현장추가저장.OnSelect</h2>
+  <div class="card">
+    <pre>With(
+    {
+        loc업체명:
+            Coalesce(
+                cmb업체.Selected.업체명복사,
+                cmb업체.Selected.제목
+            ),
+        loc현장명:
+            Trim(txt현장추가명.Text)
+    },
+    Set(var현장저장성공, false);
+    Set(var신규현장ID, Blank());
+
+    IfError(
+        Patch(
+            현장마스터,
+            cmb업체.Selected,
+            {
+                업체명복사: loc업체명,
+                기본현장여부: true
+            }
+        );
+
+        Refresh(현장마스터);
+
+        ClearCollect(
+            col동일업체현장,
+            FirstN(
+                Filter(
+                    현장마스터,
+                    업체명복사 = loc업체명 &amp;&amp;
+                    제목 = loc현장명
+                ),
+                2
+            )
+        );
+
+        If(
+            CountRows(col동일업체현장) &gt; 1,
+            Notify(
+                "같은 업체에 동일한 현장명이 2건 이상 있습니다. 현장마스터를 확인해 주세요.",
+                NotificationType.Error
+            ),
+
+            CountRows(col동일업체현장) = 1,
+            Set(
+                var신규현장ID,
+                First(col동일업체현장).ID
+            );
+            Set(var현장저장성공, true),
+
+            Set(
+                var신규현장ID,
+                Patch(
+                    현장마스터,
+                    Defaults(현장마스터),
+                    {
+                        제목: loc현장명,
+                        업체명복사: loc업체명,
+                        기본현장여부: false,
+                        '계산서 업체 연결':
+                            cmb업체.Selected.'계산서 업체 연결'
+                    }
+                ).ID
+            );
+            Set(var현장저장성공, true)
+        ),
+
+        Notify(
+            "현장 저장 중 오류가 발생했습니다: " &amp;
+            FirstError.Message,
+            NotificationType.Error
+        )
+    );
+
+    If(
+        var현장저장성공,
+        Refresh(현장마스터);
+        Reset(cmb현장);
+        Reset(txt현장추가명);
+        Set(var현장추가패널, false);
+        Notify(
+            "현장이 선택되었습니다.",
+            NotificationType.Success
+        )
+    )
+)</pre>
+  </div>
+
+  <h2>7. 적용 직후 먼저 확인</h2>
+  <div class="card warn">
     <ol>
-      <li>업체를 선택하지 않고 <strong>+ 현장 추가</strong>를 누르면 경고만 표시되고 팝업은 열리지 않는다.</li>
-      <li>업체를 선택한 뒤 누르면 기존 화면 위에 음영 배경과 흰색 카드가 열린다.</li>
-      <li>안내에 선택 업체명이 표시된다.</li>
-      <li>현장명 입력란의 기본값이 선택 업체명과 같다.</li>
-      <li>취소를 누르면 팝업이 닫힌다.</li>
-      <li>저장 버튼은 비활성 상태다.</li>
-      <li>Power Apps 수식 오류와 위임 경고가 새로 생기지 않는다.</li>
-      <li>기존 업체 선택, 현장 선택, 계산서 업체 표시, 다음 화면 이동이 그대로 정상이다.</li>
+      <li>빨간 수식 오류가 없는지 확인합니다.</li>
+      <li><code>cmb업체.Items</code>와 <code>cmb현장.Items</code>에 위임 경고가 생겼는지 확인합니다.</li>
+      <li>오류 또는 위임 경고가 있으면 아직 저장 버튼을 누르지 말고, 발생한 정확한 속성을 알려주세요.</li>
     </ol>
   </div>
 
-  <p>위 8가지만 확인한 뒤 결과를 알려주세요. 다음 작업에서 중복 방지와 SharePoint 현장 생성 수식을 붙입니다.</p>
+  <h2>8. 오류·경고가 없을 때 실제 검증</h2>
+  <div class="card ok">
+    <ol>
+      <li>업체를 선택하면 기존처럼 업체명과 같은 기본 현장이 자동 선택된다.</li>
+      <li>현장 추가 팝업을 열고 해당 업체에 실제로 추가해도 되는 새 현장명을 입력해 저장한다.</li>
+      <li>성공 알림 후 팝업이 닫히고 새 현장이 <code>cmb현장</code>에 자동 선택된다.</li>
+      <li>계산서 업체가 선택 업체의 기존 연결값으로 표시된다.</li>
+      <li>SharePoint 현장마스터에서 선택 업체 기본 행은 <code>업체명복사 = 업체명</code>, <code>기본현장여부 = 예</code>로 보정된다.</li>
+      <li>새 현장 행은 입력한 제목, 같은 업체명복사, <code>기본현장여부 = 아니요</code>, 같은 계산서 업체 연결값으로 생성된다.</li>
+      <li>같은 현장명을 다시 저장하면 새 행을 중복 생성하지 않고 기존 현장을 선택한다.</li>
+      <li>업체 콤보박스를 다시 열었을 때 사용자 추가 현장이 업체 후보로 나타나지 않는다.</li>
+      <li><code>btn접수기본다음</code>으로 다음 화면 이동까지 정상인지 확인한다. <code>btn최종저장</code>은 아직 누르지 않는다.</li>
+    </ol>
+  </div>
+
+  <p>위 결과를 알려주세요. 성공하면 마지막으로 <code>btn최종저장.OnSelect</code>의 구형 현장 참조 8곳을 전체 수식으로 교체합니다.</p>
 </body>
 </html>
