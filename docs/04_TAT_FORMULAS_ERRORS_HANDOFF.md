@@ -755,6 +755,8 @@ and(
 - 2026-09-04 신규 현장 저장 기능 실제 검증 완료: 0건 생성/1건 재사용, 새 현장 자동 선택, 계산서 업체 승계, 업체 후보 제외, 업체 재선택 조회, DisplayName 유지, 오류·위임 경고 없음이 정상이다.
 - 최신 `btn최종저장.OnSelect` 직접 현장 레코드 교정본: [`formulas/scr검토저장_btn최종저장_OnSelect.powerfx`](../formulas/scr검토저장_btn최종저장_OnSelect.powerfx). 현재 파일 실물에서 교체한 구형 `cmb현장.Selected` 참조는 총 7곳이다. `'업체/현장'` 2곳은 `{Id: cmb현장.Selected.ID, Value: cmb현장.Selected.제목}`, `'계산서 업체'` 2곳은 `cmb현장.Selected.'계산서 업체 연결'`, Flow 현장명 3곳은 `Text(cmb현장.Selected.제목)`으로 변경했다.
 - 회사 전달 전체 수식: [`handoff/TAT_btn최종저장_OnSelect.txt`](../handoff/TAT_btn최종저장_OnSelect.txt), 1,372줄, SHA-256 `66FF138E5975CDC31DC58AFA3C85ED53EF5ADE4F9FC7E7AEAFCED8D718EABDE5`. 현재 상태는 저장소 정적 교정 완료·Power Apps 적용 전 미검증이다.
+- Power Apps 적용 후 `btn최종저장.OnSelect`은 수식 오류가 없었으나 `scr검토저장 > lbl검토현장.Text`에 `cmb현장.Selected.Value` 이름 오류가 남았다. 최신 전체 수식은 [`formulas/scr검토저장_lbl검토현장_Text.powerfx`](../formulas/scr검토저장_lbl검토현장_Text.powerfx)의 `cmb현장.Selected.제목`이다. 따라서 직접 레코드 전환 영향 범위는 최종저장 7곳 + 표시 레이블 1곳 = 총 8곳이다.
+- 레이블 교정 후 관련 수식 오류가 모두 제거됐다. 사용자 요청에 따라 크레딧 절약을 위해 이미 적용된 1,372줄 최종저장 수식을 다시 읽거나 현재작업 HTML에 반복 싣지 않는다. 다음 단계는 실제 신규 저장 결과만 검증한다.
 
 #### Flow 응답 수식
 
