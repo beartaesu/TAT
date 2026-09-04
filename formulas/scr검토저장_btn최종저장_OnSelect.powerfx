@@ -535,15 +535,13 @@ IfError(
                                 Value: "접수완료"
                             },
 
-                            '업체/현장':
-                                cmb현장.Selected,
+                            '업체/현장': {
+                                Id: cmb현장.Selected.ID,
+                                Value: cmb현장.Selected.제목
+                            },
 
                             '계산서 업체':
-                                LookUp(
-                                    현장마스터,
-                                    ID = cmb현장.Selected.Id,
-                                    '계산서 업체 연결'
-                                )
+                                cmb현장.Selected.'계산서 업체 연결'
                         }
                     )
                 );
@@ -688,7 +686,7 @@ IfError(
                             Round(Value(var저장헤더.ID), 0),
                             Text(var접수번호),
                             Text(dd의뢰구분.Selected.Value),
-                            Text(cmb현장.Selected.Value),
+                            Text(cmb현장.Selected.제목),
                             If(
                                 dd의뢰구분.Selected.Value = "과제",
                                 cmb과제.Selected.제목,
@@ -874,7 +872,7 @@ IfError(
                                 Round(Value(var저장헤더.ID), 0),
                                 Text(var접수번호),
                                 Text(dd의뢰구분.Selected.Value),
-                                Text(cmb현장.Selected.Value),
+                                Text(cmb현장.Selected.제목),
                                 If(
                                     dd의뢰구분.Selected.Value = "과제",
                                     cmb과제.Selected.제목,
@@ -1060,15 +1058,13 @@ IfError(
                                         Value: "접수완료"
                                     },
 
-                                    '업체/현장':
-                                        cmb현장.Selected,
+                                    '업체/현장': {
+                                        Id: cmb현장.Selected.ID,
+                                        Value: cmb현장.Selected.제목
+                                    },
 
                                     '계산서 업체':
-                                        LookUp(
-                                            현장마스터,
-                                            ID = cmb현장.Selected.Id,
-                                            '계산서 업체 연결'
-                                        ),
+                                        cmb현장.Selected.'계산서 업체 연결',
 
                                     결과발송여부:
                                         false,
@@ -1245,7 +1241,7 @@ IfError(
                                             Round(Value(var저장헤더.ID), 0),
                                             Text(var접수번호),
                                             Text(dd의뢰구분.Selected.Value),
-                                            Text(cmb현장.Selected.Value),
+                                            Text(cmb현장.Selected.제목),
                                             If(
                                                 dd의뢰구분.Selected.Value = "과제",
                                                 cmb과제.Selected.제목,
