@@ -1,6 +1,6 @@
 # 04 TAT FORMULAS · ERRORS · HANDOFF
 
-최종 갱신: 2026-09-03
+최종 갱신: 2026-09-07
 
 ## 문서 역할과 갱신 기준
 
@@ -752,7 +752,12 @@ and(
 - 정규화 뒤 콤보 표시 필드가 `Title`에서 `ComplianceAssetId`로 자동 재선택되어 공란 목록처럼 보이는 현상이 재발했다. 이는 SharePoint 숨김 시스템 열을 Studio가 표시 필드로 재추론하는 문제로 판단한다. 최신 작업은 두 콤보의 Items에 `AddColumns(..., 표시명, 제목)`을 적용하고 `DisplayFields/SearchFields = ["표시명"]`으로 고정하며, 수정·이어쓰기 DefaultSelectedItems에도 같은 표시명 열을 포함해 반환 스키마를 통일하는 것이다.
 - 2026-09-04 표시 스키마 수정 검증 완료: 실제 적용 열 이름은 `DisplayName`이며 업체·현장 Items와 수정/이어쓰기 DefaultSelectedItems가 같은 계산 열을 반환한다. 두 콤보의 표시·선택·연동, `DisplayFields/SearchFields = ["DisplayName"]` 유지, 오류·위임 경고 없음이 정상이다.
 - 다음 저장식은 `var신규현장ID`를 항상 숫자 `0`으로 초기화해 자료형을 고정한다. 기본 화면 `btn현장추가`는 패널 열기만 수행하고, 실제 Patch는 팝업 내부 `btn현장추가저장`에만 둔다.
-- 2026-09-04 신규 현장 저장 기능 실제 검증 완료: 0건 생성/1건 재사용, 새 현장 자동 선택, 계산서 업체 승계, 업체 후보 제외, 업체 재선택 조회, DisplayName 유지, 오류·위임 경고 없음이 정상이다.
+- 2026-09-04 신규 현장 저장 기능 부분 검증 완료: 0건 생성/1건 재사용, 새 현장 자동 선택, 업체 후보 제외, 업체 재선택 조회, DisplayName 유지, 오류·위임 경고 없음은 정상이다. 이후 실제 행을 확인하니 기본 업체 행과 생성 현장의 `계산서 업체 연결`이 모두 공란이어서 계산서 업체 승계는 검증되지 않은 것으로 정정한다.
+- 당시 교정본(현재 **구버전·적용 금지**): [`formulas/scr접수기본정보_btn현장추가저장_OnSelect.powerfx`](../formulas/scr접수기본정보_btn현장추가저장_OnSelect.powerfx). 기본 업체 행의 Lookup이 공란이면 계산서업체마스터의 동일명을 사용하도록 적용했고 수식 오류는 없었지만 기능 검증 없이 폐기했다.
+- 당시 예정했던 동일명 자동 연결·새 현장 자동 선택·계산서 업체 표시 검증은 진행하지 않는다. 업체마스터의 명시적 `기본계산서업체`를 사용하는 새 수식에서 다시 검증한다.
+- 2026-09-04 구조 오류로 위 동일명 자동 연결 수식은 **구버전·적용 금지**로 전환한다. 현장마스터를 비우면 `cmb업체`도 0건이 되고, 업체와 계산서 업체가 다른 실제 업무에서는 동일명 조회가 기본 청구처를 보장하지 않는다.
+- 최신 재개 단계는 수식 변경이 아니라 SharePoint `업체마스터` 생성이다. 최소 열은 `제목`, `기본계산서업체`(계산서업체마스터 Lookup), `사용여부`(예/아니요, 기본 예)이며, 실제 생성 확인 후 새 `cmb업체.Items/DefaultSelectedItems`와 `btn현장추가저장.OnSelect` 전체 수식을 작성한다.
+- 2026-09-07 인계 주의: 현재 Power Apps에 적용된 동일명 계산서업체 조회 수식은 빨간 오류가 없더라도 운영 사용 금지이다. `cmb업체`는 삭제된 현장마스터 기본 행을 원본으로 사용해 조회 0건이다. 업체마스터 생성 확인 전 기존 수식을 보정하려고 하지 말고, `docs/02_TAT_CURRENT_STATUS.md`의 TAT-01부터 순서대로 진행한다.
 - 최신 `btn최종저장.OnSelect` 직접 현장 레코드 교정본: [`formulas/scr검토저장_btn최종저장_OnSelect.powerfx`](../formulas/scr검토저장_btn최종저장_OnSelect.powerfx). 현재 파일 실물에서 교체한 구형 `cmb현장.Selected` 참조는 총 7곳이다. `'업체/현장'` 2곳은 `{Id: cmb현장.Selected.ID, Value: cmb현장.Selected.제목}`, `'계산서 업체'` 2곳은 `cmb현장.Selected.'계산서 업체 연결'`, Flow 현장명 3곳은 `Text(cmb현장.Selected.제목)`으로 변경했다.
 - 회사 전달 전체 수식: [`handoff/TAT_btn최종저장_OnSelect.txt`](../handoff/TAT_btn최종저장_OnSelect.txt), 1,372줄, SHA-256 `66FF138E5975CDC31DC58AFA3C85ED53EF5ADE4F9FC7E7AEAFCED8D718EABDE5`. 현재 상태는 저장소 정적 교정 완료·Power Apps 적용 전 미검증이다.
 - Power Apps 적용 후 `btn최종저장.OnSelect`은 수식 오류가 없었으나 `scr검토저장 > lbl검토현장.Text`에 `cmb현장.Selected.Value` 이름 오류가 남았다. 최신 전체 수식은 [`formulas/scr검토저장_lbl검토현장_Text.powerfx`](../formulas/scr검토저장_lbl검토현장_Text.powerfx)의 `cmb현장.Selected.제목`이다. 따라서 직접 레코드 전환 영향 범위는 최종저장 7곳 + 표시 레이블 1곳 = 총 8곳이다.

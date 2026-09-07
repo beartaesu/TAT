@@ -3,71 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - 신규 접수 1건 실제 검증</title>
+  <title>TAT 현재작업 - TAT-01 업체마스터 생성</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
+    body { max-width: 900px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
     h1, h2 { color: #102a43; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .warn { border-left: 5px solid #d9822b; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
+    th, td { border: 1px solid #d9e0eb; padding: 9px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — 신규 접수 1건 실제 검증</h1>
+  <h1>TAT 현재작업 — TAT-01 SharePoint 업체마스터 생성</h1>
+
   <div class="card warn">
-    <strong>수식은 다시 교체하거나 불러오지 않습니다.</strong><br>
-    실제로 저장해도 되는 신규 접수 1건을 사용하고, 가능하면 이번에 추가한 사용자 현장을 선택합니다.
+    <strong>Power Apps 수식은 아직 변경하지 않습니다.</strong><br>
+    현장마스터를 업체 목록으로 겸용하던 구조는 폐기합니다. 계산서업체마스터 동일명 자동 매칭 수식도 다시 사용하지 않습니다.
   </div>
 
-  <h2>1. Power Apps에서 저장</h2>
+  <h2>1. 새 목록</h2>
   <div class="card">
-    <ol>
-      <li>신규 접수 기본정보에서 업체를 선택합니다.</li>
-      <li>이번에 추가한 현장을 선택하고 계산서 업체가 정상 표시되는지 확인합니다.</li>
-      <li>실제 시료명·시료수·분석항목·수량·단가를 정상 입력합니다.</li>
-      <li>검토 화면에서 현장명이 새 현장명으로 표시되는지 확인합니다.</li>
-      <li><code>btn최종저장</code>을 한 번만 누릅니다.</li>
-      <li>처리 중에는 버튼을 다시 누르지 않습니다.</li>
-    </ol>
+    <p>현재 TAT SharePoint 사이트에서 새 빈 목록을 만듭니다.</p>
+    <p><strong>목록 이름:</strong> <code>업체마스터</code></p>
   </div>
 
-  <h2>2. 저장 직후 확인</h2>
+  <h2>2. 열 구성</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>표시 이름</th><th>형식</th><th>설정</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>제목</td><td>한 줄 텍스트</td><td>기본 열 유지, 업체명 입력</td></tr>
+        <tr><td>기본계산서업체</td><td>조회(Lookup)</td><td>원본 목록: 계산서업체마스터 / 원본 열: 제목 / 단일 값</td></tr>
+        <tr><td>사용여부</td><td>예/아니요</td><td>기본값: 예</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>3. 이번 단계 확인</h2>
   <div class="card ok">
     <ol>
-      <li>Power Apps에 성공 알림이 표시되고 완료 화면으로 이동합니다.</li>
-      <li>새 접수번호가 정상 발급됩니다.</li>
-      <li>접수헤더가 정확히 1건 생성됩니다.</li>
-      <li>접수헤더의 <code>업체/현장</code> Lookup이 선택한 새 현장을 가리킵니다.</li>
-      <li>접수헤더의 <code>계산서 업체</code> Lookup이 화면 표시값과 일치합니다.</li>
-      <li>접수항목상세 건수와 입력 분석항목이 일치하고 접수헤더 Lookup이 정상입니다.</li>
-      <li>9월 접수이므로 접수시료항목매핑이 시료별 선택 내용과 일치합니다.</li>
+      <li><code>업체마스터</code> 목록이 생성됐습니다.</li>
+      <li>위 세 열의 이름과 형식이 정확합니다.</li>
+      <li><code>기본계산서업체</code>에서 계산서업체마스터의 업체를 선택할 수 있습니다.</li>
+      <li><code>사용여부</code>의 새 행 기본값이 예입니다.</li>
     </ol>
   </div>
 
-  <h2>3. Flow와 결과 파일 확인</h2>
-  <div class="card ok">
-    <ol>
-      <li><code>TAT_결과파일생성_App</code> 실행이 성공합니다.</li>
-      <li>결과 폴더와 Excel 파일이 한 번씩만 생성됩니다.</li>
-      <li>접수헤더의 결과 폴더·Excel 이름과 경로가 채워집니다.</li>
-      <li>Excel의 업체/현장명과 접수번호가 실제 입력값과 일치합니다.</li>
-      <li>중복 헤더·상세·매핑·폴더·Excel이 없습니다.</li>
-    </ol>
-  </div>
-
-  <h2>4. 알려줄 결과</h2>
   <div class="card">
-    <ul>
-      <li>발급된 접수번호와 접수헤더 ID</li>
-      <li>접수항목상세 건수</li>
-      <li>접수시료항목매핑 건수</li>
-      <li>Flow 성공/실패</li>
-      <li>결과 폴더·Excel 생성 여부</li>
-      <li>업체/현장 Lookup과 계산서 업체 Lookup 정상 여부</li>
-    </ul>
+    목록만 생성한 뒤 결과를 알려주세요. 다음 단계에서 Power Apps에 업체마스터 데이터 원본을 추가하고 <code>cmb업체</code>를 전환합니다. 업체 데이터를 수작업으로 대량 입력하는 작업은 아직 하지 않습니다.
   </div>
 </body>
 </html>
