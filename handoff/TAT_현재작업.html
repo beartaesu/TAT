@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-02 Power Apps 업체마스터 연결</title>
+  <title>TAT 현재작업 - TAT-03A 업체·계산서 업체 고유 조합 읽기</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -17,100 +17,79 @@
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-02 Power Apps 업체마스터 연결</h1>
+  <h1>TAT 현재작업 — TAT-03A 업체·계산서 업체 고유 조합 읽기</h1>
 
   <div class="card warn">
-    <strong>이번 작업은 데이터 원본 추가와 cmb업체 네 속성만 변경합니다.</strong><br>
-    <code>cmb현장</code>, <code>btn현장추가저장</code>, <code>btn최종저장</code>은 변경하거나 실행하지 않습니다. 업체 데이터를 수작업으로 대량 입력하지 않습니다.
+    <strong>이번 작업은 읽기 전용 사전검사입니다.</strong><br>
+    별도 수동 Flow를 새로 만들고 기존 Excel 표를 읽기만 합니다. SharePoint의 <strong>항목 만들기</strong>·<strong>항목 업데이트</strong> 작업은 추가하지 말고, 기존 이관 Flow도 수정하지 않습니다. 실행 결과나 MYBOX 파일에 실제 업체명·계산서 업체명을 남기지 않습니다.
   </div>
 
-  <h2>1. 데이터 원본 추가</h2>
+  <h2>1. 별도 수동 Flow 생성</h2>
   <div class="card">
     <ol>
-      <li>Power Apps Studio에서 현재 TAT 앱을 엽니다.</li>
-      <li>왼쪽 <strong>데이터</strong>에서 <strong>데이터 추가</strong>를 선택합니다.</li>
-      <li>현재 TAT SharePoint 연결에서 <code>업체마스터</code>를 찾아 추가합니다.</li>
-      <li>데이터 목록에 <code>업체마스터</code>가 표시되는지 확인합니다.</li>
+      <li>Power Automate에서 <strong>인스턴트 클라우드 흐름</strong>을 만듭니다.</li>
+      <li>흐름 이름은 <code>TAT_업체기본청구처_사전검사</code>로 입력합니다.</li>
+      <li>트리거는 <strong>수동으로 흐름 트리거</strong>를 선택합니다.</li>
     </ol>
   </div>
 
-  <h2>2. 정확한 위치</h2>
+  <h2>2. 기존 Excel 원천 전체 읽기</h2>
   <div class="card">
-    <p><code>scr접수기본정보 &gt; con접수기본전체 &gt; con접수기본본문 &gt; con접수기본카드 &gt; con접수기본행2 &gt; con업체영역 &gt; cmb업체</code></p>
+    <ol>
+      <li>Excel Online (Business)의 <strong>테이블에 있는 행 나열</strong>을 추가합니다.</li>
+      <li>작업 이름을 <code>업체계산서원천행조회</code>로 바꿉니다.</li>
+      <li>위치와 문서 라이브러리는 현재 TAT 파일이 있는 SharePoint 사이트와 <code>문서</code>를 선택합니다.</li>
+      <li>파일은 직접 입력하지 말고 선택기를 열어 루트의 <code>개발용</code> 파일을 선택합니다.</li>
+      <li>테이블은 <code>tblTATMigration</code>을 선택합니다.</li>
+      <li>필터 쿼리·정렬 기준·위쪽 개수·건너뛸 개수는 모두 비워 둡니다.</li>
+      <li>작업의 <strong>설정</strong>에서 페이지 매김을 켜고 임계값을 <code>10000</code>으로 지정합니다.</li>
+    </ol>
   </div>
 
-  <h2>3. cmb업체 전체 속성 교체</h2>
+  <h2>3. 원천 행 수 계산</h2>
   <div class="card">
-    <p><strong>Items</strong> — 기존 수식 전체 삭제 후 교체</p>
-    <pre>SortByColumns(
-    AddColumns(
-        Filter(
-            업체마스터,
-            사용여부 = true
-        ),
-        DisplayName,
-        제목
-    ),
-    "Title",
-    SortOrder.Ascending
-)</pre>
-
-    <p><strong>DisplayFields</strong> — 기존 값 전체 교체</p>
-    <pre>["DisplayName"]</pre>
-
-    <p><strong>SearchFields</strong> — 기존 값 전체 교체</p>
-    <pre>["DisplayName"]</pre>
-
-    <p><strong>DefaultSelectedItems</strong> — 기존 수식 전체 삭제 후 교체</p>
-    <pre>With(
-    {
-        loc업체목록:
-            AddColumns(
-                Filter(
-                    업체마스터,
-                    사용여부 = true
-                ),
-                DisplayName,
-                제목
-            )
-    },
-    If(
-        var완료접수수정모드 || var이어쓰기,
-        With(
-            {
-                loc기존현장:
-                    LookUp(
-                        현장마스터,
-                        ID = var저장헤더.'업체/현장'.Id
-                    )
-            },
-            Filter(
-                loc업체목록,
-                제목 = Coalesce(
-                    loc기존현장.업체명복사,
-                    loc기존현장.제목
-                )
-            )
-        ),
-        Filter(
-            loc업체목록,
-            ID = -1
-        )
-    )
-)</pre>
+    <p>데이터 작업의 <strong>작성(Compose)</strong>을 추가하고 이름을 <code>업체계산서원천행수</code>로 바꾼 뒤, 입력의 <strong>식</strong>에 아래 전체 표현식을 넣습니다.</p>
+    <pre>length(body('업체계산서원천행조회')?['value'])</pre>
   </div>
 
-  <h2>4. 이번 단계 검증</h2>
+  <h2>4. 업체·계산서 업체 두 열만 선택</h2>
+  <div class="card">
+    <ol>
+      <li>데이터 작업의 <strong>선택(Select)</strong>을 추가하고 이름을 <code>업체계산서조합선택</code>으로 바꿉니다.</li>
+      <li><strong>보낸 사람(From)</strong>의 식에 아래 표현식을 넣습니다.</li>
+    </ol>
+    <pre>body('업체계산서원천행조회')?['value']</pre>
+    <p>매핑은 다음 두 행만 만듭니다.</p>
+    <ul>
+      <li>키 <code>업체명</code> / 값의 식 <code>item()?['업체']</code></li>
+      <li>키 <code>계산서업체명</code> / 값의 식 <code>item()?['계산서 업체']</code></li>
+    </ul>
+  </div>
+
+  <h2>5. 고유 조합과 건수 계산</h2>
+  <div class="card">
+    <p>데이터 작업의 <strong>작성(Compose)</strong>을 추가하고 이름을 <code>업체계산서고유조합</code>으로 바꾼 뒤 아래 전체 표현식을 넣습니다.</p>
+    <pre>union(
+  body('업체계산서조합선택'),
+  body('업체계산서조합선택')
+)</pre>
+
+    <p>작성(Compose)을 하나 더 추가하고 이름을 <code>업체계산서고유조합건수</code>로 바꾼 뒤 아래 전체 표현식을 넣습니다.</p>
+    <pre>length(outputs('업체계산서고유조합'))</pre>
+  </div>
+
+  <h2>6. 저장·실행 및 이번 단계 검증</h2>
   <div class="card ok">
     <ol>
-      <li><code>업체마스터</code> 데이터 원본이 정상 추가됐습니다.</li>
-      <li>위 네 속성에 빨간 수식 오류가 없습니다.</li>
-      <li>새 대규모 데이터 위임 경고가 없습니다.</li>
-      <li>현재 업체마스터가 비어 있으므로 <code>cmb업체</code>가 빈 목록인 것은 정상입니다.</li>
-      <li>다른 컨트롤과 <code>btn최종저장</code>은 변경하거나 실행하지 않았습니다.</li>
+      <li>흐름을 저장하고 수동으로 한 번 실행합니다.</li>
+      <li>전체 Flow가 <strong>성공</strong>인지 확인합니다.</li>
+      <li><code>업체계산서원천행수</code> 출력이 0보다 큰 숫자인지 확인합니다.</li>
+      <li><code>업체계산서고유조합건수</code> 출력이 0보다 큰 숫자인지 확인합니다.</li>
+      <li>Flow 트리에 SharePoint 항목 만들기·업데이트 작업이 없는지 확인합니다.</li>
+      <li>실제 업체명·계산서 업체명은 복사하거나 전달하지 않습니다.</li>
     </ol>
   </div>
 
-  <p>위 결과만 알려주세요. 다음 TAT-03에서 기존 Excel의 업체 + 계산서 업체 조합을 읽기 전용으로 집계하며 SharePoint에는 아직 쓰지 않습니다.</p>
+  <p><strong>회신할 내용:</strong> Flow 성공 여부, 원천 행 수, 고유 조합 건수, SharePoint 쓰기 작업 없음 여부만 알려주세요. 다음 TAT-03B에서 업체별 1:1·1:N·공란·계산서업체마스터 미일치를 분리합니다.</p>
 </body>
 </html>
