@@ -3,81 +3,166 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-04A 안전적재 Flow 복사 및 사전검사</title>
+  <title>TAT 현재작업 - TAT-04B 정상 후보 27개 안전 적재</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
+    body { max-width: 960px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
     h1, h2 { color: #102a43; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .warn { border-left: 5px solid #d9822b; }
+    .danger { border-left: 5px solid #c53030; }
     .ok { border-left: 5px solid #18864b; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #cbd5e0; padding: 9px; text-align: left; vertical-align: top; }
+    th { background: #edf2f7; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
     pre { white-space: pre-wrap; background: #101827; color: #f3f7ff; border-radius: 9px; padding: 14px; overflow-wrap: anywhere; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-04A 안전적재 Flow 복사 및 사전검사</h1>
+  <h1>TAT 현재작업 — TAT-04B 정상 후보 27개 안전 적재</h1>
 
-  <div class="card warn">
-    <strong>이번 단계는 여전히 읽기 전용입니다.</strong><br>
-    검증된 기존 Flow는 보존하고 별도 복사본을 만든 뒤 <code>업체마스터</code>의 현재 건수만 확인합니다. SharePoint 항목 만들기·업데이트는 아직 추가하지 않습니다.
+  <div class="card danger">
+    <strong>이번 단계에서 처음으로 SharePoint 업체마스터에 27개 항목을 생성합니다.</strong><br>
+    반드시 복사본 <code>TAT_업체마스터_안전적재</code>만 수정합니다. 안전 게이트와 업체별 중복 확인을 모두 구성하고 저장한 뒤 한 번만 실행합니다. 일부만 생성되거나 실패하면 임의 삭제·재실행하지 말고 결과 건수만 보고합니다.
   </div>
 
-  <h2>완료된 분류 기준</h2>
+  <h2>확인된 실행 전 기준</h2>
   <div class="card ok">
     <ul>
-      <li>원천 7,032행, 고유 조합 166건</li>
-      <li>공란 1건, 유효 조합 165건</li>
-      <li>업체 163개: 1:1 후보 161개, 1:N 예외 2개</li>
-      <li>1:1 후보의 계산서업체마스터 대조: 정상 27개, 미일치 134개, 중복 0개</li>
-      <li>모든 분류 합계 검증 <code>true</code></li>
+      <li><code>계산서마스터분류합계검증 = true</code></li>
+      <li><code>업체마스터사전건수 = 0</code></li>
+      <li><code>var계산서마스터정상후보</code> 길이 = 27</li>
+      <li>미일치 134개·1:N 2개·공란 1개는 이번 생성 대상에서 제외</li>
     </ul>
   </div>
 
-  <h2>1. 검증된 Flow를 별도 복사</h2>
+  <h2>1. 생성 건수 변수 초기화</h2>
   <div class="card">
-    <ol>
-      <li>Power Automate의 기존 <code>TAT_업체기본청구처_사전검사</code> 상세 화면을 엽니다.</li>
-      <li><strong>다른 이름으로 저장(Save As)</strong>을 사용해 복사본을 만듭니다.</li>
-      <li>복사본 이름은 <code>TAT_업체마스터_안전적재</code>로 지정합니다.</li>
-      <li>원본 <code>TAT_업체기본청구처_사전검사</code>는 수정하지 않습니다.</li>
-      <li>복사본 편집 화면에서 기존 마지막 결과가 <code>계산서마스터분류합계검증 = true</code>가 되는 검증본과 동일한지 확인합니다.</li>
-    </ol>
+    <p><code>업체마스터사전건수</code> 바로 아래 최상위 단계에 <strong>변수 초기화</strong>를 추가합니다.</p>
+    <ul>
+      <li>작업 표시 이름: <code>업체마스터생성건수초기화</code></li>
+      <li>Name: <code>var업체마스터생성건수</code></li>
+      <li>Type: <code>Integer</code></li>
+      <li>Value: 숫자 <code>0</code></li>
+    </ul>
   </div>
 
-  <h2>2. 업체마스터 현재 행 조회</h2>
+  <h2>2. 쓰기 전 안전 게이트</h2>
   <div class="card">
-    <p>복사본의 마지막 <code>계산서마스터분류합계검증</code> 바로 아래 최상위 단계에 SharePoint <strong>2개 이상의 항목 가져오기(Get items)</strong>를 추가하고 이름을 <code>업체마스터사전조회</code>로 바꿉니다.</p>
+    <p>변수 초기화 바로 아래에 <strong>조건</strong>을 추가하고 이름을 <code>업체마스터안전적재조건</code>으로 바꿉니다. 고급식 또는 조건 전체 fx에 아래 표현식을 사용합니다.</p>
+    <pre>and(
+  equals(outputs('계산서마스터분류합계검증'), true),
+  equals(length(body('업체마스터사전조회')?['value']), 0),
+  equals(length(variables('var계산서마스터정상후보')), 27)
+)</pre>
+    <p>이 조건의 <strong>True 안에서만</strong> 다음 3~5번 작업을 만듭니다.</p>
+
+    <p><strong>False 분기:</strong> 컨트롤의 <strong>종료(Terminate)</strong>를 추가합니다.</p>
+    <ul>
+      <li>이름: <code>업체마스터안전적재차단</code></li>
+      <li>상태: <code>실패(Failed)</code></li>
+      <li>코드: <code>TAT04_GATE_BLOCKED</code></li>
+      <li>메시지: <code>분류검증, 업체마스터 공란, 정상후보 27개 중 하나 이상이 일치하지 않아 적재를 차단했습니다.</code></li>
+    </ul>
+  </div>
+
+  <h2>3. True 안에 정상 후보 반복 추가</h2>
+  <div class="card">
+    <p><strong>각각에 적용(Apply to each)</strong>을 추가하고 이름을 <code>업체마스터안전후보반복</code>으로 바꿉니다.</p>
+    <p>반복 입력의 fx 식:</p>
+    <pre>variables('var계산서마스터정상후보')</pre>
+    <p>동시성 제어는 켜지 않고 기본 순차 실행으로 둡니다.</p>
+  </div>
+
+  <h2>4. 반복 안에서 같은 업체 제목 재확인</h2>
+  <div class="card">
+    <p><code>업체마스터안전후보반복</code> 안에 SharePoint <strong>2개 이상의 항목 가져오기(Get items)</strong>를 추가하고 이름을 <code>업체마스터업체중복조회</code>로 바꿉니다.</p>
     <ul>
       <li>사이트 주소: 현재 TAT SharePoint 사이트</li>
       <li>목록 이름: <code>업체마스터</code></li>
-      <li>위쪽 개수(Top Count): <code>2</code></li>
-      <li>필터 쿼리·정렬·폴더 제한·중첩 항목 제한: 모두 비움</li>
+      <li>필터 쿼리: 아래 fx 식 전체</li>
+      <li>위쪽 개수: <code>2</code></li>
     </ul>
-    <p>이 작업은 존재 여부만 확인하므로 최대 2건만 읽습니다.</p>
+    <pre>concat(
+  'Title eq ''',
+  replace(
+    items('업체마스터안전후보반복')?['업체명'],
+    '''',
+    ''''''
+  ),
+  ''''
+)</pre>
+
+    <p>조회 아래에 조건을 추가하고 이름을 <code>업체마스터업체미존재조건</code>으로 바꿉니다.</p>
+    <ul>
+      <li>왼쪽 fx: <code>length(body('업체마스터업체중복조회')?['value'])</code></li>
+      <li>연산자: 다음과 같음</li>
+      <li>오른쪽 숫자: <code>0</code></li>
+    </ul>
   </div>
 
-  <h2>3. 업체마스터 사전 건수 계산</h2>
+  <h2>5. 미존재 True에서 업체 생성</h2>
   <div class="card">
-    <p><code>업체마스터사전조회</code> 바로 아래에 작성(Compose)을 추가하고 이름을 <code>업체마스터사전건수</code>로 바꿉니다.</p>
-    <p>입력의 <strong>fx 식</strong>에 아래 전체 표현식을 넣습니다.</p>
-    <pre>length(body('업체마스터사전조회')?['value'])</pre>
+    <p><code>업체마스터업체미존재조건</code>의 <strong>True</strong>에 SharePoint <strong>항목 만들기(Create item)</strong>를 추가하고 이름을 <code>업체마스터생성</code>으로 바꿉니다.</p>
+    <table>
+      <thead><tr><th>업체마스터 입력 필드</th><th>입력값</th></tr></thead>
+      <tbody>
+        <tr><td><code>제목</code></td><td>fx <code>items('업체마스터안전후보반복')?['업체명']</code></td></tr>
+        <tr><td><code>기본계산서업체 Id</code></td><td>fx <code>int(items('업체마스터안전후보반복')?['계산서업체ID'])</code></td></tr>
+        <tr><td><code>사용여부</code></td><td><code>예</code> 또는 Boolean <code>true</code></td></tr>
+      </tbody>
+    </table>
+    <p>Power Automate에 Lookup 필드가 <code>기본계산서업체 Id</code>로 표시되는 항목을 사용합니다. 이름이 다른 필드를 추측해 선택하지 않습니다.</p>
+
+    <p><code>업체마스터생성</code> 바로 아래 같은 True 분기에 <strong>변수 증가(Increment variable)</strong>를 추가합니다.</p>
+    <ul>
+      <li>Name: <code>var업체마스터생성건수</code></li>
+      <li>Value: 숫자 <code>1</code></li>
+    </ul>
+
+    <p><strong>업체마스터업체미존재조건의 False:</strong> 작성(Compose)을 추가합니다.</p>
+    <ul>
+      <li>이름: <code>업체마스터중복차단</code></li>
+      <li>입력 고정 문구: <code>같은 업체 제목이 이미 존재하여 이 항목은 생성하지 않았습니다.</code></li>
+    </ul>
+    <p>예상치 못한 중복이 있으면 해당 항목만 생성되지 않아 최종 생성 검증이 <code>false</code>가 됩니다. 이 경우 임의 삭제·재실행하지 않습니다.</p>
   </div>
 
-  <h2>4. 저장·실행 및 검증</h2>
+  <h2>6. 반복이 끝난 뒤 사후 건수와 최종 검증</h2>
+  <div class="card">
+    <p><code>업체마스터안전후보반복</code>이 끝난 아래쪽, 안전 게이트 <strong>True 분기 안</strong>에 SharePoint <strong>2개 이상의 항목 가져오기</strong>를 추가합니다.</p>
+    <ul>
+      <li>이름: <code>업체마스터사후조회</code></li>
+      <li>목록: <code>업체마스터</code></li>
+      <li>위쪽 개수: <code>100</code></li>
+      <li>필터·정렬: 비움</li>
+    </ul>
+
+    <p>작성(Compose) 세 개를 순서대로 추가합니다.</p>
+    <table>
+      <thead><tr><th>작업 이름</th><th>입력 fx 식</th></tr></thead>
+      <tbody>
+        <tr><td><code>업체마스터생성건수</code></td><td><code>variables('var업체마스터생성건수')</code></td></tr>
+        <tr><td><code>업체마스터사후건수</code></td><td><code>length(body('업체마스터사후조회')?['value'])</code></td></tr>
+        <tr><td><code>업체마스터생성검증</code></td><td><code>and(equals(variables('var업체마스터생성건수'), 27), equals(length(body('업체마스터사후조회')?['value']), 27))</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>7. 저장 후 한 번만 실행</h2>
   <div class="card ok">
     <ol>
-      <li>복사본 Flow를 저장하고 수동으로 한 번 실행합니다.</li>
-      <li>전체 Flow가 성공인지 확인합니다.</li>
-      <li><code>계산서마스터분류합계검증</code>이 <code>true</code>인지 확인합니다.</li>
-      <li><code>업체마스터사전건수</code>를 확인합니다. 현재 예상값은 <code>0</code>입니다.</li>
-      <li>0이 아니면 아무것도 삭제하거나 수정하지 말고 건수만 보고합니다.</li>
-      <li>Flow 트리에 SharePoint 항목 만들기·업데이트 작업이 없는지 확인합니다.</li>
-      <li>실제 업체명·계산서 업체명·ID·배열 내용은 전달하지 않습니다.</li>
+      <li>전체 구조를 저장합니다. 저장 오류가 있으면 실행하지 않습니다.</li>
+      <li>Flow를 수동으로 <strong>한 번만</strong> 실행합니다.</li>
+      <li>성공 시 생성 건수 27, 사후 건수 27, 생성 검증 <code>true</code>인지 확인합니다.</li>
+      <li>SharePoint 업체마스터에서 중복 업체가 없고 기본계산서업체 Lookup과 사용여부가 채워졌는지 표본 몇 건만 회사 PC에서 확인합니다.</li>
+      <li>실제 업체명·계산서 업체명·ID는 대화나 MYBOX에 올리지 않습니다.</li>
+      <li>실패·부분 생성 시 업체마스터 항목을 삭제하거나 Flow를 재실행하지 말고, 성공/실패 작업명과 생성·사후 건수만 보고합니다.</li>
     </ol>
   </div>
 
-  <p><strong>회신할 내용:</strong> 복사본 Flow 생성 여부, 전체 성공 여부, 계산서마스터 합계 검증값, 업체마스터 사전 건수, SharePoint 쓰기 작업 없음 여부만 알려주세요.</p>
+  <p><strong>회신할 내용:</strong> Flow 성공 여부, 업체마스터 생성 건수, 사후 건수, 생성 검증값, 중복 없음 여부, Lookup·사용여부 표본 정상 여부만 알려주세요.</p>
 </body>
 </html>
