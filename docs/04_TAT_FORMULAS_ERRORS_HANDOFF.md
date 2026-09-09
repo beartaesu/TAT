@@ -773,6 +773,9 @@ and(
 - 최신 재개 단계는 TAT-04A다. 검증된 사전검사 Flow를 별도 `TAT_업체마스터_안전적재` Flow로 복사하고, SharePoint `업체마스터` 최대 2건 읽기와 건수 작성만 추가해 실제 0건인지 확인한다. 이 단계에서는 SharePoint 항목 만들기·업데이트를 추가하지 않는다.
 - 2026-09-09 TAT-04A 실제 검증 완료: 안전적재 복사본 Flow 성공, 계산서마스터 분류 합계 `true`, `업체마스터사전건수 = 0`, SharePoint 쓰기 없음.
 - 최신 재개 단계는 TAT-04B다. 분류 합계 true·업체마스터 0건·정상후보 27개 안전 게이트와 업체별 제목 중복 0건 조건을 모두 만족할 때만 `업체마스터`에 제목·기본계산서업체 Lookup ID·사용여부 예를 생성한다. 생성 건수와 사후 목록 건수 27을 검증하며, 부분 실패·재실행 시 사전 건수 게이트로 쓰기를 차단한다.
+- 2026-09-09 사용자가 원천 Excel을 9월 8일까지의 데이터로 갱신했다. 따라서 이전 검증의 원천 7,032행·고유 조합 166건·정상후보 27개 등 모든 고정 건수는 과거 스냅샷이며 현재 업체마스터 적재 기준으로 사용 금지다. TAT-04B 쓰기를 중단하고 최신 원천 전체를 읽기 전용으로 재집계한다.
+- 같은 시점 TAT-04B 저장 시 `업체마스터업체중복조회`가 템플릿에 정의되지 않은 반복 `업체마스터안전후보반복`을 참조한다는 `InvalidTemplate` 오류가 발생했다. 반복 작업의 내부 이름 불일치 또는 조회 작업의 반복 범위 밖 배치 문제다. Flow가 저장되지 않아 실행·SharePoint 쓰기는 없었다. 최신 재집계 전에는 이 쓰기 Flow 오류를 교정하거나 실행하지 않는다.
+- 최신 재개 단계는 TAT-03R이다. 원본 읽기 전용 `TAT_업체기본청구처_사전검사`를 최신 Excel에 한 번 실행해 전체 집계·분류·계산서마스터 대조 건수와 모든 합계 검증값을 다시 확정한다.
 - 최신 `btn최종저장.OnSelect` 직접 현장 레코드 교정본: [`formulas/scr검토저장_btn최종저장_OnSelect.powerfx`](../formulas/scr검토저장_btn최종저장_OnSelect.powerfx). 현재 파일 실물에서 교체한 구형 `cmb현장.Selected` 참조는 총 7곳이다. `'업체/현장'` 2곳은 `{Id: cmb현장.Selected.ID, Value: cmb현장.Selected.제목}`, `'계산서 업체'` 2곳은 `cmb현장.Selected.'계산서 업체 연결'`, Flow 현장명 3곳은 `Text(cmb현장.Selected.제목)`으로 변경했다.
 - 회사 전달 전체 수식: [`handoff/TAT_btn최종저장_OnSelect.txt`](../handoff/TAT_btn최종저장_OnSelect.txt), 1,372줄, SHA-256 `66FF138E5975CDC31DC58AFA3C85ED53EF5ADE4F9FC7E7AEAFCED8D718EABDE5`. 현재 상태는 저장소 정적 교정 완료·Power Apps 적용 전 미검증이다.
 - Power Apps 적용 후 `btn최종저장.OnSelect`은 수식 오류가 없었으나 `scr검토저장 > lbl검토현장.Text`에 `cmb현장.Selected.Value` 이름 오류가 남았다. 최신 전체 수식은 [`formulas/scr검토저장_lbl검토현장_Text.powerfx`](../formulas/scr검토저장_lbl검토현장_Text.powerfx)의 `cmb현장.Selected.제목`이다. 따라서 직접 레코드 전환 영향 범위는 최종저장 7곳 + 표시 레이블 1곳 = 총 8곳이다.
