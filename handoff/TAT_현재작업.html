@@ -3,48 +3,136 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-05 scr접수기본정보 업체명복사 교정 전 확인</title>
+  <title>TAT 현재작업 - TAT-06 현장 추가 저장 전체 수식 교체</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
+    body { max-width: 980px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
     h1, h2 { color: #102a43; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
     .warn { border-left: 5px solid #d9822b; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
+    pre { white-space: pre-wrap; background: #101827; color: #f3f7ff; border-radius: 9px; padding: 14px; overflow-wrap: anywhere; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-05 scr접수기본정보 업체명복사 교정 전 확인</h1>
+  <h1>TAT 현재작업 — TAT-06 btn현장추가저장.OnSelect 전체 교체</h1>
 
-  <div class="card ok">
-    <strong>이 문제는 기존 TAT-05·06에 이미 기록되어 있습니다.</strong><br>
-    새 태스크를 추가하지 않습니다. 현재 <code>cmb업체</code>는 <code>업체마스터</code> 레코드를 반환하므로 구버전의 <code>cmb업체.Selected.업체명복사</code>와 <code>cmb업체.Selected.'계산서 업체 연결'</code>은 재사용하면 안 됩니다.
-  </div>
-
-  <h2>교정 방향</h2>
-  <div class="card">
-    <ul>
-      <li>선택 업체명: <code>cmb업체.Selected.제목</code></li>
-      <li>업체의 기본 청구처: <code>cmb업체.Selected.기본계산서업체</code></li>
-      <li>현장 필터: <code>현장마스터.업체명복사</code>와 선택 업체의 <code>제목</code> 비교</li>
-      <li>신규 현장 저장: 선택 업체의 제목을 <code>업체명복사</code>에 저장하고 기본계산서업체 Lookup을 승계</li>
-    </ul>
-  </div>
-
-  <h2>이번 단일 작업 — 현재 전체값 확인</h2>
   <div class="card warn">
-    <p>아직 수식을 교체하거나 저장 버튼을 실행하지 않습니다. Power Apps에서 아래 정확한 위치와 속성의 <strong>현재 전체 수식</strong>만 확인합니다.</p>
-    <ol>
-      <li><code>scr접수기본정보 &gt; con접수기본전체 &gt; con접수기본본문 &gt; con접수기본카드 &gt; con접수기본행2 &gt; con현장영역 &gt; cmb현장.Items</code></li>
-      <li>같은 <code>cmb현장.DefaultSelectedItems</code></li>
-      <li><code>con계산서업체영역 &gt; txt계산서업체.Default</code></li>
-      <li><code>scr접수기본정보</code>의 현장 추가 팝업 안 <code>btn현장추가저장.OnSelect</code></li>
-    </ol>
-    <p>업체명이나 현장명 같은 실제 데이터는 포함하지 않고 수식만 MYBOX에 올립니다.</p>
+    <strong>이번 단계에서는 실제 현장을 생성하지 않습니다.</strong><br>
+    전체 수식을 교체하고 앱을 저장한 뒤 오류·위임 경고만 확인합니다. 현장 추가 저장 버튼은 아직 누르지 않습니다.
   </div>
 
-  <p><strong>회신할 내용:</strong> 위 네 속성의 현재 전체 수식을 올린 파일명과, 현재 Power Apps에 빨간 오류·위임 경고가 있는지만 알려주세요.</p>
+  <h2>정확한 위치</h2>
+  <div class="card">
+    <p><code>scr접수기본정보</code>의 현장 추가 팝업 안 <code>btn현장추가저장 &gt; OnSelect</code></p>
+  </div>
+
+  <h2>OnSelect 전체 교체 수식</h2>
+  <div class="card">
+    <pre>With(
+    {
+        loc업체명: Trim(Text(cmb업체.Selected.제목)),
+        loc현장명: Trim(txt현장추가명.Text),
+        loc계산서업체ID: cmb업체.Selected.기본계산서업체.Id,
+        loc계산서업체명: cmb업체.Selected.기본계산서업체.Value
+    },
+    If(
+        IsBlank(cmb업체.Selected) || IsBlank(loc업체명),
+        Notify(
+            "업체를 먼저 선택해 주세요.",
+            NotificationType.Error
+        ),
+        IsBlank(loc현장명),
+        Notify(
+            "현장명을 입력해 주세요.",
+            NotificationType.Error
+        ),
+        IsBlank(loc계산서업체ID),
+        Notify(
+            "선택한 업체에 기본 계산서 업체가 연결되어 있지 않습니다. 업체마스터를 확인해 주세요.",
+            NotificationType.Error
+        ),
+        Set(var현장저장성공, false);
+        Set(var신규현장ID, 0);
+
+        ClearCollect(
+            col동일업체현장,
+            FirstN(
+                Filter(
+                    현장마스터,
+                    업체명복사 = loc업체명 &amp;&amp;
+                    제목 = loc현장명
+                ),
+                2
+            )
+        );
+
+        If(
+            CountRows(col동일업체현장) &gt; 1,
+            Notify(
+                "같은 업체에 동일한 현장명이 2건 이상 있습니다. 현장마스터를 확인해 주세요.",
+                NotificationType.Error
+            ),
+            CountRows(col동일업체현장) = 1,
+            Set(
+                var신규현장ID,
+                First(col동일업체현장).ID
+            );
+            Set(var현장저장성공, true),
+            IfError(
+                Set(
+                    var신규현장ID,
+                    Patch(
+                        현장마스터,
+                        Defaults(현장마스터),
+                        {
+                            제목: loc현장명,
+                            업체명복사: loc업체명,
+                            기본현장여부: false,
+                            '계산서 업체 연결': {
+                                Id: loc계산서업체ID,
+                                Value: loc계산서업체명
+                            }
+                        }
+                    ).ID
+                );
+                Set(var현장저장성공, true),
+                Notify(
+                    "현장 저장 중 오류가 발생했습니다: " &amp; FirstError.Message,
+                    NotificationType.Error
+                )
+            )
+        );
+
+        If(
+            var현장저장성공,
+            Refresh(현장마스터);
+            Reset(cmb현장);
+            Reset(txt현장추가명);
+            Set(var현장추가패널, false);
+            Notify(
+                "현장이 선택되었습니다.",
+                NotificationType.Success
+            )
+        )
+    )
+)</pre>
+  </div>
+
+  <h2>저장 후 확인</h2>
+  <div class="card ok">
+    <ol>
+      <li>OnSelect 기존 수식 전체를 위 수식으로 교체합니다.</li>
+      <li>앱을 저장합니다.</li>
+      <li>해당 속성과 앱 검사에서 빨간 수식 오류가 없는지 확인합니다.</li>
+      <li>위임 경고가 없는지 확인합니다.</li>
+      <li><strong>현장 추가 저장 버튼은 누르지 않습니다.</strong></li>
+      <li>SharePoint <code>현장마스터</code> 건수가 변경되지 않았는지 확인합니다.</li>
+    </ol>
+  </div>
+
+  <p><strong>회신할 내용:</strong> 수식 적용·저장 성공 여부, 빨간 오류·위임 경고 유무, 현장 추가 미실행 및 현장마스터 건수 유지 여부만 알려주세요.</p>
 </body>
 </html>

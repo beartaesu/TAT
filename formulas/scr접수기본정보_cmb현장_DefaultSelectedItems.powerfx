@@ -1,0 +1,23 @@
+If(
+    var신규현장ID > 0,
+    AddColumns(
+        Filter(
+            현장마스터,
+            ID = var신규현장ID
+        ),
+        DisplayName,
+        제목
+    ),
+    If(
+        var완료접수수정모드 || var이어쓰기,
+        AddColumns(
+            Filter(
+                현장마스터,
+                ID = var저장헤더.'업체/현장'.Id
+            ),
+            DisplayName,
+            제목
+        ),
+        Blank()
+    )
+)
