@@ -3,58 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-04C 업체마스터 27건 직접 검증</title>
+  <title>TAT 현재작업 - TAT-04D 업체·현장 관리 빈 화면 생성</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
     h1, h2 { color: #102a43; }
     .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
-    .danger { border-left: 5px solid #c53030; }
+    .warn { border-left: 5px solid #d9822b; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-04C 업체마스터 27건 직접 검증</h1>
+  <h1>TAT 현재작업 — TAT-04D 업체·현장 관리 빈 화면 생성</h1>
 
-  <div class="card danger">
-    <strong><code>TAT_업체마스터_안전적재</code> Flow는 다시 실행하지 않습니다.</strong><br>
-    전체 Flow 성공과 사전 0·생성 27·사후 27·검증 true가 이미 확인됐습니다. 이번에는 SharePoint에 생성된 결과만 읽어서 확인합니다.
+  <div class="card warn">
+    <strong>이번 단계에는 데이터 쓰기가 없습니다.</strong><br>
+    별도 관리 화면의 빈 화면만 만들고 이름을 확정합니다. 컨트롤·수식·탐색 버튼·<code>Patch</code>는 아직 추가하지 않습니다.
   </div>
 
-  <h2>확인 완료된 Flow 결과</h2>
+  <h2>확정된 화면 목적</h2>
   <div class="card ok">
-    <ul>
-      <li><code>계산서마스터분류합계검증 = true</code></li>
-      <li><code>업체마스터사전건수 = 0</code></li>
-      <li><code>업체마스터생성건수 = 27</code></li>
-      <li><code>업체마스터사후건수 = 27</code></li>
-      <li><code>업체마스터생성검증 = true</code></li>
-    </ul>
-  </div>
-
-  <h2>1. 전체 건수와 중복 확인</h2>
-  <div class="card">
     <ol>
-      <li>SharePoint의 <code>업체마스터</code> 목록을 엽니다.</li>
-      <li>전체 항목 수가 <strong>27건</strong>인지 확인합니다.</li>
-      <li><code>제목</code> 열을 오름차순 정렬하여 같은 업체 제목이 중복으로 생성되지 않았는지 확인합니다.</li>
-      <li>항목을 삭제하거나 수정하지 않습니다.</li>
+      <li>신규 업체를 먼저 생성하면서 기본 계산서업체를 지정합니다.</li>
+      <li>생성되거나 선택된 업체 아래에 현장을 생성합니다.</li>
+      <li>현장에는 업체명과 업체의 기본 계산서업체를 승계합니다.</li>
     </ol>
   </div>
 
-  <h2>2. 표본 필드 확인</h2>
+  <h2>이번 단일 작업</h2>
   <div class="card">
-    <p>서로 다른 임의의 항목 몇 건을 열어 다음만 확인합니다.</p>
-    <ul>
-      <li><code>제목</code>: 비어 있지 않음</li>
-      <li><code>기본계산서업체</code>: Lookup 값이 연결되어 있음</li>
-      <li><code>사용여부</code>: 예</li>
-    </ul>
-    <p>실제 업체명·계산서 업체명·ID는 대화나 MYBOX에 기록하지 않습니다.</p>
+    <ol>
+      <li>Power Apps Studio에서 현재 TAT 앱을 엽니다.</li>
+      <li>왼쪽 트리의 <strong>새 화면</strong>에서 <strong>빈 화면(Blank)</strong>을 하나 추가합니다.</li>
+      <li>새 화면 이름을 정확히 <code>scr업체현장관리</code>로 변경합니다.</li>
+      <li>앱을 저장합니다.</li>
+      <li>화면 트리에 <code>scr업체현장관리</code>가 하나만 존재하고 빨간 오류·경고가 없는지 확인합니다.</li>
+    </ol>
   </div>
 
-  <p><strong>회신할 내용:</strong> 전체 27건 여부, 제목 중복 없음 여부, 확인한 표본 수, 표본의 제목 비공란·Lookup 연결·사용여부 예가 모두 정상인지 알려주세요.</p>
+  <div class="card warn">
+    <strong>아직 하지 않을 작업:</strong> 레이아웃 컨테이너, 입력 컨트롤, 갤러리, 업체·현장 저장식, 화면 이동 버튼을 만들지 않습니다.
+  </div>
+
+  <p><strong>회신할 내용:</strong> <code>scr업체현장관리</code> 생성·저장 성공 여부와 오류·경고 유무만 알려주세요.</p>
 </body>
 </html>
