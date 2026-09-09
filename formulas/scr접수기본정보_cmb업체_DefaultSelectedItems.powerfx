@@ -1,0 +1,43 @@
+With(
+    {
+        loc업체목록:
+            ShowColumns(
+                AddColumns(
+                    Filter(
+                        업체마스터,
+                        사용여부 = true
+                    ),
+                    Value,
+                    Text(제목)
+                ),
+                ID,
+                제목,
+                기본계산서업체,
+                사용여부,
+                Value
+            )
+    },
+    If(
+        var완료접수수정모드 || var이어쓰기,
+        With(
+            {
+                loc기존현장:
+                    LookUp(
+                        현장마스터,
+                        ID = var저장헤더.'업체/현장'.Id
+                    )
+            },
+            Filter(
+                loc업체목록,
+                Value = Coalesce(
+                    loc기존현장.업체명복사,
+                    loc기존현장.제목
+                )
+            )
+        ),
+        Filter(
+            loc업체목록,
+            ID = -1
+        )
+    )
+)

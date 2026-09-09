@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-06A 실제 현장 1건 최초 생성</title>
+  <title>TAT 현재작업 - TAT-06B 실제 현장 1건 최초 생성</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-06A 실제 현장 1건 최초 생성</h1>
+  <h1>TAT 현재작업 — TAT-06B 실제 현장 1건 최초 생성</h1>
 
   <div class="card danger">
     <strong>이번 단계에서 SharePoint 현장마스터에 실제 항목 1건을 생성합니다.</strong><br>
@@ -26,17 +26,17 @@
   <h2>실행 전 기준</h2>
   <div class="card ok">
     <ul>
-      <li><code>btn현장추가저장.OnSelect</code> 전체 수식 적용·저장 완료</li>
-      <li>빨간 수식 오류 없음</li>
-      <li>위임 경고 없음</li>
-      <li>선택할 업체의 <code>기본계산서업체</code> Lookup 연결 완료</li>
+      <li>업체 콤보에 업체명이 정상 표시되고 검색 가능</li>
+      <li><code>DefaultSelectedItems</code> 오류 제거</li>
+      <li><code>btn현장추가저장.OnSelect</code> 업체마스터 기반 전체 수식 적용 완료</li>
+      <li>빨간 수식 오류와 위임 경고 없음</li>
     </ul>
   </div>
 
   <h2>1. 실제 필요한 신규 현장 선택</h2>
   <div class="card">
     <ol>
-      <li><code>scr접수기본정보</code>에서 업체마스터의 기존 업체 한 곳을 선택합니다.</li>
+      <li><code>scr접수기본정보</code>에서 기존 업체 한 곳을 선택합니다.</li>
       <li>현장 목록에 해당 업체의 현장이 아직 없는지 확인합니다.</li>
       <li>현장 추가 패널을 열고 실제 필요한 현장명을 입력합니다.</li>
       <li>실제 업체명과 현장명은 대화나 MYBOX에 기록하지 않습니다.</li>

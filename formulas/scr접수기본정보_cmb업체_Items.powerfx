@@ -1,0 +1,19 @@
+Sort(
+    ShowColumns(
+        AddColumns(
+            Filter(
+                업체마스터,
+                사용여부 = true
+            ),
+            Value,
+            Text(제목)
+        ),
+        ID,
+        제목,
+        기본계산서업체,
+        사용여부,
+        Value
+    ),
+    Value,
+    SortOrder.Ascending
+)
