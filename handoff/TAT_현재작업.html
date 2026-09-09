@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-04B 안전적재 Flow 반복 참조 교정·저장</title>
+  <title>TAT 현재작업 - TAT-04B 작업명 오타 교정·저장</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -18,11 +18,11 @@
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-04B 안전적재 Flow 반복 참조 교정·저장</h1>
+  <h1>TAT 현재작업 — TAT-04B 작업명 오타 교정·저장</h1>
 
   <div class="card danger">
     <strong>이번 단계에서는 Flow를 실행하지 않습니다.</strong><br>
-    반복 참조를 교정한 뒤 <strong>저장 성공만</strong> 확인합니다. 실행하면 최초로 SharePoint <code>업체마스터</code> 쓰기가 발생할 수 있으므로 실행은 다음 확인 전까지 금지합니다.
+    작업명 참조의 오타만 교정한 뒤 <strong>저장 성공만</strong> 확인합니다. 실행하면 최초로 SharePoint <code>업체마스터</code> 쓰기가 발생할 수 있으므로 실행은 다음 확인 전까지 금지합니다.
   </div>
 
   <h2>확정된 안전 기준</h2>
@@ -34,40 +34,23 @@
     </ul>
   </div>
 
-  <h2>1. 반복 안쪽 구조 확인</h2>
+  <h2>1. 확인된 원인</h2>
+  <div class="card">
+    <p>정확한 작업명은 <code>업체마스터업체중복조회</code>인데 참조에 <code>체마스터업체중복조회</code>로 입력하여 맨 앞의 <code>업</code>이 빠졌습니다.</p>
+    <p>반복 구조 문제가 아니므로 작업 위치나 반복 항목 식을 변경하지 않습니다.</p>
+  </div>
+
+  <h2>2. 오타만 교정</h2>
   <div class="card">
     <ol>
       <li><code>TAT_업체마스터_안전적재</code>를 편집합니다.</li>
-      <li><code>업체마스터업체중복조회</code>와 <code>업체마스터생성</code>이 모두 <code>업체마스터안전후보반복</code> 안쪽에 있는지 확인합니다.</li>
-      <li>두 작업이 반복 바깥에 있으면 반복 안쪽으로 옮긴 뒤 아래 식을 적용합니다.</li>
+      <li>오타가 있는 참조 <code>체마스터업체중복조회</code>를 찾습니다.</li>
+      <li>맨 앞에 <code>업</code>을 추가하여 <code>업체마스터업체중복조회</code>와 정확히 일치시킵니다.</li>
+      <li>앞서 안내된 <code>item()</code> 식 교체는 적용하지 않습니다. 이미 적용했다면 저장하지 말고 기존 식으로 되돌립니다.</li>
     </ol>
   </div>
 
-  <h2>2. 업체마스터업체중복조회 필터 쿼리 전체 교체</h2>
-  <div class="card">
-    <p><strong>필터 쿼리</strong>의 기존 식 전체를 다음 식으로 교체합니다.</p>
-    <pre><code>concat(
-  'Title eq ''',
-  replace(
-    item()?['업체명'],
-    '''',
-    ''''''
-  ),
-  ''''
-)</code></pre>
-    <p><code>items('업체마스터안전후보반복')</code>은 남기지 않습니다.</p>
-  </div>
-
-  <h2>3. 업체마스터생성 입력값 교체</h2>
-  <div class="card">
-    <ul>
-      <li><strong>제목</strong> → 식: <code>item()?['업체명']</code></li>
-      <li><strong>기본계산서업체 Id</strong> → 식: <code>int(item()?['계산서업체ID'])</code></li>
-      <li><strong>사용여부</strong> → <code>true</code></li>
-    </ul>
-  </div>
-
-  <h2>4. 안전 게이트 식 유지</h2>
+  <h2>3. 안전 게이트 식 유지</h2>
   <div class="card">
     <p>조건의 전체 식은 아래와 같아야 합니다.</p>
     <pre><code>and(
@@ -77,7 +60,7 @@
 )</code></pre>
   </div>
 
-  <h2>5. 저장만 확인</h2>
+  <h2>4. 저장만 확인</h2>
   <div class="card danger">
     <ol>
       <li>Flow를 <strong>저장</strong>합니다.</li>
@@ -87,6 +70,6 @@
     </ol>
   </div>
 
-  <p><strong>회신할 내용:</strong> 저장 성공 여부, 두 작업이 반복 안쪽에 있는지, 저장 오류가 없는지, <code>업체마스터</code>가 계속 0건인지 알려주세요. 실제 업체명·계산서 업체명·ID는 전달하지 않습니다.</p>
+  <p><strong>회신할 내용:</strong> 오타 교정 후 저장 성공 여부, 저장 오류가 없는지, <code>업체마스터</code>가 계속 0건인지 알려주세요. 실제 업체명·계산서 업체명·ID는 전달하지 않습니다.</p>
 </body>
 </html>
