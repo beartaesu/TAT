@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-04B 정상후보 27개 안전적재 1회 실행</title>
+  <title>TAT 현재작업 - TAT-04C 업체마스터 27건 직접 검증</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -16,41 +16,16 @@
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-04B 정상후보 27개 안전적재 1회 실행</h1>
+  <h1>TAT 현재작업 — TAT-04C 업체마스터 27건 직접 검증</h1>
 
   <div class="card danger">
-    <strong>이번 실행에서 처음으로 SharePoint 업체마스터에 항목이 생성됩니다.</strong><br>
-    저장된 <code>TAT_업체마스터_안전적재</code>를 한 번만 실행합니다. 실패하거나 일부만 생성되면 항목을 삭제·수정하거나 Flow를 다시 실행하지 않습니다.
+    <strong><code>TAT_업체마스터_안전적재</code> Flow는 다시 실행하지 않습니다.</strong><br>
+    전체 Flow 성공과 사전 0·생성 27·사후 27·검증 true가 이미 확인됐습니다. 이번에는 SharePoint에 생성된 결과만 읽어서 확인합니다.
   </div>
 
-  <h2>1. 실행 직전 마지막 확인</h2>
-  <div class="card ok">
-    <ol>
-      <li>SharePoint <code>업체마스터</code>가 0건인지 확인합니다. 0건이 아니면 실행하지 않습니다.</li>
-      <li><code>업체마스터안전적재조건</code>이 아래 세 칸으로 구성됐는지 확인합니다.
-        <ul>
-          <li>왼쪽: 기존 <code>and(...)</code> 전체 fx 식</li>
-          <li>가운데: <code>다음과 같음</code></li>
-          <li>오른쪽: 따옴표 없는 fx Boolean <code>true</code></li>
-        </ul>
-      </li>
-      <li>Flow 구조와 식을 추가로 수정하지 않습니다.</li>
-    </ol>
-  </div>
-
-  <h2>2. 수동으로 한 번만 실행</h2>
-  <div class="card">
-    <ol>
-      <li><code>TAT_업체마스터_안전적재</code>를 수동으로 한 번 실행합니다.</li>
-      <li>실행 중이거나 결과 확인 중에는 다시 실행하지 않습니다.</li>
-      <li>실행이 끝난 뒤 아래 출력값을 확인합니다.</li>
-    </ol>
-  </div>
-
-  <h2>3. 정상 완료 기준</h2>
+  <h2>확인 완료된 Flow 결과</h2>
   <div class="card ok">
     <ul>
-      <li>전체 Flow: <strong>성공</strong></li>
       <li><code>계산서마스터분류합계검증 = true</code></li>
       <li><code>업체마스터사전건수 = 0</code></li>
       <li><code>업체마스터생성건수 = 27</code></li>
@@ -59,20 +34,27 @@
     </ul>
   </div>
 
-  <h2>4. SharePoint 확인</h2>
+  <h2>1. 전체 건수와 중복 확인</h2>
   <div class="card">
     <ol>
-      <li><code>업체마스터</code> 전체 항목이 27건인지 확인합니다.</li>
-      <li>같은 업체 제목이 중복 생성되지 않았는지 확인합니다.</li>
-      <li>임의의 몇 건에서 제목이 비어 있지 않고, <code>기본계산서업체</code> Lookup이 연결됐으며, <code>사용여부</code>가 예인지 확인합니다.</li>
-      <li>실제 업체명·계산서 업체명·ID는 대화나 MYBOX에 올리지 않습니다.</li>
+      <li>SharePoint의 <code>업체마스터</code> 목록을 엽니다.</li>
+      <li>전체 항목 수가 <strong>27건</strong>인지 확인합니다.</li>
+      <li><code>제목</code> 열을 오름차순 정렬하여 같은 업체 제목이 중복으로 생성되지 않았는지 확인합니다.</li>
+      <li>항목을 삭제하거나 수정하지 않습니다.</li>
     </ol>
   </div>
 
-  <div class="card danger">
-    <strong>실패 또는 부분 생성 시:</strong> 업체마스터 항목을 삭제·수정하지 말고 Flow도 재실행하지 않습니다. 실패한 작업 이름과 확인 가능한 생성건수·사후건수만 알려주세요.
+  <h2>2. 표본 필드 확인</h2>
+  <div class="card">
+    <p>서로 다른 임의의 항목 몇 건을 열어 다음만 확인합니다.</p>
+    <ul>
+      <li><code>제목</code>: 비어 있지 않음</li>
+      <li><code>기본계산서업체</code>: Lookup 값이 연결되어 있음</li>
+      <li><code>사용여부</code>: 예</li>
+    </ul>
+    <p>실제 업체명·계산서 업체명·ID는 대화나 MYBOX에 기록하지 않습니다.</p>
   </div>
 
-  <p><strong>회신할 내용:</strong> Flow 성공 여부, 분류 합계 검증값, 사전 건수, 생성 건수, 사후 건수, 생성 검증값, 목록 27건 여부, 중복 없음 여부, Lookup·사용여부 표본 정상 여부만 알려주세요.</p>
+  <p><strong>회신할 내용:</strong> 전체 27건 여부, 제목 중복 없음 여부, 확인한 표본 수, 표본의 제목 비공란·Lookup 연결·사용여부 예가 모두 정상인지 알려주세요.</p>
 </body>
 </html>
