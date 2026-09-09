@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-04B 정상후보 27개 최초 안전적재</title>
+  <title>TAT 현재작업 - TAT-04B 안전 게이트 오른쪽 Boolean 교정·저장</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -12,72 +12,54 @@
     .danger { border-left: 5px solid #c53030; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
+    pre { overflow-x: auto; background: #eef2f7; padding: 14px; border-radius: 8px; }
+    pre code { padding: 0; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-04B 정상후보 27개 최초 안전적재</h1>
+  <h1>TAT 현재작업 — TAT-04B 안전 게이트 오른쪽 Boolean 교정·저장</h1>
 
   <div class="card danger">
-    <strong>이번 단계에서 처음으로 SharePoint 업체마스터에 항목이 생성됩니다.</strong><br>
-    저장 완료된 <code>TAT_업체마스터_안전적재</code>를 더 수정하지 않고 <strong>한 번만 실행</strong>합니다. 실패하거나 일부만 생성되면 항목을 삭제하거나 재실행하지 않습니다.
+    <strong>이번 단계에서는 Flow를 다시 실행하지 않습니다.</strong><br>
+    조건 오른쪽의 누락값만 추가하고 저장합니다. 직전 실행은 False 분기의 종료로 차단됐으므로 업체마스터 생성 작업은 실행되지 않았습니다.
   </div>
 
-  <h2>확인 완료된 실행 전 기준</h2>
+  <h2>확인된 실패 원인</h2>
+  <div class="card">
+    <p><code>업체마스터안전적재조건</code>의 왼쪽은 Boolean을 반환하는 <code>and(...)</code> 식이고 연산자는 <code>다음과 같음</code>인데, 오른쪽 비교값이 비어 있었습니다.</p>
+    <p>오른쪽에는 문자열 <code>"true"</code>가 아니라 <strong>fx 식 Boolean <code>true</code></strong>가 필요합니다.</p>
+  </div>
+
+  <h2>1. 조건 카드 교정</h2>
   <div class="card ok">
-    <ul>
-      <li>9월 8일 최종 데이터 행이 <code>tblTATMigration</code> 내부</li>
-      <li>최신 계산서마스터 정상후보 27개·분류 합계 검증 <code>true</code></li>
-      <li>작업명 참조 오타 교정 후 Flow 저장 오류 없음</li>
-      <li>SharePoint <code>업체마스터</code> 현재 0건</li>
-    </ul>
-  </div>
-
-  <h2>1. 실행 직전 확인</h2>
-  <div class="card">
     <ol>
-      <li><code>TAT_업체마스터_안전적재</code>를 엽니다.</li>
-      <li>마지막 저장 이후 Flow 구조나 식을 추가로 변경하지 않습니다.</li>
-      <li>SharePoint <code>업체마스터</code>가 여전히 0건인지 확인합니다.</li>
-      <li>0건이 아니면 실행하지 말고 현재 건수만 알려주세요.</li>
+      <li><code>TAT_업체마스터_안전적재</code>의 <code>업체마스터안전적재조건</code>을 엽니다.</li>
+      <li>왼쪽의 기존 전체 fx 식은 아래와 같은지 확인하고 그대로 유지합니다.</li>
     </ol>
-  </div>
-
-  <h2>2. 수동으로 한 번만 실행</h2>
-  <div class="card">
-    <ol>
-      <li>Flow의 수동 실행을 시작합니다.</li>
-      <li>실행 중이거나 결과 확인 중에는 다시 실행하지 않습니다.</li>
-      <li>전체 실행이 끝난 뒤 아래 출력만 확인합니다.</li>
+    <pre><code>and(
+  equals(outputs('계산서마스터분류합계검증'), true),
+  equals(length(body('업체마스터사전조회')?['value']), 0),
+  equals(length(variables('var계산서마스터정상후보')), 27)
+)</code></pre>
+    <ol start="3">
+      <li>가운데 연산자는 <code>다음과 같음</code>을 유지합니다.</li>
+      <li>오른쪽 입력칸을 선택하고 <strong>fx 식</strong> 탭에서 아래 값만 입력합니다.</li>
     </ol>
+    <pre><code>true</code></pre>
+    <p>따옴표를 붙이지 않습니다. 동적 콘텐츠의 글자값이 아니라 fx 식으로 입력된 Boolean이어야 합니다.</p>
   </div>
 
-  <h2>3. 실행 결과 확인</h2>
-  <div class="card ok">
-    <ul>
-      <li>전체 Flow: <strong>성공</strong></li>
-      <li><code>계산서마스터분류합계검증 = true</code></li>
-      <li><code>업체마스터사전건수 = 0</code></li>
-      <li><code>업체마스터생성건수 = 27</code></li>
-      <li><code>업체마스터사후건수 = 27</code></li>
-      <li><code>업체마스터생성검증 = true</code></li>
-    </ul>
-  </div>
-
-  <h2>4. SharePoint 표본 확인</h2>
-  <div class="card">
-    <ol>
-      <li><code>업체마스터</code> 목록의 전체 항목 수가 27건인지 확인합니다.</li>
-      <li>같은 업체 제목이 중복 생성되지 않았는지 확인합니다.</li>
-      <li>임의의 몇 건에서 제목이 비어 있지 않고, <code>기본계산서업체</code> Lookup이 연결됐으며, <code>사용여부</code>가 예인지 확인합니다.</li>
-      <li>실제 업체명·계산서 업체명·ID는 대화나 MYBOX에 올리지 않습니다.</li>
-    </ol>
-  </div>
-
+  <h2>2. 저장만 확인</h2>
   <div class="card danger">
-    <strong>실패 또는 부분 생성 시:</strong> 업체마스터 항목을 삭제·수정하지 말고 Flow를 재실행하지도 않습니다. 실패한 작업 이름과 확인 가능한 생성건수·사후건수만 알려주세요.
+    <ol>
+      <li>Flow를 저장합니다.</li>
+      <li>저장 오류가 없는지 확인합니다.</li>
+      <li><strong>테스트·실행 버튼은 누르지 않습니다.</strong></li>
+      <li>SharePoint <code>업체마스터</code>가 계속 0건인지 확인합니다.</li>
+    </ol>
   </div>
 
-  <p><strong>회신할 내용:</strong> Flow 성공 여부, 분류 합계 검증값, 사전 건수, 생성 건수, 사후 건수, 생성 검증값, 목록 27건 여부, 중복 없음 여부, Lookup·사용여부 표본 정상 여부만 알려주세요.</p>
+  <p><strong>회신할 내용:</strong> 오른쪽에 fx Boolean <code>true</code> 입력 여부, 저장 성공 여부, 업체마스터 0건 유지 여부만 알려주세요.</p>
 </body>
 </html>
