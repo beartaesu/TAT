@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-03R 최신 Excel 전체 재검증</title>
+  <title>TAT 현재작업 - TAT-04B 안전적재 Flow 반복 참조 교정·저장</title>
   <style>
     :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
     body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
@@ -12,55 +12,81 @@
     .danger { border-left: 5px solid #c53030; }
     .ok { border-left: 5px solid #18864b; }
     code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
+    pre { overflow-x: auto; background: #eef2f7; padding: 14px; border-radius: 8px; }
+    pre code { padding: 0; }
     li { margin: 7px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-03R 최신 Excel 전체 읽기 전용 재검증</h1>
+  <h1>TAT 현재작업 — TAT-04B 안전적재 Flow 반복 참조 교정·저장</h1>
 
   <div class="card danger">
-    <strong>업체마스터 쓰기를 중단합니다.</strong><br>
-    원천 Excel이 2026-09-08 데이터까지 갱신됐으므로 기존 7,032행·166조합·정상후보 27개는 현재 적재 기준으로 사용하지 않습니다. <code>TAT_업체마스터_안전적재</code>는 저장·실행하지 않습니다.
+    <strong>이번 단계에서는 Flow를 실행하지 않습니다.</strong><br>
+    반복 참조를 교정한 뒤 <strong>저장 성공만</strong> 확인합니다. 실행하면 최초로 SharePoint <code>업체마스터</code> 쓰기가 발생할 수 있으므로 실행은 다음 확인 전까지 금지합니다.
   </div>
 
-  <h2>확인된 TAT-04B 오류</h2>
-  <div class="card">
-    <p><code>업체마스터업체중복조회</code>가 템플릿에 없는 반복 이름 <code>업체마스터안전후보반복</code>을 참조해 <code>InvalidTemplate</code> 저장 오류가 발생했습니다.</p>
-    <p>Flow가 저장되지 않았으므로 SharePoint 항목 생성은 실행되지 않았습니다. 최신 건수 확정 전에는 이 오류를 고치거나 쓰기 Flow를 실행하지 않습니다.</p>
-  </div>
-
-  <h2>1. 원본 읽기 전용 Flow 실행</h2>
-  <div class="card">
-    <ol>
-      <li>저장 오류가 난 <code>TAT_업체마스터_안전적재</code> 편집 화면을 닫습니다. 변경 내용을 저장하거나 실행하지 않습니다.</li>
-      <li>원본 <code>TAT_업체기본청구처_사전검사</code>를 엽니다.</li>
-      <li>Flow 트리에 SharePoint 항목 만들기·업데이트가 없는지 다시 확인합니다.</li>
-      <li>Excel <code>업체계산서원천행조회</code>가 갱신된 기존 <code>개발용</code> 파일의 <code>tblTATMigration</code>을 가리키는지 확인합니다.</li>
-      <li>원본 Flow를 수동으로 한 번 실행합니다.</li>
-    </ol>
-  </div>
-
-  <h2>2. 최신 집계값 확인</h2>
+  <h2>확정된 안전 기준</h2>
   <div class="card ok">
-    <p>실행 기록에서 아래 출력의 숫자 또는 Boolean만 확인합니다.</p>
-    <ol>
-      <li><code>업체계산서원천행수</code></li>
-      <li><code>업체계산서고유조합건수</code></li>
-      <li><code>업체계산서공란조합건수</code></li>
-      <li><code>업체계산서유효조합건수</code></li>
-      <li><code>업체고유건수</code></li>
-      <li><code>업체일대일후보건수</code></li>
-      <li><code>업체일대다예외건수</code></li>
-      <li><code>조합분류합계검증</code></li>
-      <li><code>업체분류합계검증</code></li>
-      <li><code>계산서마스터정상후보건수</code></li>
-      <li><code>계산서마스터미일치건수</code></li>
-      <li><code>계산서마스터중복건수</code></li>
-      <li><code>계산서마스터분류합계검증</code></li>
-    </ol>
-    <p>전체 Flow도 성공이어야 합니다. 배열의 실제 업체명·계산서 업체명·ID는 열어보거나 전달하지 않습니다.</p>
+    <ul>
+      <li>9월 8일 최종 데이터 행은 <code>tblTATMigration</code> 내부</li>
+      <li>최신 계산서마스터 정상후보: <strong>27개</strong></li>
+      <li>SharePoint <code>업체마스터</code> 사전 건수: <strong>0개</strong></li>
+    </ul>
   </div>
 
-  <p><strong>회신할 내용:</strong> 위 13개 출력값, 전체 Flow 성공 여부, SharePoint 쓰기 작업 없음 여부만 알려주세요. 최신 숫자를 확인한 뒤 TAT-04B의 고정 건수와 반복 참조를 새 기준으로 다시 작성합니다.</p>
+  <h2>1. 반복 안쪽 구조 확인</h2>
+  <div class="card">
+    <ol>
+      <li><code>TAT_업체마스터_안전적재</code>를 편집합니다.</li>
+      <li><code>업체마스터업체중복조회</code>와 <code>업체마스터생성</code>이 모두 <code>업체마스터안전후보반복</code> 안쪽에 있는지 확인합니다.</li>
+      <li>두 작업이 반복 바깥에 있으면 반복 안쪽으로 옮긴 뒤 아래 식을 적용합니다.</li>
+    </ol>
+  </div>
+
+  <h2>2. 업체마스터업체중복조회 필터 쿼리 전체 교체</h2>
+  <div class="card">
+    <p><strong>필터 쿼리</strong>의 기존 식 전체를 다음 식으로 교체합니다.</p>
+    <pre><code>concat(
+  'Title eq ''',
+  replace(
+    item()?['업체명'],
+    '''',
+    ''''''
+  ),
+  ''''
+)</code></pre>
+    <p><code>items('업체마스터안전후보반복')</code>은 남기지 않습니다.</p>
+  </div>
+
+  <h2>3. 업체마스터생성 입력값 교체</h2>
+  <div class="card">
+    <ul>
+      <li><strong>제목</strong> → 식: <code>item()?['업체명']</code></li>
+      <li><strong>기본계산서업체 Id</strong> → 식: <code>int(item()?['계산서업체ID'])</code></li>
+      <li><strong>사용여부</strong> → <code>true</code></li>
+    </ul>
+  </div>
+
+  <h2>4. 안전 게이트 식 유지</h2>
+  <div class="card">
+    <p>조건의 전체 식은 아래와 같아야 합니다.</p>
+    <pre><code>and(
+  equals(outputs('계산서마스터분류합계검증'), true),
+  equals(length(body('업체마스터사전조회')?['value']), 0),
+  equals(length(variables('var계산서마스터정상후보')), 27)
+)</code></pre>
+  </div>
+
+  <h2>5. 저장만 확인</h2>
+  <div class="card danger">
+    <ol>
+      <li>Flow를 <strong>저장</strong>합니다.</li>
+      <li><code>InvalidTemplate</code> 또는 다른 저장 오류가 없는지 확인합니다.</li>
+      <li><strong>테스트·실행 버튼은 누르지 않습니다.</strong></li>
+      <li>SharePoint <code>업체마스터</code>가 계속 0건인지 확인합니다.</li>
+    </ol>
+  </div>
+
+  <p><strong>회신할 내용:</strong> 저장 성공 여부, 두 작업이 반복 안쪽에 있는지, 저장 오류가 없는지, <code>업체마스터</code>가 계속 0건인지 알려주세요. 실제 업체명·계산서 업체명·ID는 전달하지 않습니다.</p>
 </body>
 </html>
