@@ -1,0 +1,6 @@
+If(
+    IsBlank(Trim(txt업체관리업체명.Text)) ||
+    IsBlank(cmb업체관리기본계산서업체.Selected.ID),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)

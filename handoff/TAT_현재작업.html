@@ -2,73 +2,55 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재작업 - TAT-06B 실제 현장 1건 최초 생성</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TAT 현재작업 - 접수 업체 현장 계산서 업체 연동 검증</title>
   <style>
-    :root { color-scheme: light; font-family: "Malgun Gothic", sans-serif; }
-    body { max-width: 920px; margin: 32px auto; padding: 0 20px 48px; color: #172033; background: #f5f7fb; line-height: 1.55; }
-    h1, h2 { color: #102a43; }
-    .card { background: #fff; border: 1px solid #d9e0eb; border-radius: 12px; padding: 18px; margin: 14px 0; }
-    .danger { border-left: 5px solid #c53030; }
-    .ok { border-left: 5px solid #18864b; }
-    code { font-family: Consolas, monospace; background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
-    li { margin: 7px 0; }
+    body{max-width:900px;margin:32px auto;padding:0 20px 48px;font-family:"Malgun Gothic",sans-serif;color:#172033;background:#f5f7fb;line-height:1.6}
+    h1,h2{color:#102a43}.card{background:#fff;border:1px solid #d9e0eb;border-radius:12px;padding:18px;margin:14px 0}.warn{border-left:5px solid #c53030}.ok{border-left:5px solid #18864b}code{font-family:Consolas,monospace;background:#eef2f7;padding:2px 5px;border-radius:4px}li{margin:8px 0}
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — TAT-06B 실제 현장 1건 최초 생성</h1>
+  <h1>TAT 현재작업 — 접수 업체·현장·계산서 업체 연동 검증</h1>
 
-  <div class="card danger">
-    <strong>이번 단계에서 SharePoint 현장마스터에 실제 항목 1건을 생성합니다.</strong><br>
-    실제로 필요한 현장 하나만 사용하고 저장 버튼은 한 번만 누릅니다. 실패하거나 일부만 반영되면 삭제·수정하거나 다시 누르지 않습니다.
-  </div>
-
-  <h2>실행 전 기준</h2>
   <div class="card ok">
-    <ul>
-      <li>업체 콤보에 업체명이 정상 표시되고 검색 가능</li>
-      <li><code>DefaultSelectedItems</code> 오류 제거</li>
-      <li><code>btn현장추가저장.OnSelect</code> 업체마스터 기반 전체 수식 적용 완료</li>
-      <li>빨간 수식 오류와 위임 경고 없음</li>
-    </ul>
+    TAT-06 추가 현장 저장과 시험 데이터 정리가 완료됐습니다. 이번에는 기존 두 현장으로 접수 화면의 선택·표시 연동만 회귀 검증합니다.
   </div>
 
-  <h2>1. 실제 필요한 신규 현장 선택</h2>
+  <h2>검증 위치</h2>
+  <div class="card"><code>scr접수기본정보 &gt; con접수기본행2</code></div>
+
+  <h2>검증 순서</h2>
   <div class="card">
     <ol>
-      <li><code>scr접수기본정보</code>에서 기존 업체 한 곳을 선택합니다.</li>
-      <li>현장 목록에 해당 업체의 현장이 아직 없는지 확인합니다.</li>
-      <li>현장 추가 패널을 열고 실제 필요한 현장명을 입력합니다.</li>
-      <li>실제 업체명과 현장명은 대화나 MYBOX에 기록하지 않습니다.</li>
+      <li>신규 접수 상태에서 <code>cmb업체</code>의 업체 1건을 선택합니다.</li>
+      <li><code>cmb현장</code>에 기본 현장이 자동 선택되는지 확인합니다.</li>
+      <li><code>txt계산서업체</code>에 연결된 계산서 업체명이 표시되는지 확인합니다.</li>
+      <li><code>cmb현장</code>에서 기존 추가 현장을 선택합니다.</li>
+      <li><code>txt계산서업체</code>가 공란이 되지 않고 같은 계산서 업체명을 유지하는지 확인합니다.</li>
+      <li><code>cmb현장</code>에서 기본 현장을 다시 선택할 수 있는지 확인합니다.</li>
+      <li>전체 과정에서 빨간 수식 오류와 노란 위임 경고가 없는지 확인합니다.</li>
     </ol>
   </div>
 
-  <h2>2. 저장 버튼 한 번 실행</h2>
-  <div class="card">
-    <ol>
-      <li><code>btn현장추가저장</code>을 한 번만 누릅니다.</li>
-      <li><code>현장이 선택되었습니다.</code> 성공 알림이 표시되는지 확인합니다.</li>
-      <li>패널이 닫히고 생성된 현장이 <code>cmb현장</code>에 자동 선택되는지 확인합니다.</li>
-      <li><code>txt계산서업체</code>에 선택 업체의 기본 계산서업체가 표시되는지 확인합니다.</li>
-    </ol>
-  </div>
-
-  <h2>3. SharePoint 직접 확인</h2>
-  <div class="card ok">
-    <p><code>현장마스터</code>에서 방금 생성된 한 행을 확인합니다.</p>
+  <div class="card warn">
+    <strong>이번 단계에서 하지 않는 작업</strong>
     <ul>
-      <li><code>제목</code>: 입력한 현장명</li>
-      <li><code>업체명복사</code>: 선택한 업체명</li>
-      <li><code>기본현장여부</code>: 아니요</li>
-      <li><code>계산서 업체 연결</code>: 선택 업체의 기본계산서업체 Lookup</li>
-      <li>전체 건수: 실행 전보다 정확히 1건 증가</li>
+      <li>수식 또는 SharePoint 데이터 변경</li>
+      <li>현장 추가·저장</li>
+      <li><code>btn접수기본다음</code> 실행</li>
+      <li>실제 업체명·현장명·계산서 업체명 회신</li>
     </ul>
   </div>
 
-  <div class="card danger">
-    <strong>실패·부분 생성 시:</strong> 같은 버튼을 다시 누르거나 생성 행을 삭제·수정하지 않습니다. 오류 문구, 성공 알림 여부, 현장마스터 증가 건수만 알려주세요.
+  <h2>회신 형식</h2>
+  <div class="card">
+    <ul>
+      <li>기본 현장 자동 선택: 됨 / 안 됨</li>
+      <li>기본 현장 계산서 업체 표시: 정상 / 공란·오류</li>
+      <li>추가 현장 계산서 업체 표시: 정상·동일 / 공란·다름</li>
+      <li>기본 현장 재선택: 가능 / 불가</li>
+      <li>오류·위임 경고: 없음 / 있음</li>
+    </ul>
   </div>
-
-  <p><strong>회신할 내용:</strong> 성공 알림, 자동 선택, 계산서업체 표시, 현장마스터 1건 증가, 제목·업체명복사·기본현장여부·계산서 업체 연결 정상 여부만 알려주세요.</p>
 </body>
 </html>

@@ -1,0 +1,5 @@
+If(
+    IsBlank(Trim(Text(cmb업체.Selected.Value))),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)

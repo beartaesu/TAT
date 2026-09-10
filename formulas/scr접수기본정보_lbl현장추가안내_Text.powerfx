@@ -1,0 +1,4 @@
+"선택 업체: " & Coalesce(
+    cmb업체.Selected.Value,
+    ""
+)

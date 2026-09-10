@@ -4,6 +4,11 @@ Refresh(
 
 With(
     {
+        loc선택현장:
+            LookUp(
+                현장마스터,
+                ID = cmb현장.Selected.ID
+            ),
         var입력시료명수:
             CountRows(
                 Filter(
@@ -56,18 +61,18 @@ With(
             NotificationType.Warning
         ),
 
-        IsBlank(cmb현장.Selected),
+        IsBlank(loc선택현장),
 
         Notify(
             "업체/현장을 선택해 주세요.",
             NotificationType.Warning
         ),
 
-        IsBlank(cmb현장.Selected.'계산서 업체 연결'),
+        IsBlank(loc선택현장.'계산서 업체 연결'.Id),
 
         Notify(
             "선택한 현장 """ &
-            cmb현장.Selected.제목 &
+            loc선택현장.제목 &
             """에 계산서 업체가 연결되어 있지 않습니다. " &
             "현장마스터에서 계산서 업체를 연결한 후 다시 시도해 주세요.",
             NotificationType.Error

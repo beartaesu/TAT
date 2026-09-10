@@ -1,14 +1,14 @@
 Sort(
     AddColumns(
         If(
-            IsBlank(cmb업체.Selected),
+            IsBlank(cmb업체.Selected.CompanyKey),
             Filter(
                 현장마스터,
                 ID = -1
             ),
             Filter(
                 현장마스터,
-                업체명복사 = cmb업체.Selected.제목
+                업체명키 = cmb업체.Selected.CompanyKey
             )
         ),
         DisplayName,

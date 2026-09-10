@@ -18,6 +18,18 @@ If(
             DisplayName,
             제목
         ),
-        Blank()
+        If(
+            IsBlank(cmb업체.Selected.CompanyKey),
+            Blank(),
+            AddColumns(
+                Filter(
+                    현장마스터,
+                    업체명키 = cmb업체.Selected.CompanyKey &&
+                    기본현장여부 = true
+                ),
+                DisplayName,
+                제목
+            )
+        )
     )
 )

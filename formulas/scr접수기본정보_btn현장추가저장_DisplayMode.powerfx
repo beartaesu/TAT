@@ -1,0 +1,6 @@
+If(
+    IsBlank(Trim(Text(cmb업체.Selected.Value))) ||
+    IsBlank(Trim(txt현장추가명.Text)),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)

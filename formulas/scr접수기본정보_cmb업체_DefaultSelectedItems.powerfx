@@ -4,17 +4,17 @@ With(
             ShowColumns(
                 AddColumns(
                     Filter(
-                        업체마스터,
-                        사용여부 = true
+                        현장마스터,
+                        기본현장여부 = true
                     ),
                     Value,
-                    Text(제목)
+                    Text(업체명복사),
+                    CompanyKey,
+                    Text(업체명키)
                 ),
                 ID,
-                제목,
-                기본계산서업체,
-                사용여부,
-                Value
+                Value,
+                CompanyKey
             )
     },
     If(
@@ -29,10 +29,7 @@ With(
             },
             Filter(
                 loc업체목록,
-                Value = Coalesce(
-                    loc기존현장.업체명복사,
-                    loc기존현장.제목
-                )
+                CompanyKey = Text(loc기존현장.업체명키)
             )
         ),
         Filter(

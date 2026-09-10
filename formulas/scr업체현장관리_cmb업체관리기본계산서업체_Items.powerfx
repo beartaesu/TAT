@@ -1,0 +1,16 @@
+Sort(
+    ShowColumns(
+        AddColumns(
+            Filter(
+                계산서업체마스터,
+                사용여부 = true
+            ),
+            Value,
+            Text(제목)
+        ),
+        ID,
+        Value
+    ),
+    Value,
+    SortOrder.Ascending
+)

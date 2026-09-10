@@ -1,0 +1,14 @@
+With(
+    {
+        loc선택현장:
+            LookUp(
+                현장마스터,
+                ID = cmb현장.Selected.ID
+            )
+    },
+    If(
+        IsBlank(loc선택현장),
+        Blank(),
+        loc선택현장.'계산서 업체 연결'.Value
+    )
+)
