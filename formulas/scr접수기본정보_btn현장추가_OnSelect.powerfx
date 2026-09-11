@@ -1,0 +1,3 @@
+Set(var신규현장ID, 0);
+Reset(txt현장추가명);
+Set(var현장추가패널, true)

@@ -1,3 +1,20 @@
+[1] scr업체현장관리 > btn업체관리저장 > DisplayMode
+
+If(
+    IsBlank(Trim(txt업체관리업체명.Text)) ||
+    If(
+        Text(rad업체관리계산서업체구분.Selected.Value) = "신규 계산서 업체 등록",
+        Not(frm업체관리신규계산서업체.Valid) ||
+        IsBlank(Trim(Text(frm업체관리신규계산서업체.Updates.제목))),
+        IsBlank(cmb업체관리기본계산서업체.Selected.ID)
+    ),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)
+
+
+[2] scr업체현장관리 > btn업체관리저장 > OnSelect
+
 With(
     {
         loc업체명: Trim(txt업체관리업체명.Text),
@@ -5,19 +22,12 @@ With(
             Substitute(
                 Substitute(
                     Substitute(
-                        Substitute(
-                            Trim(txt업체관리업체명.Text),
-                            " ",
-                            ""
-                        ),
-                        "(주)",
-                        ""
+                        Substitute(Trim(txt업체관리업체명.Text), " ", ""),
+                        "(주)", ""
                     ),
-                    "㈜",
-                    ""
+                    "㈜", ""
                 ),
-                "주식회사",
-                ""
+                "주식회사", ""
             )
         ),
         loc신규계산서모드:
@@ -26,24 +36,12 @@ With(
     },
     If(
         IsBlank(loc업체명),
-        Notify(
-            "업체명을 입력해 주세요.",
-            NotificationType.Warning
-        ),
+        Notify("업체명을 입력해 주세요.", NotificationType.Warning),
         IsBlank(loc업체명키),
-        Notify(
-            "법인 표기를 제외한 업체명을 입력해 주세요.",
-            NotificationType.Warning
-        ),
+        Notify("법인 표기를 제외한 업체명을 입력해 주세요.", NotificationType.Warning),
         ClearCollect(
             col업체관리동일업체현장,
-            FirstN(
-                Filter(
-                    현장마스터,
-                    업체명키 = loc업체명키
-                ),
-                2
-            )
+            FirstN(Filter(현장마스터, 업체명키 = loc업체명키), 2)
         );
         ClearCollect(
             col업체관리동일기본현장,
@@ -56,7 +54,6 @@ With(
                 2
             )
         );
-
         If(
             CountRows(col업체관리동일기본현장) > 1,
             Notify(
@@ -80,10 +77,7 @@ With(
                     First(col업체관리동일기본현장).'계산서 업체 연결'.Id,
                     0
                 ) <>
-                Coalesce(
-                    cmb업체관리기본계산서업체.Selected.ID,
-                    0
-                ),
+                Coalesce(cmb업체관리기본계산서업체.Selected.ID, 0),
                 Notify(
                     "기존 기본 현장의 계산서 업체가 현재 선택값과 다릅니다. 저장하지 않고 현장마스터를 확인해 주세요.",
                     NotificationType.Error
@@ -99,9 +93,7 @@ With(
                     {
                         loc신규계산서업체명:
                             Trim(
-                                Text(
-                                    frm업체관리신규계산서업체.Updates.제목
-                                )
+                                Text(frm업체관리신규계산서업체.Updates.제목)
                             )
                     },
                     If(
@@ -131,17 +123,9 @@ With(
                                 "같은 이름의 계산서 업체가 이미 있습니다. 기존 계산서 업체 선택을 사용해 주세요.",
                                 NotificationType.Warning
                             ),
-                            Set(
-                                var업체관리저장업체명,
-                                loc업체명
-                            );
-                            Set(
-                                var업체관리저장업체명키,
-                                loc업체명키
-                            );
-                            SubmitForm(
-                                frm업체관리신규계산서업체
-                            )
+                            Set(var업체관리저장업체명, loc업체명);
+                            Set(var업체관리저장업체명키, loc업체명키);
+                            SubmitForm(frm업체관리신규계산서업체)
                         )
                     )
                 ),
@@ -192,3 +176,66 @@ With(
         )
     )
 )
+
+
+[3] scr업체현장관리 > frm업체관리신규계산서업체 > OnSuccess
+
+If(
+    IsBlank(var업체관리저장업체명) ||
+    IsBlank(var업체관리저장업체명키),
+    Notify(
+        "계산서 업체는 생성됐지만 기본 현장 생성 정보가 없습니다. 저장을 다시 실행하지 말고 현장마스터를 확인해 주세요.",
+        NotificationType.Error
+    ),
+    IfError(
+        Patch(
+            현장마스터,
+            Defaults(현장마스터),
+            {
+                제목: var업체관리저장업체명,
+                업체명복사: var업체관리저장업체명,
+                업체명키: var업체관리저장업체명키,
+                기본현장여부: true,
+                '계산서 업체 연결': {
+                    Id: frm업체관리신규계산서업체.LastSubmit.ID,
+                    Value: frm업체관리신규계산서업체.LastSubmit.제목
+                }
+            }
+        );
+        Refresh(계산서업체마스터);
+        Refresh(현장마스터);
+        Reset(txt업체관리업체명);
+        Reset(cmb업체관리기본계산서업체);
+        ResetForm(frm업체관리신규계산서업체);
+        NewForm(frm업체관리신규계산서업체);
+        Reset(rad업체관리계산서업체구분);
+        Set(var업체관리저장업체명, "");
+        Set(var업체관리저장업체명키, "");
+        Notify(
+            "신규 계산서 업체와 업체 기본 현장을 저장했습니다.",
+            NotificationType.Success
+        ),
+        Notify(
+            "계산서 업체는 생성됐지만 기본 현장 생성에 실패했습니다. 저장을 다시 실행하지 말고 현장마스터를 확인해 주세요: " &
+            FirstError.Message,
+            NotificationType.Error
+        )
+    )
+)
+
+
+[4] scr업체현장관리 > frm업체관리신규계산서업체 > OnFailure
+
+Notify(
+    "신규 계산서 업체 저장에 실패했습니다: " &
+    frm업체관리신규계산서업체.Error,
+    NotificationType.Error
+)
+
+
+[정적 검증]
+- 네 속성 모두 빨간 수식 오류 없음
+- 노란 위임 경고 없음
+- 기존 모드: 업체명 + 기존 계산서 업체 선택 시 저장 버튼 활성
+- 신규 모드: 업체명 + 신규 폼 필수값 충족 시 저장 버튼 활성
+- 이번 단계에서는 저장 버튼을 누르지 않음

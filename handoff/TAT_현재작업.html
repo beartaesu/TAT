@@ -2,59 +2,55 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>TAT 현재작업 - 접수 화면 업체 추가 버튼</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAT 현재 작업 - 9월 9일 이관 시작 번호 확인</title>
   <style>
-    body{max-width:900px;margin:32px auto;padding:0 20px 48px;font-family:"Malgun Gothic",sans-serif;color:#172033;background:#f5f7fb;line-height:1.6}
-    h1,h2{color:#102a43}.card{background:#fff;border:1px solid #d9e0eb;border-radius:12px;padding:18px;margin:14px 0}.warn{border-left:5px solid #c53030}.ok{border-left:5px solid #18864b}code{font-family:Consolas,monospace;background:#eef2f7;padding:2px 5px;border-radius:4px}li{margin:8px 0}
+    body { font-family: "Malgun Gothic", sans-serif; line-height: 1.65; max-width: 920px; margin: 32px auto; padding: 0 20px; color: #222; }
+    h1, h2 { color: #17365d; }
+    .warn { background: #fff4e5; border-left: 5px solid #e69138; padding: 12px 16px; }
+    .ok { background: #eef7ee; border-left: 5px solid #4f8a4f; padding: 12px 16px; }
+    code { background: #f3f3f3; padding: 2px 5px; }
+    li { margin: 6px 0; }
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — 접수 화면 업체 추가 버튼</h1>
+  <h1>9월 9일 이관 시작 번호 읽기 전용 확인</h1>
 
-  <div class="card ok">
-    TAT-09 최종저장 검증은 모두 완료됐습니다. 접수 중 필요한 업체를 바로 등록할 수 있도록 업체 콤보 옆에 관리 화면 진입 버튼 하나를 추가합니다.
-  </div>
+  <p class="ok">업체등록 화면과 실제 신규 저장 검증은 완료됐다. 다음은 이관을 실행하기 전에 번호 경계만 확인하는 단계다.</p>
 
-  <h2>정확한 위치</h2>
-  <div class="card">
-    <p><code>scr접수기본정보 &gt; con접수기본행2 &gt; con업체영역</code></p>
-    <p><code>cmb업체</code>의 다음 컨트롤로 버튼을 추가합니다. 기존 <code>btn현장추가</code>를 복사해 이 컨테이너에 붙여넣으면 같은 스타일을 유지할 수 있습니다.</p>
-  </div>
+  <p class="warn"><strong>이번 단계에서는 저장·수정하지 않는다.</strong> 이관 Flow를 실행하지 않고, SharePoint 행과 접수번호관리 값을 변경하지 않는다.</p>
 
-  <h2>버튼 이름과 속성</h2>
-  <div class="card">
-    <ul>
-      <li>컨트롤 이름: <code>btn업체추가</code></li>
-      <li><code>Text</code>: <code>"업체 추가"</code></li>
-      <li><code>OnSelect</code>: <code>Navigate(scr업체현장관리, ScreenTransition.Fade)</code></li>
-      <li><code>DisplayMode</code>: <code>DisplayMode.Edit</code></li>
-      <li><code>Tooltip</code>: <code>"업체 및 현장 관리"</code></li>
-      <li><code>AccessibleLabel</code>: <code>"업체 추가"</code></li>
-    </ul>
-  </div>
+  <h2>1. 원천 Excel 확인</h2>
+  <ol>
+    <li><code>tblTATMigration</code>에서 9월 9일 이관 대상 범위를 필터링한다.</li>
+    <li>미접수 번호 형식과 측정인 번호 형식을 각각 분리한다.</li>
+    <li>각 구분에서 이관 대상의 가장 이른 접수번호를 확인한다.</li>
+    <li>동일 접수번호가 여러 분석행으로 반복되는 것은 정상이며, 접수번호 자체의 고유 목록으로 판단한다.</li>
+  </ol>
 
-  <h2>검증</h2>
-  <div class="card">
-    <ol>
-      <li>빨간 수식 오류와 노란 위임 경고가 없는지 확인합니다.</li>
-      <li><code>btn업체추가</code>를 눌러 <code>scr업체현장관리</code>로 이동하는지 확인합니다.</li>
-      <li>업체·현장 저장 버튼은 누르지 않습니다.</li>
-    </ol>
-  </div>
+  <h2>2. SharePoint 확인</h2>
+  <ol>
+    <li><code>접수번호관리</code>에서 미접수와 측정인 각각의 현재 마지막 번호를 확인한다.</li>
+    <li><code>접수헤더</code>에서 원천의 첫 대상 접수번호가 이미 존재하는지도 검색한다.</li>
+    <li>목록은 읽기만 하고 값을 변경하지 않는다.</li>
+  </ol>
 
-  <div class="card warn">
-    이번 단계에서는 신규 업체·현장 생성과 기존 데이터 변경을 하지 않습니다. 9월 9일 시험 접수번호 확인은 버튼 검증 완료 후 다음 작업으로 진행합니다.
-  </div>
+  <h2>3. 판정</h2>
+  <ul>
+    <li>원천 첫 번호가 번호관리 마지막 번호 다음 순번이고 접수헤더에 없으면: <strong>연속·신규</strong></li>
+    <li>원천 첫 번호가 번호관리 마지막 번호 이하이면: <strong>중복 또는 번호관리 불일치</strong></li>
+    <li>번호 사이가 비어 있으면: <strong>누락 구간 있음</strong></li>
+    <li>두 번호 체계는 서로 섞지 않고 미접수와 측정인을 각각 판정한다.</li>
+  </ul>
 
-  <h2>회신 형식</h2>
-  <div class="card">
-    <ul>
-      <li>btn업체추가 생성: 완료 / 실패</li>
-      <li>scr업체현장관리 이동: 성공 / 실패</li>
-      <li>오류·위임 경고: 없음 / 있음</li>
-      <li>데이터 저장: 안 함</li>
-    </ul>
-  </div>
+  <h2>결과 회신</h2>
+  <ul>
+    <li>미접수: 연속·신규 / 중복·불일치 / 누락 구간</li>
+    <li>측정인: 연속·신규 / 중복·불일치 / 누락 구간</li>
+    <li>두 첫 대상 번호의 접수헤더 기존 행: 둘 다 없음 / 있음</li>
+    <li>데이터 또는 Flow 실행: 안 함</li>
+  </ul>
+
+  <p>실제 업체명·시료명·담당자와 원천 행 내용은 이 전달 파일이나 회신에 적지 않는다.</p>
 </body>
 </html>

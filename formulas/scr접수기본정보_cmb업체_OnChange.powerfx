@@ -1,0 +1,2 @@
+Set(var신규현장ID, 0);
+Reset(cmb현장)

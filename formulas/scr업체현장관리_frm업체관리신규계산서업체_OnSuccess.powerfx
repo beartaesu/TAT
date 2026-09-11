@@ -1,0 +1,42 @@
+If(
+    IsBlank(var업체관리저장업체명) ||
+    IsBlank(var업체관리저장업체명키),
+    Notify(
+        "계산서 업체는 생성됐지만 기본 현장 생성 정보가 없습니다. 저장을 다시 실행하지 말고 현장마스터를 확인해 주세요.",
+        NotificationType.Error
+    ),
+    IfError(
+        Patch(
+            현장마스터,
+            Defaults(현장마스터),
+            {
+                제목: var업체관리저장업체명,
+                업체명복사: var업체관리저장업체명,
+                업체명키: var업체관리저장업체명키,
+                기본현장여부: true,
+                '계산서 업체 연결': {
+                    Id: frm업체관리신규계산서업체.LastSubmit.ID,
+                    Value: frm업체관리신규계산서업체.LastSubmit.제목
+                }
+            }
+        );
+        Refresh(계산서업체마스터);
+        Refresh(현장마스터);
+        Reset(txt업체관리업체명);
+        Reset(cmb업체관리기본계산서업체);
+        ResetForm(frm업체관리신규계산서업체);
+        NewForm(frm업체관리신규계산서업체);
+        Reset(rad업체관리계산서업체구분);
+        Set(var업체관리저장업체명, "");
+        Set(var업체관리저장업체명키, "");
+        Notify(
+            "신규 계산서 업체와 업체 기본 현장을 저장했습니다.",
+            NotificationType.Success
+        ),
+        Notify(
+            "계산서 업체는 생성됐지만 기본 현장 생성에 실패했습니다. 저장을 다시 실행하지 말고 현장마스터를 확인해 주세요: " &
+            FirstError.Message,
+            NotificationType.Error
+        )
+    )
+)

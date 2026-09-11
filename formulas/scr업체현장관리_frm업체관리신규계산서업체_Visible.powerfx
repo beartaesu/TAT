@@ -1,0 +1,5 @@
+If(
+    Text(rad업체관리계산서업체구분.Selected.Value) = "신규 계산서 업체 등록",
+    true,
+    false
+)

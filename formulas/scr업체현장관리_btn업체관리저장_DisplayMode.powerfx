@@ -1,6 +1,11 @@
 If(
     IsBlank(Trim(txt업체관리업체명.Text)) ||
-    IsBlank(cmb업체관리기본계산서업체.Selected.ID),
+    If(
+        Text(rad업체관리계산서업체구분.Selected.Value) = "신규 계산서 업체 등록",
+        Not(frm업체관리신규계산서업체.Valid) ||
+        IsBlank(Trim(Text(frm업체관리신규계산서업체.Updates.제목))),
+        IsBlank(cmb업체관리기본계산서업체.Selected.ID)
+    ),
     DisplayMode.Disabled,
     DisplayMode.Edit
 )

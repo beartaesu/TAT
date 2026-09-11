@@ -1,0 +1,5 @@
+Notify(
+    "신규 계산서 업체 저장에 실패했습니다: " &
+    frm업체관리신규계산서업체.Error,
+    NotificationType.Error
+)
