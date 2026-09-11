@@ -3,53 +3,57 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>TAT 현재작업 - 접수 업체 현장 계산서 업체 연동 검증</title>
+  <title>TAT 현재작업 - 접수 화면 업체 추가 버튼</title>
   <style>
     body{max-width:900px;margin:32px auto;padding:0 20px 48px;font-family:"Malgun Gothic",sans-serif;color:#172033;background:#f5f7fb;line-height:1.6}
     h1,h2{color:#102a43}.card{background:#fff;border:1px solid #d9e0eb;border-radius:12px;padding:18px;margin:14px 0}.warn{border-left:5px solid #c53030}.ok{border-left:5px solid #18864b}code{font-family:Consolas,monospace;background:#eef2f7;padding:2px 5px;border-radius:4px}li{margin:8px 0}
   </style>
 </head>
 <body>
-  <h1>TAT 현재작업 — 접수 업체·현장·계산서 업체 연동 검증</h1>
+  <h1>TAT 현재작업 — 접수 화면 업체 추가 버튼</h1>
 
   <div class="card ok">
-    TAT-06 추가 현장 저장과 시험 데이터 정리가 완료됐습니다. 이번에는 기존 두 현장으로 접수 화면의 선택·표시 연동만 회귀 검증합니다.
+    TAT-09 최종저장 검증은 모두 완료됐습니다. 접수 중 필요한 업체를 바로 등록할 수 있도록 업체 콤보 옆에 관리 화면 진입 버튼 하나를 추가합니다.
   </div>
 
-  <h2>검증 위치</h2>
-  <div class="card"><code>scr접수기본정보 &gt; con접수기본행2</code></div>
+  <h2>정확한 위치</h2>
+  <div class="card">
+    <p><code>scr접수기본정보 &gt; con접수기본행2 &gt; con업체영역</code></p>
+    <p><code>cmb업체</code>의 다음 컨트롤로 버튼을 추가합니다. 기존 <code>btn현장추가</code>를 복사해 이 컨테이너에 붙여넣으면 같은 스타일을 유지할 수 있습니다.</p>
+  </div>
 
-  <h2>검증 순서</h2>
+  <h2>버튼 이름과 속성</h2>
+  <div class="card">
+    <ul>
+      <li>컨트롤 이름: <code>btn업체추가</code></li>
+      <li><code>Text</code>: <code>"업체 추가"</code></li>
+      <li><code>OnSelect</code>: <code>Navigate(scr업체현장관리, ScreenTransition.Fade)</code></li>
+      <li><code>DisplayMode</code>: <code>DisplayMode.Edit</code></li>
+      <li><code>Tooltip</code>: <code>"업체 및 현장 관리"</code></li>
+      <li><code>AccessibleLabel</code>: <code>"업체 추가"</code></li>
+    </ul>
+  </div>
+
+  <h2>검증</h2>
   <div class="card">
     <ol>
-      <li>신규 접수 상태에서 <code>cmb업체</code>의 업체 1건을 선택합니다.</li>
-      <li><code>cmb현장</code>에 기본 현장이 자동 선택되는지 확인합니다.</li>
-      <li><code>txt계산서업체</code>에 연결된 계산서 업체명이 표시되는지 확인합니다.</li>
-      <li><code>cmb현장</code>에서 기존 추가 현장을 선택합니다.</li>
-      <li><code>txt계산서업체</code>가 공란이 되지 않고 같은 계산서 업체명을 유지하는지 확인합니다.</li>
-      <li><code>cmb현장</code>에서 기본 현장을 다시 선택할 수 있는지 확인합니다.</li>
-      <li>전체 과정에서 빨간 수식 오류와 노란 위임 경고가 없는지 확인합니다.</li>
+      <li>빨간 수식 오류와 노란 위임 경고가 없는지 확인합니다.</li>
+      <li><code>btn업체추가</code>를 눌러 <code>scr업체현장관리</code>로 이동하는지 확인합니다.</li>
+      <li>업체·현장 저장 버튼은 누르지 않습니다.</li>
     </ol>
   </div>
 
   <div class="card warn">
-    <strong>이번 단계에서 하지 않는 작업</strong>
-    <ul>
-      <li>수식 또는 SharePoint 데이터 변경</li>
-      <li>현장 추가·저장</li>
-      <li><code>btn접수기본다음</code> 실행</li>
-      <li>실제 업체명·현장명·계산서 업체명 회신</li>
-    </ul>
+    이번 단계에서는 신규 업체·현장 생성과 기존 데이터 변경을 하지 않습니다. 9월 9일 시험 접수번호 확인은 버튼 검증 완료 후 다음 작업으로 진행합니다.
   </div>
 
   <h2>회신 형식</h2>
   <div class="card">
     <ul>
-      <li>기본 현장 자동 선택: 됨 / 안 됨</li>
-      <li>기본 현장 계산서 업체 표시: 정상 / 공란·오류</li>
-      <li>추가 현장 계산서 업체 표시: 정상·동일 / 공란·다름</li>
-      <li>기본 현장 재선택: 가능 / 불가</li>
+      <li>btn업체추가 생성: 완료 / 실패</li>
+      <li>scr업체현장관리 이동: 성공 / 실패</li>
       <li>오류·위임 경고: 없음 / 있음</li>
+      <li>데이터 저장: 안 함</li>
     </ul>
   </div>
 </body>

@@ -1,0 +1,475 @@
+btn임시저장.onselect
+
+If(
+    CountRows(col선택항목) = 0,
+
+    Notify(
+        "선택된 분석항목이 없습니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력수량 < 1
+    ) > 0,
+
+    Notify(
+        "모든 분석항목의 수량은 1 이상이어야 합니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력수량 > Value(txt시료수.Text)
+    ) > 0,
+
+    Notify(
+        "분석항목 수량은 전체 시료수 " &
+        Text(Value(txt시료수.Text)) &
+        "개를 초과할 수 없습니다.",
+        NotificationType.Warning
+    ),
+
+    CountIf(
+        col선택항목,
+        입력단가 < 0
+    ) > 0,
+
+    Notify(
+        "분석항목 단가는 0원 이상이어야 합니다.",
+        NotificationType.Warning
+    ),
+
+    dd의뢰구분.Selected.Value = "과제" &&
+    IsBlank(cmb과제.Selected.ID),
+
+    Notify(
+        "과제를 선택해 주세요.",
+        NotificationType.Warning
+    ),
+
+    var저장중,
+
+    Notify(
+        "현재 저장 중입니다. 잠시만 기다려 주세요.",
+        NotificationType.Warning
+    ),
+
+    Set(
+        var저장중,
+        true
+    );
+
+    If(
+        var이어쓰기 &&
+        !IsBlank(var저장헤더.ID),
+
+        /* =========================================
+           1. 이어쓰기 임시저장
+           기존 번호·헤더 유지
+           헤더 수정
+           기존 상세 삭제 후 현재 항목 재생성
+           ========================================= */
+
+        IfError(
+            Set(
+                var저장헤더,
+                Patch(
+                    접수헤더,
+                    LookUp(
+                        접수헤더,
+                        ID = var저장헤더.ID
+                    ),
+                    {
+                        의뢰일자:
+                            dp의뢰일자.SelectedDate,
+
+                        '시료명 요약':
+                            txt시료명.Text,
+
+                        시료수:
+                            Value(txt시료수.Text),
+
+                        비고:
+                            txt비고.Text,
+
+                        의뢰구분: {
+                            Value:
+                                dd의뢰구분.Selected.Value
+                        },
+
+                        접수상태: {
+                            Value: "임시작성"
+                        },
+
+                        '업체/현장': {
+                            Id: cmb현장.Selected.ID,
+                            Value: cmb현장.Selected.제목
+                        },
+
+                        '계산서 업체':
+                            cmb현장.Selected.'계산서 업체 연결',
+
+                        과제연결:
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                LookUp(
+                                    Choices(
+                                        접수헤더.과제연결
+                                    ),
+                                    Id = cmb과제.Selected.ID
+                                ),
+                                Blank()
+                            ),
+
+                        과제명복사:
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                cmb과제.Selected.제목,
+                                Blank()
+                            ),
+
+                        과제문서번호복사:
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                cmb과제.Selected.과제문서번호,
+                                Blank()
+                            ),
+
+                        과제시작일복사:
+                            If(
+                                dd의뢰구분.Selected.Value = "과제",
+                                cmb과제.Selected.과제시작일,
+                                Blank()
+                            )
+                    }
+                )
+            );
+
+            RemoveIf(
+                접수항목상세,
+                접수헤더ID복사 = Round(
+                    Value(var저장헤더.ID),
+                    0
+                )
+            );
+
+            ForAll(
+                col선택항목 As 현재항목,
+
+                Patch(
+                    접수항목상세,
+                    Defaults(접수항목상세),
+                    {
+                        제목:
+                            var접수번호 &
+                            "-" &
+                            현재항목.분석항목명,
+
+                        접수헤더연결: {
+                            Id: var저장헤더.ID,
+                            Value: var저장헤더.제목
+                        },
+
+                        접수헤더ID복사:
+                            Round(
+                                Value(var저장헤더.ID),
+                                0
+                            ),
+
+                        분석항목:
+                            LookUp(
+                                Choices(
+                                    접수항목상세.분석항목
+                                ),
+                                Id = 현재항목.분석항목ID
+                            ),
+
+                        항목분류:
+                            현재항목.항목분류,
+
+                        수량:
+                            현재항목.입력수량,
+
+                        단가:
+                            현재항목.입력단가,
+
+                        분석상태: {
+                            Value: "대기"
+                        },
+
+                        정산대상여부:
+                            true,
+
+                        표준소요일수:
+                            현재항목.표준소요일수
+                    }
+                )
+            );
+
+            Notify(
+                "임시작성 수정 완료 / 접수번호: " &
+                var접수번호 &
+                " / 헤더 ID: " &
+                Text(var저장헤더.ID) &
+                " / 상세 " &
+                Text(CountRows(col선택항목)) &
+                "건",
+                NotificationType.Success
+            ),
+
+            Notify(
+                "임시작성 수정 중 오류가 발생했습니다: " &
+                FirstError.Message,
+                NotificationType.Error
+            )
+        ),
+
+        /* =========================================
+           2. 신규 임시저장
+           번호 발급 → 헤더 생성 → 상세 생성
+           ========================================= */
+
+        Set(
+            var번호발급응답,
+            Blank()
+        );
+
+        Set(
+            var접수번호,
+            Blank()
+        );
+
+        Set(
+            var저장헤더,
+            Blank()
+        );
+
+        IfError(
+            Set(
+                var번호발급응답,
+                접수번호발급_App.Run(
+                    dd의뢰구분.Selected.Value,
+                    Text(
+                        dp의뢰일자.SelectedDate,
+                        "yyyy-mm-dd"
+                    ),
+                    If(
+                        dd의뢰구분.Selected.Value = "과제",
+                        cmb과제.Selected.ID,
+                        0
+                    )
+                )
+            );
+
+            Set(
+                var접수번호,
+                Text(
+                    var번호발급응답.접수번호
+                )
+            );
+
+            If(
+                IsBlank(var접수번호),
+
+                Notify(
+                    "접수번호를 발급받지 못했습니다.",
+                    NotificationType.Error
+                ),
+
+                Set(
+                    var저장헤더,
+                    Patch(
+                        접수헤더,
+                        Defaults(접수헤더),
+                        {
+                            제목:
+                                var접수번호,
+
+                            의뢰일자:
+                                dp의뢰일자.SelectedDate,
+
+                            '시료명 요약':
+                                txt시료명.Text,
+
+                            시료수:
+                                Value(txt시료수.Text),
+
+                            비고:
+                                txt비고.Text,
+
+                            의뢰구분: {
+                                Value:
+                                    dd의뢰구분.Selected.Value
+                            },
+
+                            접수상태: {
+                                Value: "임시작성"
+                            },
+
+                            '업체/현장': {
+                                Id: cmb현장.Selected.ID,
+                                Value: cmb현장.Selected.제목
+                            },
+
+                            '계산서 업체':
+                                cmb현장.Selected.'계산서 업체 연결',
+
+                            과제연결:
+                                If(
+                                    dd의뢰구분.Selected.Value = "과제",
+                                    LookUp(
+                                        Choices(
+                                            접수헤더.과제연결
+                                        ),
+                                        Id = cmb과제.Selected.ID
+                                    ),
+                                    Blank()
+                                ),
+
+                            과제명복사:
+                                If(
+                                    dd의뢰구분.Selected.Value = "과제",
+                                    cmb과제.Selected.제목,
+                                    Blank()
+                                ),
+
+                            과제문서번호복사:
+                                If(
+                                    dd의뢰구분.Selected.Value = "과제",
+                                    cmb과제.Selected.과제문서번호,
+                                    Blank()
+                                ),
+
+                            과제시작일복사:
+                                If(
+                                    dd의뢰구분.Selected.Value = "과제",
+                                    cmb과제.Selected.과제시작일,
+                                    Blank()
+                                ),
+
+                            결과발송여부:
+                                false,
+
+                            완료여부:
+                                false,
+
+                            최초의뢰구분: {
+                                Value:
+                                    dd의뢰구분.Selected.Value
+                            },
+
+                            최초접수번호:
+                                var접수번호,
+
+                            이전접수번호:
+                                Blank(),
+
+                            구분변경여부:
+                                false,
+
+                            폴더처리상태: {
+                                Value: "미생성"
+                            }
+                        }
+                    )
+                );
+
+                If(
+                    IsBlank(var저장헤더.ID),
+
+                    Notify(
+                        "접수번호는 발급됐지만 접수헤더 저장에 실패했습니다. 발급번호: " &
+                        var접수번호,
+                        NotificationType.Error
+                    ),
+
+                    IfError(
+                        ForAll(
+                            col선택항목 As 현재항목,
+
+                            Patch(
+                                접수항목상세,
+                                Defaults(접수항목상세),
+                                {
+                                    제목:
+                                        var접수번호 &
+                                        "-" &
+                                        현재항목.분석항목명,
+
+                                    접수헤더연결: {
+                                        Id: var저장헤더.ID,
+                                        Value: var저장헤더.제목
+                                    },
+
+                                    접수헤더ID복사:
+                                        Round(
+                                            Value(var저장헤더.ID),
+                                            0
+                                        ),
+
+                                    분석항목:
+                                        LookUp(
+                                            Choices(
+                                                접수항목상세.분석항목
+                                            ),
+                                            Id = 현재항목.분석항목ID
+                                        ),
+
+                                    항목분류:
+                                        현재항목.항목분류,
+
+                                    수량:
+                                        현재항목.입력수량,
+
+                                    단가:
+                                        현재항목.입력단가,
+
+                                    분석상태: {
+                                        Value: "대기"
+                                    },
+
+                                    정산대상여부:
+                                        true,
+
+                                    표준소요일수:
+                                        현재항목.표준소요일수
+                                }
+                            )
+                        );
+
+                        Notify(
+                            "임시저장 완료 / 접수번호: " &
+                            var접수번호 &
+                            " / 헤더 ID: " &
+                            Text(var저장헤더.ID) &
+                            " / 상세 " &
+                            Text(CountRows(col선택항목)) &
+                            "건",
+                            NotificationType.Success
+                        ),
+
+                        Notify(
+                            "접수헤더는 저장됐지만 상세 항목 저장 중 오류가 발생했습니다. 접수번호: " &
+                            var접수번호 &
+                            " / 오류: " &
+                            FirstError.Message,
+                            NotificationType.Error
+                        )
+                    )
+                )
+            ),
+
+            Notify(
+                "임시저장 중 오류가 발생했습니다: " &
+                FirstError.Message,
+                NotificationType.Error
+            )
+        )
+    );
+
+    Set(
+        var저장중,
+        false
+    )
+)
