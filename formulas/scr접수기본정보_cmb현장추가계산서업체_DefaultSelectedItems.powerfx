@@ -1,0 +1,22 @@
+With(
+    {
+        loc기본계산서업체ID:
+            LookUp(
+                현장마스터,
+                ID = cmb업체.Selected.ID
+            ).'계산서 업체 연결'.Id
+    },
+    If(
+        IsBlank(loc기본계산서업체ID),
+        Blank(),
+        AddColumns(
+            Filter(
+                계산서업체마스터,
+                ID = loc기본계산서업체ID &&
+                사용여부 = true
+            ),
+            DisplayName,
+            제목
+        )
+    )
+)

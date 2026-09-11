@@ -1,3 +1,4 @@
 Set(var신규현장ID, 0);
 Reset(txt현장추가명);
+Reset(cmb현장추가계산서업체);
 Set(var현장추가패널, true)

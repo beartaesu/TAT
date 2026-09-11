@@ -1,0 +1,12 @@
+SortByColumns(
+    AddColumns(
+        Filter(
+            계산서업체마스터,
+            사용여부 = true
+        ),
+        DisplayName,
+        제목
+    ),
+    "Title",
+    SortOrder.Ascending
+)
