@@ -1,6 +1,7 @@
 If(
-    IsBlank(Trim(Text(cmb업체.Selected.Value))) ||
-    IsBlank(Trim(txt현장추가명.Text)),
+    IsBlank(cmb업체.Selected.ID) ||
+    IsBlank(Trim(txt현장추가명.Text)) ||
+    IsBlank(cmb현장추가계산서업체.Selected.ID),
     DisplayMode.Disabled,
     DisplayMode.Edit
 )

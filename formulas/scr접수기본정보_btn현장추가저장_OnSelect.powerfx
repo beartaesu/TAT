@@ -4,6 +4,11 @@ With(
             LookUp(
                 현장마스터,
                 ID = cmb업체.Selected.ID
+            ),
+        loc선택계산서업체:
+            LookUp(
+                계산서업체마스터,
+                ID = cmb현장추가계산서업체.Selected.ID
             )
     },
     With(
@@ -30,8 +35,8 @@ With(
                     ""
                 )
             ),
-            loc계산서업체ID: loc선택업체.'계산서 업체 연결'.Id,
-            loc계산서업체명: loc선택업체.'계산서 업체 연결'.Value
+            loc계산서업체ID: loc선택계산서업체.ID,
+            loc계산서업체명: loc선택계산서업체.제목
         },
         If(
             IsBlank(loc선택업체) ||
@@ -52,9 +57,10 @@ With(
                 "업체명과 같은 기본 현장이 이미 있습니다. 추가 현장명만 입력해 주세요.",
                 NotificationType.Warning
             ),
-            IsBlank(loc계산서업체ID),
+            IsBlank(loc선택계산서업체) ||
+            !loc선택계산서업체.사용여부,
             Notify(
-                "선택한 업체의 기본 현장에 계산서 업체가 연결되어 있지 않습니다.",
+                "사용 중인 계산서 업체를 선택해 주세요.",
                 NotificationType.Error
             ),
             Set(var현장저장성공, false);
@@ -79,11 +85,28 @@ With(
                     NotificationType.Error
                 ),
                 CountRows(col동일업체현장) = 1,
-                Set(
-                    var신규현장ID,
-                    First(col동일업체현장).ID
-                );
-                Set(var현장저장성공, true),
+                With(
+                    {
+                        loc기존현장: First(col동일업체현장)
+                    },
+                    If(
+                        IsBlank(loc기존현장.'계산서 업체 연결'.Id),
+                        Notify(
+                            "기존 현장에 계산서 업체가 연결되어 있지 않습니다. 현장마스터를 확인해 주세요.",
+                            NotificationType.Error
+                        ),
+                        loc기존현장.'계산서 업체 연결'.Id <> loc계산서업체ID,
+                        Notify(
+                            "기존 현장에는 다른 계산서 업체가 연결되어 있습니다. 현장마스터를 확인해 주세요.",
+                            NotificationType.Error
+                        ),
+                        Set(
+                            var신규현장ID,
+                            loc기존현장.ID
+                        );
+                        Set(var현장저장성공, true)
+                    )
+                ),
                 IfError(
                     Set(
                         var신규현장ID,
@@ -115,6 +138,7 @@ With(
                 Refresh(현장마스터);
                 Reset(cmb현장);
                 Reset(txt현장추가명);
+                Reset(cmb현장추가계산서업체);
                 Set(var현장추가패널, false);
                 Notify(
                     "현장이 선택되었습니다.",
