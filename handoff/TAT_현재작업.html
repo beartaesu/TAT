@@ -3,11 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 - 누락 기본 현장 1건 생성 검증</title>
+  <title>TAT 현재 작업 - 다음 실제 접수번호 확인</title>
   <style>
     body { font-family: "Malgun Gothic", sans-serif; line-height: 1.65; max-width: 920px; margin: 32px auto; padding: 0 20px; color: #222; }
     h1, h2 { color: #17365d; }
-    .ok { background: #eef7ee; border-left: 5px solid #4f8a4f; padding: 12px 16px; }
     .warn { background: #fff4e5; border-left: 5px solid #e69138; padding: 12px 16px; }
     .note { background: #eef4fb; border-left: 5px solid #3973ac; padding: 12px 16px; }
     code { background: #f3f3f3; padding: 2px 5px; font-family: Consolas, monospace; }
@@ -15,45 +14,29 @@
   </style>
 </head>
 <body>
-  <h1>TAT-10 누락 기본 현장 1건 생성 검증</h1>
+  <h1>다음 실제 Power Apps 접수번호 확인</h1>
 
-  <p class="ok">접수번호 접두어 교정은 저장 완료됐고 수동 번호발급은 하지 않았다. 이제 중단했던 이관 시험 Flow 검증으로 복귀한다.</p>
-  <p class="warn"><strong>방금까지 사용한 동일 시험번호로 TAT_이관_시험조회를 정확히 한 번만 실행한다. 결과 확인 전 두 번째 실행은 금지한다.</strong></p>
+  <p class="note">9월 9일 이후 신규 건은 Power Apps로 직접 접수한다. TAT_이관_시험조회와 과거 데이터 이관 작업은 보류한다.</p>
+  <p class="warn"><strong>접두어 확인만을 위한 시험 접수나 번호발급 Flow 수동 실행은 하지 않는다.</strong> 다음 실제 업무 접수에서 자연스럽게 확인한다.</p>
 
-  <h2>실행</h2>
-  <ol>
-    <li>접수번호발급_App이 아니라 <code>TAT_이관_시험조회</code>를 연다.</li>
-    <li>앞선 실행에서 <code>시험현장건수 = 0</code>, <code>시험계산서업체건수 = 1</code>이었던 동일 시험번호를 입력한다.</li>
-    <li>한 번만 실행하고 완료될 때까지 재클릭하지 않는다.</li>
-  </ol>
-
-  <h2>Flow 검증</h2>
+  <h2>확인 기준</h2>
   <ul>
-    <li>Flow 전체: 성공</li>
-    <li><code>시험기본현장생성조건</code>: 예 분기</li>
-    <li><code>시험기본현장생성</code>: 성공</li>
-    <li><code>시험현장계산서업체일치확인</code>: false — 생성 전 조회값이므로 정상</li>
-    <li><code>시험이관가능확인</code>: false</li>
-    <li><code>시험접수헤더생성</code> 이하: 건너뜀</li>
+    <li>미접수 실제 저장: <code>ES-DR-연도-순번</code></li>
+    <li>측정인 실제 저장: <code>ENE-날짜-순번</code></li>
+    <li>접수번호관리의 해당 행 마지막순번: 정확히 1 증가</li>
+    <li>접수헤더·상세·매핑·결과 파일: 기존 Power Apps 저장 절차대로 정상 생성</li>
+    <li>접수번호발급 후 접수번호관리 접두어: 미접수 <code>ES</code>, 측정인 <code>ENE</code> 유지</li>
   </ul>
 
-  <h2>SharePoint 검증</h2>
+  <h2>금지</h2>
   <ul>
-    <li>현장마스터 신규 행: 정확히 1건</li>
-    <li><code>제목 = 업체명복사</code></li>
-    <li><code>업체명키</code>: 공란 아님</li>
-    <li><code>기본현장여부 = 예</code></li>
-    <li><code>계산서 업체 연결</code>: 이번에 유일 조회된 계산서 업체와 연결</li>
-    <li>접수헤더·접수항목상세·접수시료항목매핑 신규 생성: 모두 없음</li>
+    <li><code>TAT_이관_시험조회</code> 추가 실행</li>
+    <li><code>접수번호발급_App</code> 수동 실행</li>
+    <li>9월 9일 이후 건의 Excel 이관</li>
+    <li>방금 자동 생성된 기본 현장 행의 임의 삭제</li>
   </ul>
 
   <h2>회신</h2>
-  <ul>
-    <li>Flow와 기본 현장 생성: 성공 / 실패</li>
-    <li>관계 검사·전체 이관 가능: false / 다른 값</li>
-    <li>헤더 이하: 건너뜀 / 실행됨</li>
-    <li>기본 현장 필드·Lookup: 정상 / 이상</li>
-    <li>접수 관련 신규 생성: 없음 / 있음</li>
-  </ul>
+  <p>다음 실제 접수가 발생했을 때 의뢰구분, 발급 형식 정상 여부, 저장 성공 여부만 알려준다. 실제 업체명과 접수번호 전체는 기록하지 않는다.</p>
 </body>
 </html>
