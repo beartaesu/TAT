@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAT 현재 작업 - 이관 Flow 마스터 조회 구조 확인</title>
+  <title>TAT 현재 작업 - 누락 기본 현장 1건 생성 검증</title>
   <style>
     body { font-family: "Malgun Gothic", sans-serif; line-height: 1.65; max-width: 920px; margin: 32px auto; padding: 0 20px; color: #222; }
     h1, h2 { color: #17365d; }
@@ -15,41 +15,45 @@
   </style>
 </head>
 <body>
-  <h1>TAT-10 이관 Flow 마스터 조회 구조 확인</h1>
+  <h1>TAT-10 누락 기본 현장 1건 생성 검증</h1>
 
-  <p class="ok">P0 업체·현장 구조 복구는 16/16 완료됐다. 다음은 기존 9월 이관 Flow를 현재 계산서업체마스터 + 현장마스터 구조에 맞추기 위한 읽기 전용 확인이다.</p>
-  <p class="warn"><strong>이번 단계에서는 Flow를 수정·저장·실행하지 않는다.</strong> 현재 정의만 확인한다.</p>
+  <p class="ok">접수번호 접두어 교정은 저장 완료됐고 수동 번호발급은 하지 않았다. 이제 중단했던 이관 시험 Flow 검증으로 복귀한다.</p>
+  <p class="warn"><strong>방금까지 사용한 동일 시험번호로 TAT_이관_시험조회를 정확히 한 번만 실행한다. 결과 확인 전 두 번째 실행은 금지한다.</strong></p>
 
-  <h2>확인할 위치</h2>
-  <p>기존 9월 이관에 사용 중인 시험 Flow에서 아래 작업을 연다.</p>
-  <ul>
-    <li><code>시험현장조회</code></li>
-    <li><code>시험계산서업체조회</code></li>
-    <li><code>시험이관가능확인</code></li>
-    <li><code>시험현장건수</code>, <code>시험현장ID확인</code></li>
-    <li><code>시험계산서업체건수</code>, <code>시험계산서업체ID확인</code></li>
-  </ul>
-
-  <h2>전달 방법</h2>
+  <h2>실행</h2>
   <ol>
-    <li>각 작업의 메뉴에서 <strong>코드 보기</strong>를 연다.</li>
-    <li>위 작업들의 정의를 한 파일 <code>TAT10_조회구조.txt</code>에 복사한다.</li>
-    <li>복사가 어려우면 작업 카드의 입력값이 모두 보이도록 화면 캡처를 올린다.</li>
+    <li>접수번호발급_App이 아니라 <code>TAT_이관_시험조회</code>를 연다.</li>
+    <li>앞선 실행에서 <code>시험현장건수 = 0</code>, <code>시험계산서업체건수 = 1</code>이었던 동일 시험번호를 입력한다.</li>
+    <li>한 번만 실행하고 완료될 때까지 재클릭하지 않는다.</li>
   </ol>
 
-  <p class="note">회사 데이터 값이나 실행 원시 출력은 넣지 않아도 된다. 목록, 필터 쿼리, 최대 항목 수, Compose 식 등 설정만 있으면 된다.</p>
-
-  <h2>완료 기준</h2>
+  <h2>Flow 검증</h2>
   <ul>
-    <li><code>TAT10_조회구조.txt</code> 또는 해당 화면 캡처가 MYBOX에 있음</li>
-    <li>Flow 변경·저장 없음</li>
-    <li>Flow 실행 없음</li>
+    <li>Flow 전체: 성공</li>
+    <li><code>시험기본현장생성조건</code>: 예 분기</li>
+    <li><code>시험기본현장생성</code>: 성공</li>
+    <li><code>시험현장계산서업체일치확인</code>: false — 생성 전 조회값이므로 정상</li>
+    <li><code>시험이관가능확인</code>: false</li>
+    <li><code>시험접수헤더생성</code> 이하: 건너뜀</li>
+  </ul>
+
+  <h2>SharePoint 검증</h2>
+  <ul>
+    <li>현장마스터 신규 행: 정확히 1건</li>
+    <li><code>제목 = 업체명복사</code></li>
+    <li><code>업체명키</code>: 공란 아님</li>
+    <li><code>기본현장여부 = 예</code></li>
+    <li><code>계산서 업체 연결</code>: 이번에 유일 조회된 계산서 업체와 연결</li>
+    <li>접수헤더·접수항목상세·접수시료항목매핑 신규 생성: 모두 없음</li>
   </ul>
 
   <h2>회신</h2>
   <ul>
-    <li>조회 구조 파일 업로드: 완료 / 미완료</li>
-    <li>Flow 변경·실행: 없음 / 있음</li>
+    <li>Flow와 기본 현장 생성: 성공 / 실패</li>
+    <li>관계 검사·전체 이관 가능: false / 다른 값</li>
+    <li>헤더 이하: 건너뜀 / 실행됨</li>
+    <li>기본 현장 필드·Lookup: 정상 / 이상</li>
+    <li>접수 관련 신규 생성: 없음 / 있음</li>
   </ul>
 </body>
 </html>
