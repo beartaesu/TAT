@@ -1,0 +1,32 @@
+Set(var내보내기진행중, true);
+Set(var내보내기결과, Blank());
+
+IfError(
+    Set(
+        var내보내기결과,
+        TAT_로우데이터내보내기_App.Run(
+            Text(dte홈내보내기시작일.SelectedDate, "[$-en-US]yyyy-mm-dd"),
+            Text(dte홈내보내기종료일.SelectedDate, "[$-en-US]yyyy-mm-dd")
+        )
+    );
+    If(
+        var내보내기결과.내보내기성공,
+        Notify(
+            "Excel 내보내기 완료: " &
+            Text(var내보내기결과.내보내기접수수) & "건 / " &
+            Text(var내보내기결과.내보내기행수) & "행",
+            NotificationType.Success
+        );
+        Launch(var내보내기결과.내보내기파일링크),
+        Notify(
+            var내보내기결과.내보내기메시지,
+            NotificationType.Error
+        )
+    ),
+    Notify(
+        "Excel 내보내기 실행 중 오류가 발생했습니다. " & FirstError.Message,
+        NotificationType.Error
+    )
+);
+
+Set(var내보내기진행중, false)

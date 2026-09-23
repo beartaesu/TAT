@@ -1,0 +1,17 @@
+concat(
+  'OData__xc758__xb8b0__xc77c__xc790_ ge ''',
+  convertTimeZone(
+    concat(triggerBody()?['text'], 'T00:00:00'),
+    'Korea Standard Time',
+    'UTC',
+    'yyyy-MM-ddTHH:mm:ssZ'
+  ),
+  ''' and OData__xc758__xb8b0__xc77c__xc790_ lt ''',
+  convertTimeZone(
+    addDays(concat(triggerBody()?['text_1'], 'T00:00:00'), 1),
+    'Korea Standard Time',
+    'UTC',
+    'yyyy-MM-ddTHH:mm:ssZ'
+  ),
+  ''''
+)

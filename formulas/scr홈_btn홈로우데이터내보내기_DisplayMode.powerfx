@@ -1,0 +1,8 @@
+If(
+    var내보내기진행중 = true ||
+    IsBlank(dte홈내보내기시작일.SelectedDate) ||
+    IsBlank(dte홈내보내기종료일.SelectedDate) ||
+    dte홈내보내기시작일.SelectedDate > dte홈내보내기종료일.SelectedDate,
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)
