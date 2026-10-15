@@ -362,7 +362,28 @@ IfError(
             Text(LookUp(접수헤더, ID = var저장헤더.ID).제목),
             Text(LookUp(접수헤더, ID = var저장헤더.ID).결과폴더경로),
             Text(LookUp(접수헤더, ID = var저장헤더.ID).결과엑셀파일경로),
-            0
+            0,
+            Text(var저장헤더.의뢰일자, "yymmdd"),
+            With(
+                {
+                    loc결과현장: LookUp(
+                        현장마스터,
+                        ID = Value(var저장헤더.'업체/현장'.Id)
+                    )
+                },
+                With(
+                    {
+                        loc결과업체명: Trim(Coalesce(Text(loc결과현장.업체명복사), Text(loc결과현장.제목))),
+                        loc결과현장명: Trim(Text(loc결과현장.제목))
+                    },
+                    If(
+                        Lower(Substitute(Substitute(Substitute(Substitute(loc결과업체명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")) =
+                            Lower(Substitute(Substitute(Substitute(Substitute(loc결과현장명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")),
+                        loc결과업체명,
+                        loc결과업체명 & "_" & loc결과현장명
+                    )
+                )
+            )
         )
     );
 
@@ -701,7 +722,28 @@ IfError(
                             "",
                             "",
                             "",
-                            0
+                            0,
+                            Text(var저장헤더.의뢰일자, "yymmdd"),
+                            With(
+                                {
+                                    loc결과현장: LookUp(
+                                        현장마스터,
+                                        ID = Value(var저장헤더.'업체/현장'.Id)
+                                    )
+                                },
+                                With(
+                                    {
+                                        loc결과업체명: Trim(Coalesce(Text(loc결과현장.업체명복사), Text(loc결과현장.제목))),
+                                        loc결과현장명: Trim(Text(loc결과현장.제목))
+                                    },
+                                    If(
+                                        Lower(Substitute(Substitute(Substitute(Substitute(loc결과업체명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")) =
+                                            Lower(Substitute(Substitute(Substitute(Substitute(loc결과현장명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")),
+                                        loc결과업체명,
+                                        loc결과업체명 & "_" & loc결과현장명
+                                    )
+                                )
+                            )
                         )
                     );
 
@@ -887,7 +929,28 @@ IfError(
                                 "",
                                 "",
                                 "",
-                                0
+                                0,
+                                Text(var저장헤더.의뢰일자, "yymmdd"),
+                                With(
+                                    {
+                                        loc결과현장: LookUp(
+                                            현장마스터,
+                                            ID = Value(var저장헤더.'업체/현장'.Id)
+                                        )
+                                    },
+                                    With(
+                                        {
+                                            loc결과업체명: Trim(Coalesce(Text(loc결과현장.업체명복사), Text(loc결과현장.제목))),
+                                            loc결과현장명: Trim(Text(loc결과현장.제목))
+                                        },
+                                        If(
+                                            Lower(Substitute(Substitute(Substitute(Substitute(loc결과업체명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")) =
+                                                Lower(Substitute(Substitute(Substitute(Substitute(loc결과현장명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")),
+                                            loc결과업체명,
+                                            loc결과업체명 & "_" & loc결과현장명
+                                        )
+                                    )
+                                )
                             )
                         );
 
@@ -1259,7 +1322,28 @@ IfError(
                                             "",
                                             "",
                                             "",
-                                            0
+                                            0,
+                                            Text(var저장헤더.의뢰일자, "yymmdd"),
+                                            With(
+                                                {
+                                                    loc결과현장: LookUp(
+                                                        현장마스터,
+                                                        ID = Value(var저장헤더.'업체/현장'.Id)
+                                                    )
+                                                },
+                                                With(
+                                                    {
+                                                        loc결과업체명: Trim(Coalesce(Text(loc결과현장.업체명복사), Text(loc결과현장.제목))),
+                                                        loc결과현장명: Trim(Text(loc결과현장.제목))
+                                                    },
+                                                    If(
+                                                        Lower(Substitute(Substitute(Substitute(Substitute(loc결과업체명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")) =
+                                                            Lower(Substitute(Substitute(Substitute(Substitute(loc결과현장명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")),
+                                                        loc결과업체명,
+                                                        loc결과업체명 & "_" & loc결과현장명
+                                                    )
+                                                )
+                                            )
                                         )
                                     );
 

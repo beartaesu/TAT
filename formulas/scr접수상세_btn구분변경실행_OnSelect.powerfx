@@ -84,7 +84,7 @@ If(
                         Round(Value(var상세접수.ID), 0),
                         Text(var변경후접수번호),
                         Text(var변경후의뢰구분),
-                        Text(Substitute(var상세접수.결과폴더명, var변경전접수번호 & "-", "")),
+                        Text(var상세접수.'업체/현장'.Value),
                         "",
                         0,
                         "",
@@ -95,7 +95,28 @@ If(
                         Text(var변경전접수번호),
                         Text(var변경전결과폴더경로),
                         Text(var변경전결과엑셀경로),
-                        Round(Value(var구분변경이력.ID), 0)
+                        Round(Value(var구분변경이력.ID), 0),
+                        Text(var상세접수.의뢰일자, "yymmdd"),
+                        With(
+                            {
+                                loc결과현장: LookUp(
+                                    현장마스터,
+                                    ID = Value(var상세접수.'업체/현장'.Id)
+                                )
+                            },
+                            With(
+                                {
+                                    loc결과업체명: Trim(Coalesce(Text(loc결과현장.업체명복사), Text(loc결과현장.제목))),
+                                    loc결과현장명: Trim(Text(loc결과현장.제목))
+                                },
+                                If(
+                                    Lower(Substitute(Substitute(Substitute(Substitute(loc결과업체명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")) =
+                                        Lower(Substitute(Substitute(Substitute(Substitute(loc결과현장명, " ", ""), "(주)", ""), "㈜", ""), "주식회사", "")),
+                                    loc결과업체명,
+                                    loc결과업체명 & "_" & loc결과현장명
+                                )
+                            )
+                        )
                     )
                 );
                 Set(
